@@ -1,0 +1,21 @@
+{
+  "fonts": [
+    {
+      "family": "DefaultSans",
+      "variants": [
+        { "style": "normal", "weight": 300, "src": ["DefaultSans-Light.woff2", "DefaultSans-Light.woff"] },
+        { "style": "normal", "weight": 400, "src": ["DefaultSans-Regular.woff2", "DefaultSans-Regular.woff"] },
+        { "style": "normal", "weight": 600, "src": ["DefaultSans-Semibold.woff2"] },
+        { "style": "normal", "weight": 700, "src": ["DefaultSans-Bold.woff2"] }
+      ]
+    },
+    {
+      "family": "DefaultSerif",
+      "variants": [
+        { "style": "normal", "weight": 400, "src": ["DefaultSerif-Regular.woff2"] },
+        { "style": "italic", "weight": 400, "src": ["DefaultSerif-Italic.woff2"] },
+        { "style": "normal", "weight": 700, "src": ["DefaultSerif-Bold.woff2"] }
+      ]
+    }
+  ]
+}

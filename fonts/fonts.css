@@ -1,0 +1,22 @@
+/* Example variable fonts. Replace/add to match your actual font files in /fonts */
+@font-face {
+  font-family: "InterVar";
+  src: url("./Inter-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "SourceSerifVar";
+  src: url("./SourceSerif4-Variable.woff2") format("woff2");
+  font-weight: 200 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Human names used in UI → font-family stacks */
+:root {
+  --font-inter: "InterVar", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+  --font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: "SourceSerifVar", Georgia, "Times New Roman", Times, serif;
+}

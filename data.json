@@ -1,0 +1,77 @@
+{
+  "header": {
+    "name": "John Doe",
+    "role": "Data Analyst",
+    "email": "john.doe@email.com",
+    "phone": "+39 333 000 0000",
+    "residence": "Milan, Italy",
+    "birthdate": "01/01/1990",
+    "avatar": ""
+  },
+
+  "summary": "Motivated professional with a passion for data-driven insights and continuous learning. Experienced in analytical problem solving and team collaboration.",
+
+  "skills": [
+    { "group": "Programming Languages", "items": ["Python", "R", "SQL", "C/C++"] },
+    { "group": "AI / ML", "items": ["Classification", "Regression", "Clustering"] },
+    { "group": "Libraries", "items": ["pandas", "NumPy", "scikit-learn"] },
+    { "group": "Tools", "items": ["Git", "Docker", "Power BI"] }
+  ],
+
+  "languages": [
+    { "name": "English", "score": 5, "level": "C2" },
+    { "name": "Italian", "score": 5, "level": "Native" },
+    { "name": "Spanish", "score": 3, "level": "B1" }
+  ],
+
+  "experience": [
+    {
+      "title": "Data Analyst",
+      "company": "TechCorp",
+      "period": "01/2023 – Present",
+      "location": "Milan, Italy",
+      "bullets": [
+        "Analyzed large datasets to provide strategic insights.",
+        "Created dashboards for sales and marketing KPIs."
+      ]
+    },
+    {
+      "title": "Junior Analyst",
+      "company": "Insight Ltd.",
+      "period": "06/2021 – 12/2022",
+      "location": "Remote",
+      "bullets": [
+        "Supported BI reporting and ad-hoc analysis projects.",
+        "Collaborated with cross-functional teams on data collection."
+      ]
+    }
+  ],
+
+  "education": [
+    {
+      "degree": "M.Sc. in Data Science",
+      "school": "Politecnico di Milano",
+      "period": "2019 – 2021",
+      "location": "Milan, Italy",
+      "gpa": "108/110"
+    },
+    {
+      "degree": "B.Sc. in Computer Engineering",
+      "school": "University of Bergamo",
+      "period": "2016 – 2019",
+      "location": "Bergamo, Italy",
+      "gpa": "103/110"
+    }
+  ],
+
+  "online": {
+    "website": { "label": "johndoe.com", "url": "https://johndoe.com" },
+    "linkedin": { "label": "linkedin.com/in/johndoe", "url": "https://linkedin.com/in/johndoe" }
+  },
+
+  "laws": [
+    "I authorize the processing of my personal data in accordance with GDPR 2016/679.",
+    "Registered under protected categories (Law 68/99).",
+    "Holder of Law 104/1992 (Article 3, paragraph 1)."
+  ]
+}

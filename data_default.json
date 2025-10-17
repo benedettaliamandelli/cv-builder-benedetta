@@ -1,0 +1,140 @@
+{
+  "header": {
+    "name": "BENEDETTA LIA MANDELLI",
+    "role": "Data Scientist / Biomedical Engineer",
+    "email": "benedettaliamandelli@gmail.com",
+    "phone": "+39 3791760568",
+    "residence": "20155 Milan, Italy",
+    "birthdate": "24/01/1999",
+    "avatar": ""
+  },
+
+  "summary": "Biomedical Engineer and Data Scientist passionate about AI-driven healthcare innovation. Combining a strong academic foundation with practical experience in MedTech and Pharma to translate data into meaningful clinical insights and business value.",
+
+  "skills": [
+    { "group": "Programming Languages", "items": ["Python", "C/C++", "Java", "JavaScript"] },
+    { "group": "AI / ML", "items": ["Supervised Learning", "Unsupervised Learning", "Classification", "Regression", "Clustering"] },
+    { "group": "Libraries", "items": ["pandas", "NumPy", "Seaborn", "scikit-learn", "Statsmodels"] },
+    { "group": "Tools", "items": ["MATLAB", "R", "Simulink", "VS Code", "GitHub", "PyTorch", "Microsoft Office 365", "STM32CubeIDE", "Arduino IDE", "KiCad", "Solidworks"] },
+    { "group": "Communication Protocols", "items": ["I2C", "UART", "USART", "SPI", "RS232"] },
+    { "group": "3D Printers & PCB Design", "items": ["Resin Printer", "PLA Extrusion Printer", "CNC Milling Machine"] },
+    { "group": "Diseases Knowledge", "items": ["Multiple Myeloma", "Diabetes", "Pulmonary Disorders"] }
+  ],
+
+  "languages": [
+    { "name": "Italian", "score": 5, "level": "Native" },
+    { "name": "English", "score": 4, "level": "C1" },
+    { "name": "Spanish", "score": 4, "level": "C1" }
+  ],
+
+  "experience": [
+    {
+      "title": "Medical Advisor Intern",
+      "company": "Sanofi Oncology",
+      "period": "03/2025 – Present",
+      "location": "Milan, Italy",
+      "bullets": [
+        "Supported Pharma Managed Access Programs (compassionate use): approval, execution, reporting, archiving.",
+        "Managed local studies (Phase IV, observational, registries, Real World Data Generation).",
+        "Collected evidence and data from databases for publications or dossiers.",
+        "Collaborated in training sessions for cross-department colleagues.",
+        "Contributed to forecasting models with Marketing Team using vial consumption trends."
+      ]
+    },
+    {
+      "title": "Clinical Specialist Intern",
+      "company": "Medtronic Diabetes",
+      "period": "07/2024 – 03/2025",
+      "location": "Milan, Italy",
+      "bullets": [
+        "Coordinated investigator-initiated studies and local management.",
+        "Conducted bibliographic reviews and disseminated clinical evidence.",
+        "Updated clinical tools and collaborated with the clinical marketing team.",
+        "Participated in marketing events and professional congresses."
+      ]
+    },
+    {
+      "title": "Medical Device Designer",
+      "company": "Supplyframe",
+      "period": "07/2024 – 10/2024",
+      "location": "Los Angeles, USA",
+      "bullets": [
+        "Hackathon 1st Prize: assistive orthosis with soft robotics.",
+        "Collaborated with Rancho Los Amigos Rehabilitation Center and investors.",
+        "Speaker at Supercon 2023; completed prototyping grant program.",
+        "Developed GUI design and optimized breathing circuit for low-resource devices."
+      ]
+    },
+    {
+      "title": "GUI & Circuit Optimization – M.Sc. Thesis",
+      "company": "TechRes Laboratory",
+      "period": "03/2023 – 04/2024",
+      "location": "Milan, Italy",
+      "bullets": [
+        "Developed SAFER ventilator integrating oxygen concentrator for neonatal care in LMIC.",
+        "Handled hardware assembly, sensor acquisition, and 3D circuit design.",
+        "Created GUI using EVE Screen Designer & STM32CubeIDE.",
+        "Trained NICU healthcare professionals at IRCCS San Gerardo Hospital."
+      ]
+    },
+    {
+      "title": "Researcher – B.Sc. Thesis",
+      "company": "iHeart",
+      "period": "09/2020 – 03/2021",
+      "location": "Milan, Italy",
+      "bullets": [
+        "Modeled COVID-19 impact on myocardium and oxygen exchange.",
+        "Built simulation models in MATLAB as a digital-twin clinical tool."
+      ]
+    }
+  ],
+
+  "education": [
+    {
+      "degree": "M.Sc. Data Analytics and Artificial Intelligence in Health Science",
+      "school": "Bocconi & Humanitas University",
+      "period": "2025",
+      "location": "Milan, Italy",
+      "gpa": ""
+    },
+    {
+      "degree": "M.Sc. Biomedical Engineering",
+      "school": "Politecnico di Milano",
+      "period": "03/2021 – 04/2024",
+      "location": "Milan, Italy",
+      "gpa": "105/110"
+    },
+    {
+      "degree": "Erasmus Exchange Program",
+      "school": "Universidad de Navarra",
+      "period": "08/2022 – 01/2023",
+      "location": "Donostia, Spain",
+      "gpa": ""
+    },
+    {
+      "degree": "B.Sc. Biomedical Engineering",
+      "school": "Politecnico di Milano",
+      "period": "09/2017 – 03/2021",
+      "location": "Milan, Italy",
+      "gpa": "92/110"
+    },
+    {
+      "degree": "Scientific High School Diploma",
+      "school": "Alexis Carrel High School",
+      "period": "2012 – 2017",
+      "location": "Milan, Italy",
+      "gpa": "88/100"
+    }
+  ],
+
+  "online": {
+    "website": { "label": "benedettaliamandelli.com", "url": "https://benedettaliamandelli.com" },
+    "linkedin": { "label": "linkedin.com/in/benedettaliamandelli", "url": "https://linkedin.com/in/benedettaliamandelli" }
+  },
+
+  "laws": [
+    "I authorize the processing of personal data in accordance with Legislative Decree 101/2018 and GDPR 2016/679.",
+    "Registered under protected categories (Law 68/99).",
+    "Holder of Law 104/1992 (Article 3, paragraph 1)."
+  ]
+}

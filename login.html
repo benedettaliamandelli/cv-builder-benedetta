@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>CV Studio — Login</title>
+
+<link rel="stylesheet" href="./styles.css"/>
+<link rel="stylesheet" href="./fonts/fonts.css"/>
+
+<!-- Tailwind + React (optional; UI could be plain JS, but we stay consistent) -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<!-- Firebase auth (your keys go in auth.firebase.js) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script src="./auth.firebase.js"></script>
+<script src="./storage.firebase.js"></script>
+</head>
+<body class="bg-neutral-100">
+<div id="root"></div>
+
+<script type="text/babel">
+const {useEffect, useState} = React;
+
+function Login(){
+  const [checking, setChecking] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(()=>{
+    const off = Auth.onAuthChange((user)=>{
+      // if already logged in → go to home with uid
+      if(user?.uid){
+        location.replace('./home.html?uid=' + encodeURIComponent(user.uid));
+      } else {
+        setChecking(false);
+      }
+    });
+    return off;
+  },[]);
+
+  async function google(){
+    try{
+      setError(""); await Auth.signInWithGoogle();
+      // onAuthChange will redirect
+    }catch(e){ setError(e.message||"Sign-in failed"); }
+  }
+  async function apple(){
+    try{
+      setError(""); await Auth.signInWithApple();
+    }catch(e){ setError(e.message||"Sign-in failed"); }
+  }
+  function guest(){
+    // Guest mode → no uid param, uses localStorage fallback in storage.firebase.js
+    location.href = './home.html';
+  }
+
+  if(checking) return <div className="min-h-screen flex items-center justify-center text-neutral-600">Checking session…</div>;
+
+  return (
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="card w-full max-w-md p-6">
+        <div className="text-center mb-6">
+          <div className="text-2xl font-semibold" style={{fontFamily:'var(--font-inter)'}}>CV Studio</div>
+          <div className="text-sm text-neutral-600">Sign in to manage and export your CVs</div>
+        </div>
+
+        {error && <div className="mb-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2">{error}</div>}
+
+        <div className="grid gap-2">
+          <button className="btn" onClick={google}>Continue with Google</button>
+          <button className="btn" onClick={apple}>Continue with Apple</button>
+          <div className="text-center text-xs text-neutral-500 my-2">— or —</div>
+          <button className="btn" onClick={guest}>Continue as Guest</button>
+        </div>
+
+        <div className="text-[11px] text-neutral-500 mt-4 leading-snug">
+          By continuing you agree to the Terms and acknowledge the Privacy Policy. In guest mode your CVs are saved locally in your browser.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Login/>);
+</script>
+</body>
+</html>

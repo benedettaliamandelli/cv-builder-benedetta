@@ -1,0 +1,141 @@
+<!-- Add this in <head> of pages that need Firebase (already done) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>CV Studio — Home</title>
+<link rel="stylesheet" href="./styles.css"/>
+<link rel="stylesheet" href="./fonts/fonts.css"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<!-- Storage/Auth (Firebase first, fallback local) -->
+<script src="./auth.firebase.js"></script>
+<script src="./storage.firebase.js"></script>
+<script src="./storage.local.js"></script>
+
+<!-- Templates registry -->
+<script src="./templates/default.template.js"></script>
+<script src="./templates/minimal.template.js"></script>
+</head>
+<body class="bg-neutral-100">
+<div id="root"></div>
+
+<script type="text/babel">
+const {useEffect,useState} = React;
+
+function useAuth(){
+  const [user,setUser]=React.useState(null);
+  React.useEffect(()=>Auth.onAuthChange(setUser),[]);
+  return {user, signIn:Auth.signInWithGoogle, signOut:Auth.signOut};
+}
+
+function Home(){
+  const {user,signIn,signOut} = useAuth();
+  const [docs,setDocs] = useState([]);
+  const [tpls,setTpls] = useState([]);
+
+  useEffect(()=>{
+    setTpls(window.CV_TEMPLATES ? window.CV_TEMPLATES.list() : []);
+  },[]);
+
+    useEffect(()=>{
+    const params = new URL(location.href).searchParams;
+    const guest = params.get('guest') === '1';
+    if(!user && !guest){
+    // Give a moment to Auth to resolve; then redirect if still null
+    const t = setTimeout(()=>{ if(!Auth.user){ location.replace('./login.html'); } }, 300);
+    return ()=>clearTimeout(t);
+    }
+    },[user]);
+
+    async function refresh(){
+    const all = await StorageAPI.list(user?.uid);
+    setDocs(all);
+    }
+    useEffect(()=>{ refresh(); },[user]);
+
+  async function createNew(){
+    const name = prompt("Document name:", "Default");
+    if(!name) return;
+    const tpl = prompt("Template id (from list):", (tpls[0]?.id||"default"));
+    const payload = (window.CV_TEMPLATES.get(tpl)||window.CV_TEMPLATES.get('default')).seed();
+    await StorageAPI.save(name, payload, user?.uid);
+    location.href = './editor.html?doc=' + encodeURIComponent(name) + (user?`&uid=${user.uid}`:'');
+  }
+
+  function openDoc(n){
+    location.href = './editor.html?doc=' + encodeURIComponent(n) + (user?`&uid=${user.uid}`:'');
+  }
+
+  async function removeDoc(n){
+    if(!confirm(`Delete "${n}"?`)) return;
+    await StorageAPI.remove(n, user?.uid);
+    refresh();
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <header className="flex items-center gap-3 mb-6">
+        <div className="text-xl font-semibold">CV Studio</div>
+        <div className="ml-auto">
+          {user ? (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-neutral-600">Hello {user.displayName||user.email}</span>
+              <button className="btn" onClick={signOut}>Sign out</button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <button className="btn" onClick={signIn}>Sign in with Google</button>
+            </div>
+          )}
+        </div>
+      </header>
+
+      <section className="card p-4 mb-6">
+        <div className="font-semibold mb-2">Templates</div>
+        <div className="grid grid-cols-2 gap-2">
+          {tpls.map(t=>(
+            <div key={t.id} className="border rounded p-3">
+              <div className="font-medium">{t.name}</div>
+              <div className="text-sm text-neutral-600">{t.desc}</div>
+              <div className="mt-2 text-xs text-neutral-500">id: {t.id}</div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-3">
+          <button className="btn-primary" onClick={createNew}>+ Create CV</button>
+        </div>
+      </section>
+
+      <section className="card p-4">
+        <div className="font-semibold mb-2">Your CVs</div>
+        <div className="grid gap-2">
+          {docs.length===0 && <div className="text-sm text-neutral-500">No documents yet.</div>}
+          {docs.map(n=>(
+            <div key={n} className="flex items-center justify-between border rounded p-2">
+              <div>{n}</div>
+              <div className="flex items-center gap-2">
+                <button className="btn" onClick={()=>openDoc(n)}>Open</button>
+                <button className="btn-danger" onClick={()=>removeDoc(n)}>Delete</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Home/>);
+</script>
+</body>
+</html> 
