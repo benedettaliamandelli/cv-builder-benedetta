@@ -8,17 +8,18 @@
 <link rel="stylesheet" href="./styles.css"/>
 <link rel="stylesheet" href="./fonts/fonts.css"/>
 
-<!-- Tailwind + React (optional; UI could be plain JS, but we stay consistent) -->
+<!-- Tailwind + React -->
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-<!-- Firebase auth (your keys go in auth.firebase.js) -->
+<!-- Firebase SDKs (safe to include even if you haven't configured keys yet) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
+<!-- Your auth+storage (Firebase first, then local fallback inside storage.firebase.js) -->
 <script src="./auth.firebase.js"></script>
 <script src="./storage.firebase.js"></script>
 </head>
@@ -28,16 +29,33 @@
 <script type="text/babel">
 const {useEffect, useState} = React;
 
+function detectFirebase(){
+  // True if firebase initialized properly and Auth is wired
+  const okSDK = !!(window.firebase && firebase.apps);
+  const appCount = okSDK ? firebase.apps.length : 0;
+  // If auth.firebase.js failed to initialize (bad/missing config), appCount stays 0
+  return appCount > 0 && !!window.Auth;
+}
+
 function Login(){
   const [checking, setChecking] = useState(true);
   const [error, setError] = useState("");
+  const hasFirebase = detectFirebase();
 
   useEffect(()=>{
+    if(!window.Auth){
+      // Fallback stub (guest only) if auth not present
+      window.Auth = {
+        onAuthChange: (fn)=>{ fn(null); return ()=>{}; },
+        signInWithGoogle: async()=>{ throw new Error("Firebase not configured"); },
+        signInWithApple: async()=>{ throw new Error("Firebase not configured"); },
+        signOut: async()=>{}
+      };
+    }
     const off = Auth.onAuthChange((user)=>{
-      // if already logged in → go to home with uid
       if(user?.uid){
         location.replace('./home.html?uid=' + encodeURIComponent(user.uid));
-      } else {
+      }else{
         setChecking(false);
       }
     });
@@ -46,18 +64,23 @@ function Login(){
 
   async function google(){
     try{
-      setError(""); await Auth.signInWithGoogle();
-      // onAuthChange will redirect
-    }catch(e){ setError(e.message||"Sign-in failed"); }
+      setError("");
+      await Auth.signInWithGoogle();
+      // onAuthChange will redirect on success
+    }catch(e){
+      setError(e?.message || "Google sign-in failed. If you haven't added Firebase config, use Guest.");
+    }
   }
   async function apple(){
     try{
-      setError(""); await Auth.signInWithApple();
-    }catch(e){ setError(e.message||"Sign-in failed"); }
+      setError("");
+      await Auth.signInWithApple();
+    }catch(e){
+      setError(e?.message || "Apple sign-in failed. If you haven't added Firebase config, use Guest.");
+    }
   }
   function guest(){
-    // Guest mode → no uid param, uses localStorage fallback in storage.firebase.js
-    location.href = './home.html';
+    location.href = './home.html?guest=1';
   }
 
   if(checking) return <div className="min-h-screen flex items-center justify-center text-neutral-600">Checking session…</div>;
@@ -66,21 +89,27 @@ function Login(){
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="card w-full max-w-md p-6">
         <div className="text-center mb-6">
-          <div className="text-2xl font-semibold" style={{fontFamily:'var(--font-inter)'}}>CV Studio</div>
+          <div className="text-2xl font-semibold">CV Studio</div>
           <div className="text-sm text-neutral-600">Sign in to manage and export your CVs</div>
         </div>
 
-        {error && <div className="mb-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2">{error}</div>}
+        {!hasFirebase && (
+          <div className="mb-3 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
+            Firebase not configured yet. You can continue as Guest now and set Firebase later.
+          </div>
+        )}
+
+        {error && <div className="mb-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded p-2">{error}</div>}
 
         <div className="grid gap-2">
-          <button className="btn" onClick={google}>Continue with Google</button>
-          <button className="btn" onClick={apple}>Continue with Apple</button>
+          <button className="btn" onClick={google} disabled={!hasFirebase}>Continue with Google</button>
+          <button className="btn" onClick={apple} disabled={!hasFirebase}>Continue with Apple</button>
           <div className="text-center text-xs text-neutral-500 my-2">— or —</div>
           <button className="btn" onClick={guest}>Continue as Guest</button>
         </div>
 
         <div className="text-[11px] text-neutral-500 mt-4 leading-snug">
-          By continuing you agree to the Terms and acknowledge the Privacy Policy. In guest mode your CVs are saved locally in your browser.
+          In guest mode your CVs are saved locally in your browser.
         </div>
       </div>
     </div>
