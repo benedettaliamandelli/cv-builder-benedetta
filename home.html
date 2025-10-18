@@ -1,28 +1,30 @@
-<!-- Add this in <head> of pages that need Firebase (already done) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
-
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>CV Studio — Home</title>
+
 <link rel="stylesheet" href="./styles.css"/>
 <link rel="stylesheet" href="./fonts/fonts.css"/>
+
+<!-- UI libs -->
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-<!-- Storage/Auth (Firebase first, fallback local) -->
+<!-- Firebase SDKs (safe to include even if not configured yet) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<!-- Auth + Storage (Firebase first, then resilient local fallback) -->
 <script src="./auth.firebase.js"></script>
 <script src="./storage.firebase.js"></script>
 <script src="./storage.local.js"></script>
 
-<!-- Templates registry -->
+<!-- Templates registry must be available before the Home app runs -->
 <script src="./templates/default.template.js"></script>
 <script src="./templates/minimal.template.js"></script>
 </head>
@@ -30,55 +32,103 @@
 <div id="root"></div>
 
 <script type="text/babel">
-const {useEffect,useState} = React;
+const { useEffect, useState } = React;
 
+/* ---------- helpers ---------- */
+function isGuest() {
+  try { return new URL(location.href).searchParams.get('guest') === '1'; }
+  catch { return false; }
+}
+
+/* Track auth and mirror to window.AuthUser for non-React code */
 function useAuth(){
-  const [user,setUser]=React.useState(null);
-  React.useEffect(()=>Auth.onAuthChange(setUser),[]);
-  return {user, signIn:Auth.signInWithGoogle, signOut:Auth.signOut};
+  const [user, setUser] = useState(null);
+  useEffect(()=>{
+    if (!window.Auth || !window.Auth.onAuthChange) {
+      // guest/local mode
+      setUser(null);
+      window.AuthUser = null;
+      return;
+    }
+    const off = window.Auth.onAuthChange(u => {
+      setUser(u || null);
+      window.AuthUser = u || null;
+    });
+    return off;
+  },[]);
+  return {
+    user,
+    signIn: window.Auth?.signInWithGoogle || (()=>alert('Google sign-in unavailable (Firebase not configured). Use guest mode.')),
+    signOut: window.Auth?.signOut || (async()=>{})
+  };
 }
 
 function Home(){
-  const {user,signIn,signOut} = useAuth();
-  const [docs,setDocs] = useState([]);
-  const [tpls,setTpls] = useState([]);
+  const { user, signIn, signOut } = useAuth();
+  const [docs, setDocs] = useState([]);
+  const [tpls, setTpls] = useState([]);
 
   useEffect(()=>{
     setTpls(window.CV_TEMPLATES ? window.CV_TEMPLATES.list() : []);
   },[]);
 
-    useEffect(()=>{
-    const params = new URL(location.href).searchParams;
-    const guest = params.get('guest') === '1';
-    if(!user && !guest){
-    // Give a moment to Auth to resolve; then redirect if still null
-    const t = setTimeout(()=>{ if(!Auth.user){ location.replace('./login.html'); } }, 300);
-    return ()=>clearTimeout(t);
+  // guard: if not authenticated and not guest → bounce to login
+  useEffect(()=>{
+    const guest = isGuest();
+    if (!user && !guest) {
+      const t = setTimeout(()=>{ location.replace('./login.html'); }, 300);
+      return ()=>clearTimeout(t);
     }
-    },[user]);
+  }, [user]);
 
-    async function refresh(){
-    const all = await StorageAPI.list(user?.uid);
-    setDocs(all);
+  async function refresh(){
+    try {
+      const all = await window.StorageAPI.list(user?.uid);
+      setDocs(all);
+    } catch (e) {
+      console.warn('List failed:', e);
+      setDocs([]);
     }
-    useEffect(()=>{ refresh(); },[user]);
+  }
+  useEffect(()=>{ refresh(); }, [user]);
 
   async function createNew(){
     const name = prompt("Document name:", "Default");
-    if(!name) return;
-    const tpl = prompt("Template id (from list):", (tpls[0]?.id||"default"));
-    const payload = (window.CV_TEMPLATES.get(tpl)||window.CV_TEMPLATES.get('default')).seed();
-    await StorageAPI.save(name, payload, user?.uid);
-    location.href = './editor.html?doc=' + encodeURIComponent(name) + (user?`&uid=${user.uid}`:'');
+    if (name === null) return;
+    const trimmed = name.trim();
+    if (!trimmed) { alert("Please enter a name"); return; }
+
+    // Template registry (defensive)
+    const reg = window.CV_TEMPLATES;
+    const tplId = (reg && reg.list && reg.list()[0]?.id) || 'default';
+    const tpl = (reg && reg.get && reg.get(tplId)) || { seed: ()=> ({ _orders:{ left:[], right:[] }, header:{ name:"JOHN DOE" } }) };
+    const payload = tpl.seed ? tpl.seed() : { _orders:{ left:[], right:[] }, header:{ name:"JOHN DOE" } };
+
+    try {
+      await window.StorageAPI.save(trimmed, payload, user?.uid);
+    } catch (e) {
+      // localStorage blocked or quota → continue in-memory
+      console.warn('Save failed (continuing):', e);
+    }
+
+    const params = new URLSearchParams();
+    params.set('doc', trimmed);
+    if (user?.uid) params.set('uid', user.uid);
+    if (isGuest()) params.set('guest','1');
+    location.href = './editor.html?' + params.toString();
   }
 
   function openDoc(n){
-    location.href = './editor.html?doc=' + encodeURIComponent(n) + (user?`&uid=${user.uid}`:'');
+    const params = new URLSearchParams();
+    params.set('doc', n);
+    if (user?.uid) params.set('uid', user.uid);
+    if (isGuest()) params.set('guest','1');
+    location.href = './editor.html?' + params.toString();
   }
 
   async function removeDoc(n){
-    if(!confirm(`Delete "${n}"?`)) return;
-    await StorageAPI.remove(n, user?.uid);
+    if (!confirm(`Delete "${n}"?`)) return;
+    await window.StorageAPI.remove(n, user?.uid);
     refresh();
   }
 
@@ -89,12 +139,14 @@ function Home(){
         <div className="ml-auto">
           {user ? (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-neutral-600">Hello {user.displayName||user.email}</span>
+              <span className="text-sm text-neutral-600">Hello {user.displayName || user.email}</span>
               <button className="btn" onClick={signOut}>Sign out</button>
             </div>
           ) : (
             <div className="flex items-center gap-2">
+              <a className="btn" href="./login.html">Go to login</a>
               <button className="btn" onClick={signIn}>Sign in with Google</button>
+              <a className="btn" href="./home.html?guest=1">Guest mode</a>
             </div>
           )}
         </div>
@@ -110,6 +162,7 @@ function Home(){
               <div className="mt-2 text-xs text-neutral-500">id: {t.id}</div>
             </div>
           ))}
+          {tpls.length===0 && <div className="text-sm text-neutral-500">Loading templates…</div>}
         </div>
         <div className="mt-3">
           <button className="btn-primary" onClick={createNew}>+ Create CV</button>
@@ -138,4 +191,4 @@ function Home(){
 ReactDOM.createRoot(document.getElementById('root')).render(<Home/>);
 </script>
 </body>
-</html> 
+</html>

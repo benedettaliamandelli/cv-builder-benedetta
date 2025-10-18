@@ -1,43 +1,76 @@
 (function(){
   const hasFirebase = !!(window.firebase && firebase.apps && firebase.apps.length);
-  const db = hasFirebase? firebase.firestore() : null;
+  const db = hasFirebase ? firebase.firestore() : null;
 
-  async function list(uid){
-    if(!db || !uid){  // fallback or anonymous → local list
-      return window.StorageAPI ? window.StorageAPI._local_list() : [];
+  // --- In-memory fallback if localStorage is blocked (Safari private mode, etc.)
+  const MEM = {};
+
+  function _local_list(){
+    try {
+      return Object.keys(localStorage)
+        .filter(k => k.startsWith('cvdoc:'))
+        .map(k => k.replace('cvdoc:', ''))
+        .sort();
+    } catch (e) {
+      // localStorage unavailable → use memory store
+      return Object.keys(MEM).sort();
     }
-    const snap = await db.collection('users').doc(uid).collection('cvdocs').get();
-    return snap.docs.map(d=>d.id).sort();
   }
-  async function save(name, data, uid){
-    if(!db || !uid){
-      return window.StorageAPI? window.StorageAPI._local_save(name,data) : false;
+
+  function _local_save(name, data){
+    try {
+      localStorage.setItem('cvdoc:' + name, JSON.stringify(data));
+    } catch (e) {
+      // QuotaExceededError / SecurityError → memory fallback
+      MEM[name] = data;
     }
+    return true;
+  }
+
+  function _local_load(name){
+    try {
+      const raw = localStorage.getItem('cvdoc:' + name);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {
+      // ignore, try memory
+    }
+    return MEM[name] || null;
+  }
+
+  function _local_remove(name){
+    try { localStorage.removeItem('cvdoc:' + name); } catch (e) { /* ignore */ }
+    delete MEM[name];
+    return true;
+  }
+
+  // --- Public API (Firestore if signed-in, else local)
+  async function list(uid){
+    if (!db || !uid) return _local_list();
+    const snap = await db.collection('users').doc(uid).collection('cvdocs').get();
+    return snap.docs.map(d => d.id).sort();
+  }
+
+  async function save(name, data, uid){
+    if (!db || !uid) return _local_save(name, data);
     await db.collection('users').doc(uid).collection('cvdocs').doc(name).set(data);
     return true;
   }
+
   async function load(name, uid){
-    if(!db || !uid){
-      return window.StorageAPI? window.StorageAPI._local_load(name) : null;
-    }
+    if (!db || !uid) return _local_load(name);
     const doc = await db.collection('users').doc(uid).collection('cvdocs').doc(name).get();
-    return doc.exists? doc.data() : null;
+    return doc.exists ? doc.data() : null;
   }
+
   async function remove(name, uid){
-    if(!db || !uid){
-      return window.StorageAPI? window.StorageAPI._local_remove(name) : false;
-    }
+    if (!db || !uid) return _local_remove(name);
     await db.collection('users').doc(uid).collection('cvdocs').doc(name).delete();
     return true;
   }
 
-  // Expose a unified API; if Firebase present, these use Firestore; else they delegate to local
   window.StorageAPI = {
     list, save, load, remove,
-    // local helpers used by fallback path
-    _local_list(){ return Object.keys(localStorage).filter(k=>k.startsWith('cvdoc:')).map(k=>k.replace('cvdoc:','')).sort(); },
-    _local_save(name,data){ localStorage.setItem('cvdoc:'+name, JSON.stringify(data)); return true; },
-    _local_load(name){ const raw=localStorage.getItem('cvdoc:'+name); return raw? JSON.parse(raw): null; },
-    _local_remove(name){ localStorage.removeItem('cvdoc:'+name); return true; }
+    // expose locals for completeness
+    _local_list, _local_save, _local_load, _local_remove
   };
 })();
