@@ -1,13 +1,16 @@
 // auth.firebase.js
 (function(){
   // ⚠️ Replace with your own Firebase project config
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "SENDER_ID",
-    appId: "APP_ID",
+    apiKey: "AIzaSyAyByi1Wzze-zlcfS6OpK0gMa36rlF1BFs",
+    authDomain: "cv-builder-14ae9.firebaseapp.com",
+    projectId: "cv-builder-14ae9",
+    storageBucket: "cv-builder-14ae9.firebasestorage.app",
+    messagingSenderId: "769809338403",
+    appId: "1:769809338403:web:44a6234446b3780e38a196",
+    measurementId: "G-9GBMHWR9HM"
   };
 
   try{ firebase.initializeApp(firebaseConfig); }catch(e){ /* already initialized or missing */ }
