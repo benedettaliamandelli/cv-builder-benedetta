@@ -8,23 +8,23 @@
 <link rel="stylesheet" href="./styles.css"/>
 <link rel="stylesheet" href="./fonts/fonts.css"/>
 
-<!-- Tailwind + React + Babel (fine for GH Pages; for prod, prebuild) -->
+<!-- UI libs (fine for GH Pages dev; for prod, prebuild) -->
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-<!-- Firebase (optional) -->
+<!-- Optional Firebase (safe if unconfigured) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-<!-- Storage/Auth shims (your files) -->
+<!-- Storage/Auth (your shims) -->
 <script src="./auth.firebase.js"></script>
 <script src="./storage.firebase.js"></script>
 <script src="./storage.local.js"></script>
 
-<!-- Templates (your files) -->
+<!-- Templates (your registry) -->
 <script src="./templates/default.js?v=20251019"></script>
 <script src="./templates/minimal.js?v=20251019"></script>
 
@@ -32,27 +32,28 @@
   :root{
     --rule:#d1d5db;
     --accent:#2563eb;
-    --toolbar-h: 96px; /* two rows */
+    --toolbar-h: 112px; /* compact two-row toolbar */
   }
-  /* small UI helpers */
-  .btn{ padding:.45rem .75rem; border:1px solid #e5e7eb; border-radius:.5rem; background:#fff; }
-  .btn:hover{ background:#f9fafb; }
-  .btn-primary{ padding:.5rem .85rem; border-radius:.55rem; background:#111827; color:#fff; border:1px solid #111827; }
-  .btn-danger{ padding:.45rem .75rem; border:1px solid #fecaca; background:#fee2e2; color:#991b1b; border-radius:.5rem; }
-  .input{ border:1px solid #e5e7eb; border-radius:.45rem; padding:.35rem .6rem; background:#fff; min-width:0; }
-  .color{ width:40px; height:32px; padding:0; border:1px solid #e5e7eb; border-radius:.45rem; }
-
   body{ background:#f8fafc; }
   body.has-toolbar{ padding-top:var(--toolbar-h); }
 
-  /* sticky toolbar (two rows) */
-  #toolbar{ position:fixed; top:0; left:0; right:0; z-index:40; background:rgba(255,255,255,.9);
+  /* toolbar */
+  #toolbar{ position:fixed; top:0; left:0; right:0; z-index:40; background:rgba(255,255,255,.92);
             backdrop-filter:saturate(180%) blur(8px); border-bottom:1px solid #e5e7eb; }
   .toolbar-row{ max-width:1600px; margin:0 auto; padding:.5rem 1rem; display:grid; gap:.5rem; }
   .toolbar-row.row1{ grid-template-columns:auto 1fr auto; align-items:center; }
-  .toolbar-row.row2{ grid-template-columns:repeat(12, minmax(0,1fr)); align-items:center; }
+  .toolbar-row.row2{ grid-template-columns:repeat(12,minmax(0,1fr)); align-items:center; }
 
-  /* A4 preview with two columns (no overlap) */
+  /* buttons/inputs */
+  .btn{ padding:.45rem .7rem; border:1px solid #e5e7eb; border-radius:.5rem; background:#fff; }
+  .btn:hover{ background:#f9fafb; }
+  .btn-primary{ padding:.48rem .85rem; border:1px solid #111827; border-radius:.55rem; background:#111827; color:#fff; }
+  .btn-danger{ padding:.45rem .7rem; border:1px solid #fecaca; border-radius:.5rem; background:#fee2e2; color:#991b1b; }
+  .chip{ padding:.15rem .45rem; border:1px solid #e5e7eb; border-radius:.4rem; background:#fff; font-size:.8rem; }
+  .input{ border:1px solid #e5e7eb; border-radius:.45rem; padding:.35rem .6rem; background:#fff; min-width:0; }
+  .color{ width:40px; height:32px; padding:0; border:1px solid #e5e7eb; border-radius:.45rem; }
+
+  /* A4 sheet with 1/3 : 2/3 columns */
   .sheet{
     width:210mm; min-height:297mm; margin:14mm auto; background:#fff; color:#111827;
     box-shadow:0 10px 25px rgba(0,0,0,.06);
@@ -61,17 +62,25 @@
     font-family:"Inter", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
     font-size:var(--fs,11pt); line-height:var(--lh,1.45);
   }
+  .sheet-header{ grid-column: 1 / -1; } /* header spans full width */
   .title-divider{ height:1px; background:var(--rule); margin:.35rem 0 .8rem; }
   .meta{ color:#6b7280; }
+
   .editable[contenteditable="true"]{ cursor:text; }
   .editable[contenteditable="true"]:focus{ outline:2px solid var(--accent); outline-offset:1px; }
 
   .avatar{ width:92px; height:92px; border-radius:9999px; overflow:hidden; border:1px solid #e5e7eb; background:#f3f4f6;
            display:flex; align-items:center; justify-content:center; }
+  .logo{ width:32px; height:32px; border-radius:9999px; overflow:hidden; border:1px solid #e5e7eb; background:#f3f4f6; flex:0 0 auto; }
 
-  /* icon as mask (inherits color) */
+  /* icons (color follows currentColor) */
   .icon{ display:inline-block; width:1em; height:1em; background:currentColor; -webkit-mask:center/contain no-repeat; mask:center/contain no-repeat; }
   .circle-icon{ display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:9999px; background:#e5e7eb; color:var(--accent); }
+
+  /* section header row controls */
+  .secbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:.15rem; }
+  .secbar .controls{ display:flex; gap:.25rem; }
+  .secbar .title{ text-transform:uppercase; letter-spacing:.08em; font-size:11px; }
 
   /* Print */
   @media print{
@@ -87,18 +96,15 @@
 <div id="root"></div>
 
 <script type="text/babel">
-/* ---------- SAFE UTILS (no crash in older browsers) ---------- */
-const {useState, useEffect, useRef} = React;
+const {useState,useEffect,useRef} = React;
+
+/* ---------- utilities ---------- */
 const rid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 const param = (k,d=null)=>{ try{ return new URL(location.href).searchParams.get(k) ?? d; }catch{return d;} };
 const uid = param('uid', null);
 const docName = param('doc','Default');
-const deepClone = (obj)=> {
-  if (typeof structuredClone === 'function') return structuredClone(obj);
-  return JSON.parse(JSON.stringify(obj));
-};
+const clone = (o)=> (typeof structuredClone==='function'? structuredClone(o) : JSON.parse(JSON.stringify(o)));
 
-/* robust StorageAPI fallback */
 (function ensureStorageAPI(){
   if (window.StorageAPI) return;
   window.StorageAPI = {
@@ -109,25 +115,32 @@ const deepClone = (obj)=> {
   };
 })();
 
-/* robust templates fallback */
 (function ensureTemplates(){
-  if (!window.CV_TEMPLATES) {
-    const blankSeed = ()=>({
-      header:{name:"JOHN DOE", role:"", email:"", phone:"", residence:"", birthdate:"", avatar:""},
-      summary:"",
-      sectionNames:{experience:"Experience",education:"Education",projects:"Projects",volunteering:"Volunteering",skills:"Skills",languages:"Languages",strengths:"Strengths",hobbies:"Hobbies",online:"Online",certifications:"Certifications",awards:"Awards",laws:"Laws"},
-      experience:[], education:[], projects:[], volunteering:[],
-      skills:[], languages:[], strengths:[], hobbies:[],
-      online:{}, certifications:[], awards:[],
-      laws:["I authorize the processing of personal data in accordance with GDPR 2016/679."],
-      _theme:{accent:"#2563eb", fs:11, lh:1.45, heading:"var(--font-inter)", body:"var(--font-inter)", meta:"var(--font-inter)", h:600, sub:500}
-    });
-    window.CV_TEMPLATES = {
-      _map: { default: { id:'default', name:'Default', seed:blankSeed, migrate:(s)=>s }, minimal:{ id:'minimal', name:'Minimal', seed:blankSeed, migrate:(s)=>s } },
-      list(){ return Object.values(this._map); },
-      get(id){ return this._map[id] || this._map.default; }
-    };
-  }
+  if (window.CV_TEMPLATES) return;
+  const blankSeed = ()=>({
+    header:{name:"JOHN DOE", role:"", email:"", phone:"", residence:"", birthdate:"", avatar:""},
+    summary:"Click to edit your professional summary.",
+    sectionNames:{experience:"Experience",education:"Education",projects:"Projects",volunteering:"Volunteering",skills:"Skills",languages:"Languages",strengths:"Strengths",hobbies:"Hobbies",online:"Online",certifications:"Certifications",awards:"Awards",laws:"Laws"},
+    experience:[{id:rid(), title:"Medical Advisor Intern", company:"Sanofi Oncology", period:"03/2025 – Present", location:"Milan, Italy", logo:"", bullets:["Managed MAPs (compassionate use).","Supported local studies and data collection."]}],
+    education:[{id:rid(), degree:"M.Sc. in Biomedical Engineering", school:"Politecnico di Milano", period:"03/2021 – 04/2024", location:"Milan, Italy", gpa:"105/110"}],
+    projects:[{id:rid(), name:"Alexa skill for cognitive training of stroke patients", domain:"E-Health", period:"09/2022 – 12/2022", location:"Politecnico di Milano", bullets:["Digital empowering & testing skill for MCI patients","Voice interface via Alexa Developer Console (JS)","Patient reminders and notifications"]}],
+    volunteering:[],
+    skills:[{id:rid(), group:"Programming", items:["Python","C/C++","JavaScript"]}],
+    languages:[{id:rid(), name:"Italian", score:5, level:"Native"}, {id:rid(), name:"English", score:4, level:"C1"}],
+    strengths:[{id:rid(), icon:"bulb", label:"Problem solving"}],
+    hobbies:[{id:rid(), icon:"camera", label:"Photography"}],
+    online:{ website:{label:"johndoe.com",url:"https://example.com"}, linkedin:{label:"/in/johndoe",url:"https://linkedin.com/in/johndoe"}, github:{label:"github.com/johndoe",url:"https://github.com/johndoe"} },
+    certifications:[{id:rid(), icon:"certificate", line1:"First Certificate Exam (B2)", line2:"Novartis"}],
+    awards:[{id:rid(), icon:"award", line1:"Best Thesis Prize", line2:"Politecnico di Milano"}],
+    laws:["I authorize the processing of personal data in accordance with GDPR 2016/679."],
+    _orders:{ left:["laws","skills","languages","strengths","hobbies","online"], right:["experience","education","projects","volunteering","certifications","awards"] },
+    _theme:{accent:"#2563eb", fs:11, lh:1.45, heading:"var(--font-inter)", body:"var(--font-inter)", meta:"var(--font-inter)", h:600, sub:500}
+  });
+  window.CV_TEMPLATES = {
+    _map: { default:{id:'default',name:'Default',seed:blankSeed,migrate:(s)=>s}, minimal:{id:'minimal',name:'Minimal',seed:blankSeed,migrate:(s)=>s} },
+    list(){ return Object.values(this._map); },
+    get(id){ return this._map[id] || this._map.default; }
+  };
 })();
 
 /* loaders */
@@ -138,7 +151,7 @@ async function loadDoc(){
 }
 async function saveDoc(data){ return window.StorageAPI.save(docName, data, uid); }
 
-/* pick image */
+/* image picker */
 function pickImage(cb){
   const i=document.createElement('input'); i.type='file'; i.accept='image/*';
   i.onchange=e=>{
@@ -147,13 +160,13 @@ function pickImage(cb){
   };
   i.click();
 }
-/* Icon component */
+/* icons that follow color */
 function Icon({name, className="", style={}}){
   if(!name) return null;
   return <span className={"icon "+className} style={{...style, WebkitMask:`url(./icons/${name}.svg)`, mask:`url(./icons/${name}.svg)`}}/>;
 }
 
-/* font presets */
+/* fonts presets */
 const FONT_PRESETS = [
   {label:"Inter (default)", fs:11, lh:1.45, heading:"var(--font-inter)", body:"var(--font-inter)", meta:"var(--font-inter)", h:600, sub:500},
   {label:"System Clean", fs:11, lh:1.45, heading:"var(--font-system)", body:"var(--font-system)", meta:"var(--font-system)", h:600, sub:500},
@@ -163,8 +176,6 @@ const FONT_PRESETS = [
 /* ---------- APP ---------- */
 function App(){
   const [state,setState] = useState(null);
-
-  /* theme controls */
   const [accent,setAccent] = useState("#2563eb");
   const [fs,setFs] = useState(11);
   const [lh,setLh] = useState(1.45);
@@ -174,66 +185,472 @@ function App(){
   const [hWeight,setHWeight] = useState(600);
   const [subWeight,setSubWeight] = useState(500);
 
-  /* load once */
+  const [addType,setAddType] = useState("experience");
+  const [addCol,setAddCol] = useState("right");
+
   useEffect(()=>{(async()=>{
-    try{
-      const d = await loadDoc();
-      setState(d);
-      const t=d._theme||{};
-      setAccent(t.accent ?? "#2563eb");
-      setFs(t.fs ?? 11);
-      setLh(t.lh ?? 1.45);
-      setHFont(t.heading || "var(--font-inter)");
-      setBFont(t.body || "var(--font-inter)");
-      setMFont(t.meta || "var(--font-inter)");
-      setHWeight(t.h ?? 600);
-      setSubWeight(t.sub ?? 500);
-    }catch(e){
-      console.error("Load failed", e);
-      const fallback = window.CV_TEMPLATES.get('default').seed();
-      setState(fallback);
-    }
+    const d=await loadDoc();
+    setState(d);
+    const t=d._theme||{};
+    setAccent(t.accent ?? "#2563eb");
+    setFs(t.fs ?? 11);
+    setLh(t.lh ?? 1.45);
+    setHFont(t.heading || "var(--font-inter)");
+    setBFont(t.body || "var(--font-inter)");
+    setMFont(t.meta || "var(--font-inter)");
+    setHWeight(t.h ?? 600);
+    setSubWeight(t.sub ?? 500);
   })();},[]);
 
-  /* debounced autosave */
   const saveTimer = useRef(null);
   function scheduleSave(next){
     clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(()=>{
-      saveDoc(next).catch(()=>{});
-    }, 600);
+    saveTimer.current = setTimeout(()=>{ saveDoc(next).catch(()=>{}); }, 600);
   }
 
   if(!state) return <div className="p-6 text-neutral-600">Loading…</div>;
+
+  function themed(next){
+    next._theme = {accent, fs, lh, heading:hFont, body:bFont, meta:mFont, h:hWeight, sub:subWeight};
+    return next;
+  }
 
   /* inline edit helper */
   function setPath(path, value){
     const parts = path.split('.');
     setState(prev=>{
-      const copy = deepClone(prev);
+      const copy = clone(prev);
       let t = copy;
       for(let i=0;i<parts.length-1;i++){ t = t[parts[i]]; }
       t[parts.at(-1)] = value;
-      copy._theme = {accent, fs, lh, heading:hFont, body:bFont, meta:mFont, h:hWeight, sub:subWeight};
-      scheduleSave(copy);
+      scheduleSave(themed(copy));
       return copy;
     });
   }
 
-  /* section title */
-  function SectionTitle({children}){
+  /* section ordering + management */
+  const allTypes = ["experience","education","projects","volunteering","skills","languages","strengths","hobbies","online","certifications","awards","laws"];
+
+  function addSection(){
+    const col = addCol === 'left' ? 'left' : 'right';
+    setState(s=>{
+      const next = clone(s);
+      const arr = next._orders[col];
+      if (!arr.includes(addType)) arr.push(addType);
+      scheduleSave(themed(next));
+      return next;
+    });
+  }
+  function removeSection(col, key){
+    setState(s=>{
+      const next = clone(s);
+      next._orders[col] = next._orders[col].filter(k=>k!==key);
+      scheduleSave(themed(next));
+      return next;
+    });
+  }
+  function moveSection(col, key, dir){
+    setState(s=>{
+      const next = clone(s);
+      const arr = col==='left'? next._orders.left : next._orders.right;
+      const i = arr.indexOf(key); if(i===-1) return s;
+      if(dir==='swap'){
+        arr.splice(i,1);
+        const tgt = col==='left'? next._orders.right : next._orders.left;
+        tgt.splice(0,0,key);
+      }else{
+        const j = dir==='up'? i-1 : i+1;
+        if(j<0 || j>=arr.length) return s;
+        [arr[i],arr[j]]=[arr[j],arr[i]];
+      }
+      scheduleSave(themed(next));
+      return next;
+    });
+  }
+
+  /* list item helpers */
+  function addItem(listKey, sample){
+    setState(s=>{
+      const next = clone(s);
+      next[listKey] = [...(next[listKey]||[]), sample];
+      scheduleSave(themed(next));
+      return next;
+    });
+  }
+  function removeItem(listKey, id){
+    setState(s=>{
+      const next = clone(s);
+      next[listKey] = (next[listKey]||[]).filter(x=>x.id!==id);
+      scheduleSave(themed(next));
+      return next;
+    });
+  }
+  function updateInList(listKey, id, updater){
+    setState(s=>{
+      const next = clone(s);
+      next[listKey] = (next[listKey]||[]).map(x=> x.id===id ? updater(clone(x)) : x);
+      scheduleSave(themed(next));
+      return next;
+    });
+  }
+
+  /* section chrome */
+  function SectionBar({name,label,col}){
     return (
-      <div className="mb-2">
-        <div className="uppercase tracking-widest text-[11px]"
-             style={{color:accent, fontFamily:hFont, fontWeight:hWeight}}>
-          {children}
+      <div className="secbar">
+        <div className="title" style={{color:accent, fontFamily:hFont, fontWeight:hWeight}}>{label}</div>
+        <div className="controls">
+          <button className="chip" title="Up" onClick={()=>moveSection(col,name,'up')}>↑</button>
+          <button className="chip" title="Down" onClick={()=>moveSection(col,name,'down')}>↓</button>
+          <button className="chip" title="Swap column" onClick={()=>moveSection(col,name,'swap')}>⇆</button>
+          <button className="chip" title="Remove section" onClick={()=>removeSection(col,name)}>✕</button>
         </div>
-        <div className="title-divider"></div>
       </div>
     );
   }
 
-  /* ----- TOOLBAR (2 rows) ----- */
+  /* RENDERERS */
+  const R = {
+    experience:(col)=>(
+      <section className="mb-6">
+        <SectionBar name="experience" label={state.sectionNames.experience||'Experience'} col={col}/>
+        <div className="title-divider"></div>
+        {(state.experience||[]).map(ex=>(
+          <div key={ex.id} className="mb-4">
+            <div className="flex items-start gap-3">
+              {ex.logo ? <div className="logo"><img src={ex.logo} className="w-full h-full object-cover" alt=""/></div> : null}
+              <div className="flex-1 min-w-0">
+                <div className="editable font-medium text-sm" contentEditable suppressContentEditableWarning
+                     onBlur={e=>updateInList('experience', ex.id, it=>{ it.title=e.target.textContent; return it; })}>
+                  {ex.title}
+                </div>
+                <div className="text-sm" style={{color:accent}}>
+                  <span className="editable" contentEditable suppressContentEditableWarning
+                        onBlur={e=>updateInList('experience', ex.id, it=>{ it.company=e.target.textContent; return it; })}>
+                    {ex.company}
+                  </span>
+                </div>
+                <div className="text-xs meta mb-1">
+                  <span className="editable" contentEditable suppressContentEditableWarning
+                        onBlur={e=>updateInList('experience', ex.id, it=>{ it.period=e.target.textContent; return it; })}>
+                    {ex.period}
+                  </span> •
+                  <span className="editable ml-1" contentEditable suppressContentEditableWarning
+                        onBlur={e=>updateInList('experience', ex.id, it=>{ it.location=e.target.textContent; return it; })}>
+                    {ex.location}
+                  </span>
+                </div>
+                {(ex.bullets||[]).length>0 &&
+                  <ul className="list-disc pl-5 text-sm text-neutral-800">
+                    {ex.bullets.map((b,idx)=>(
+                      <li key={idx} className="editable" contentEditable suppressContentEditableWarning
+                          onBlur={e=>updateInList('experience', ex.id, it=>{ it.bullets[idx]=e.target.textContent; return it; })}>
+                        {b}
+                      </li>
+                    ))}
+                  </ul>}
+                <div className="mt-1 flex gap-1">
+                  <button className="chip" onClick={()=>pickImage(url=>updateInList('experience', ex.id, it=>{ it.logo=url; return it; }))}>Logo</button>
+                  {ex.logo && <button className="chip" onClick={()=>updateInList('experience', ex.id, it=>{ it.logo=""; return it; })}>Remove logo</button>}
+                  <button className="chip" onClick={()=>updateInList('experience', ex.id, it=>{ it.bullets=[...(it.bullets||[]), "New achievement"]; return it; })}>+ Bullet</button>
+                  <button className="chip danger" onClick={()=>removeItem('experience',ex.id)}>Delete item</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+        <button className="btn" onClick={()=>addItem('experience',{id:rid(), title:"", company:"", period:"", location:"", logo:"", bullets:[]})}>+ Add experience</button>
+      </section>
+    ),
+
+    education:(col)=>(
+      <section className="mb-6">
+        <SectionBar name="education" label={state.sectionNames.education||'Education'} col={col}/>
+        <div className="title-divider"></div>
+        {(state.education||[]).map(ed=>(
+          <div key={ed.id} className="mb-3">
+            <div className="font-medium text-sm editable" contentEditable suppressContentEditableWarning
+                 onBlur={e=>updateInList('education',ed.id,it=>{ it.degree=e.target.textContent; return it; })}>
+              {ed.degree}
+            </div>
+            <div className="text-sm" style={{color:accent}}>
+              <span className="editable" contentEditable suppressContentEditableWarning
+                    onBlur={e=>updateInList('education',ed.id,it=>{ it.school=e.target.textContent; return it; })}>
+                {ed.school}
+              </span>
+            </div>
+            <div className="text-xs meta">
+              <span className="editable" contentEditable suppressContentEditableWarning
+                    onBlur={e=>updateInList('education',ed.id,it=>{ it.period=e.target.textContent; return it; })}>
+                {ed.period}
+              </span>
+              {ed.gpa!==undefined &&
+                <span> • GPA <span className="editable" contentEditable suppressContentEditableWarning
+                                   onBlur={e=>updateInList('education',ed.id,it=>{ it.gpa=e.target.textContent; return it; })}>{ed.gpa}</span></span>}
+              <span> • </span>
+              <span className="editable" contentEditable suppressContentEditableWarning
+                    onBlur={e=>updateInList('education',ed.id,it=>{ it.location=e.target.textContent; return it; })}>
+                {ed.location}
+              </span>
+            </div>
+            <div className="mt-1">
+              <button className="chip danger" onClick={()=>removeItem('education',ed.id)}>Delete item</button>
+            </div>
+          </div>
+        ))}
+        <button className="btn" onClick={()=>addItem('education',{id:rid(), degree:"", school:"", period:"", location:"", gpa:""})}>+ Add education</button>
+      </section>
+    ),
+
+    projects:(col)=>(
+      <section className="mb-6">
+        <SectionBar name="projects" label={state.sectionNames.projects||'Projects'} col={col}/>
+        <div className="title-divider"></div>
+        {(state.projects||[]).map(p=>(
+          <div key={p.id} className="mb-3">
+            <div className="font-medium text-sm editable" contentEditable suppressContentEditableWarning
+                 onBlur={e=>updateInList('projects',p.id,it=>{ it.name=e.target.textContent; return it; })}>
+              {p.name}
+            </div>
+            {p.domain && <div className="text-sm editable" style={{color:accent}} contentEditable suppressContentEditableWarning
+                 onBlur={e=>updateInList('projects',p.id,it=>{ it.domain=e.target.textContent; return it; })}>{p.domain}</div>}
+            <div className="text-xs meta">
+              <span className="editable" contentEditable suppressContentEditableWarning
+                    onBlur={e=>updateInList('projects',p.id,it=>{ it.period=e.target.textContent; return it; })}>{p.period}</span>
+              <span> • </span>
+              <span className="editable" contentEditable suppressContentEditableWarning
+                    onBlur={e=>updateInList('projects',p.id,it=>{ it.location=e.target.textContent; return it; })}>{p.location}</span>
+            </div>
+            {(p.bullets||[]).length>0 &&
+              <ul className="list-disc pl-5 text-sm text-neutral-800">
+                {p.bullets.map((b,idx)=>(
+                  <li key={idx} className="editable" contentEditable suppressContentEditableWarning
+                      onBlur={e=>updateInList('projects',p.id,it=>{ it.bullets[idx]=e.target.textContent; return it; })}>
+                    {b}
+                  </li>
+                ))}
+              </ul>}
+            <div className="mt-1 flex gap-1">
+              <button className="chip" onClick={()=>updateInList('projects',p.id,it=>{ it.bullets=[...(it.bullets||[]), "New project note"]; return it; })}>+ Bullet</button>
+              <button className="chip danger" onClick={()=>removeItem('projects',p.id)}>Delete item</button>
+            </div>
+          </div>
+        ))}
+        <button className="btn" onClick={()=>addItem('projects',{id:rid(), name:"", domain:"", period:"", location:"", bullets:[]})}>+ Add project</button>
+      </section>
+    ),
+
+    volunteering:(col)=>(
+      <section className="mb-6">
+        <SectionBar name="volunteering" label={state.sectionNames.volunteering||'Volunteering'} col={col}/>
+        <div className="title-divider"></div>
+        {(state.volunteering||[]).map(v=>(
+          <div key={v.id} className="mb-4">
+            <div className="flex items-start gap-3">
+              {v.logo ? <div className="logo"><img src={v.logo} className="w-full h-full object-cover" alt=""/></div> : null}
+              <div className="flex-1 min-w-0">
+                <div className="editable font-medium text-sm" contentEditable suppressContentEditableWarning
+                     onBlur={e=>updateInList('volunteering', v.id, it=>{ it.role=e.target.textContent; return it; })}>
+                  {v.role}
+                </div>
+                <div className="text-sm" style={{color:accent}}>
+                  <span className="editable" contentEditable suppressContentEditableWarning
+                        onBlur={e=>updateInList('volunteering', v.id, it=>{ it.org=e.target.textContent; return it; })}>
+                    {v.org}
+                  </span>
+                </div>
+                <div className="text-xs meta mb-1">
+                  <span className="editable" contentEditable suppressContentEditableWarning
+                        onBlur={e=>updateInList('volunteering', v.id, it=>{ it.period=e.target.textContent; return it; })}>
+                    {v.period}
+                  </span> •
+                  <span className="editable ml-1" contentEditable suppressContentEditableWarning
+                        onBlur={e=>updateInList('volunteering', v.id, it=>{ it.location=e.target.textContent; return it; })}>
+                    {v.location}
+                  </span>
+                </div>
+                <div className="mt-1 flex gap-1">
+                  <button className="chip" onClick={()=>pickImage(url=>updateInList('volunteering', v.id, it=>{ it.logo=url; return it; }))}>Logo</button>
+                  {v.logo && <button className="chip" onClick={()=>updateInList('volunteering', v.id, it=>{ it.logo=""; return it; })}>Remove logo</button>}
+                  <button className="chip danger" onClick={()=>removeItem('volunteering',v.id)}>Delete item</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+        <button className="btn" onClick={()=>addItem('volunteering',{id:rid(), role:"", org:"", period:"", location:"", logo:""})}>+ Add volunteering</button>
+      </section>
+    ),
+
+    certifications:(col)=>(
+      <section className="mb-6">
+        <SectionBar name="certifications" label={state.sectionNames.certifications||'Certifications'} col={col}/>
+        <div className="title-divider"></div>
+        {(state.certifications||[]).map(c=>(
+          <div key={c.id} className="mb-2">
+            <div className="text-sm" style={{color:accent}}>
+              <span className="editable" contentEditable suppressContentEditableWarning
+                    onBlur={e=>updateInList('certifications',c.id,it=>{ it.line1=e.target.textContent; return it; })}>{c.line1}</span>
+            </div>
+            {c.line2 && <div className="text-sm editable" contentEditable suppressContentEditableWarning
+                  onBlur={e=>updateInList('certifications',c.id,it=>{ it.line2=e.target.textContent; return it; })}>{c.line2}</div>}
+            <div className="mt-1 flex gap-1">
+              <button className="chip" onClick={()=>pickImage(url=>updateInList('certifications',c.id,it=>{ it.logo=url; return it; }))}>Logo</button>
+              {c.logo && <button className="chip" onClick={()=>updateInList('certifications',c.id,it=>{ it.logo=""; return it; })}>Remove logo</button>}
+              <button className="chip danger" onClick={()=>removeItem('certifications',c.id)}>Delete item</button>
+            </div>
+          </div>
+        ))}
+        <button className="btn" onClick={()=>addItem('certifications',{id:rid(), icon:"certificate", line1:"", line2:"", logo:""})}>+ Add certification</button>
+      </section>
+    ),
+
+    awards:(col)=>(
+      <section className="mb-6">
+        <SectionBar name="awards" label={state.sectionNames.awards||'Awards'} col={col}/>
+        <div className="title-divider"></div>
+        {(state.awards||[]).map(a=>(
+          <div key={a.id} className="mb-2">
+            <div className="font-medium text-sm editable" contentEditable suppressContentEditableWarning
+                 onBlur={e=>updateInList('awards',a.id,it=>{ it.line1=e.target.textContent; return it; })}>{a.line1}</div>
+            {a.line2 && <div className="text-sm editable" contentEditable suppressContentEditableWarning
+                 onBlur={e=>updateInList('awards',a.id,it=>{ it.line2=e.target.textContent; return it; })}>{a.line2}</div>}
+            <div className="mt-1 flex gap-1">
+              <button className="chip" onClick={()=>pickImage(url=>updateInList('awards',a.id,it=>{ it.logo=url; return it; }))}>Logo</button>
+              {a.logo && <button className="chip" onClick={()=>updateInList('awards',a.id,it=>{ it.logo=""; return it; })}>Remove logo</button>}
+              <button className="chip danger" onClick={()=>removeItem('awards',a.id)}>Delete item</button>
+            </div>
+          </div>
+        ))}
+        <button className="btn" onClick={()=>addItem('awards',{id:rid(), icon:"award", line1:"", line2:"", logo:""})}>+ Add award</button>
+      </section>
+    ),
+
+    skills:(col)=>(
+      <section className="mb-6">
+        <SectionBar name="skills" label={state.sectionNames.skills||'Skills'} col={col}/>
+        <div className="title-divider"></div>
+        {(state.skills||[]).map(g=>(
+          <div key={g.id} className="mb-3">
+            <div className="text-sm editable" style={{fontFamily:hFont, fontWeight:400}}
+                 contentEditable suppressContentEditableWarning
+                 onBlur={e=>updateInList('skills',g.id,it=>{ it.group=e.target.textContent; return it; })}>
+              {g.group}
+            </div>
+            <div className="mt-1 flex flex-wrap gap-1" style={{fontFamily:mFont}}>
+              {(g.items||[]).map((s,idx)=>(
+                <span key={idx} className="px-2 py-0.5 border rounded-full text-sm editable"
+                      contentEditable suppressContentEditableWarning
+                      onBlur={e=>updateInList('skills',g.id,it=>{ it.items[idx]=e.target.textContent; return it; })}>
+                  {s}
+                </span>
+              ))}
+            </div>
+            <div className="mt-1 flex gap-1">
+              <button className="chip" onClick={()=>updateInList('skills',g.id,it=>{ it.items=[...(it.items||[]),"New skill"]; return it; })}>+ Skill</button>
+              <button className="chip danger" onClick={()=>removeItem('skills',g.id)}>Delete group</button>
+            </div>
+          </div>
+        ))}
+        <button className="btn" onClick={()=>addItem('skills',{id:rid(), group:"", items:[]})}>+ Add group</button>
+      </section>
+    ),
+
+    languages:(col)=>(
+      <section className="mb-6">
+        <SectionBar name="languages" label={state.sectionNames.languages||'Languages'} col={col}/>
+        <div className="title-divider"></div>
+        {(state.languages||[]).map(l=>(
+          <div key={l.id} className="flex items-center justify-between text-sm mb-1" style={{fontFamily:mFont}}>
+            <span className="editable truncate" contentEditable suppressContentEditableWarning
+                  onBlur={e=>updateInList('languages',l.id,it=>{ it.name=e.target.textContent; return it; })}>
+              {l.name}
+            </span>
+            <span className="text-xs meta ml-3 editable" contentEditable suppressContentEditableWarning
+                  onBlur={e=>updateInList('languages',l.id,it=>{ it.level=e.target.textContent; return it; })}>
+              {l.level}
+            </span>
+            <button className="chip danger ml-2" onClick={()=>removeItem('languages',l.id)}>×</button>
+          </div>
+        ))}
+        <button className="btn" onClick={()=>addItem('languages',{id:rid(), name:"", score:3, level:""})}>+ Add language</button>
+      </section>
+    ),
+
+    strengths:(col)=>(
+      <section className="mb-6">
+        <SectionBar name="strengths" label={state.sectionNames.strengths||'Strengths'} col={col}/>
+        <div className="title-divider"></div>
+        {(state.strengths||[]).map(it=>(
+          <div key={it.id} className="flex items-center gap-2 mb-2">
+            <span className="circle-icon" style={{color:accent}}><Icon name={it.icon||'bulb'} className="w-4 h-4"/></span>
+            <span className="editable" contentEditable suppressContentEditableWarning
+                  onBlur={e=>updateInList('strengths',it.id,x=>{ x.label=e.target.textContent; return x; })}>
+              {it.label}
+            </span>
+            <button className="chip danger ml-auto" onClick={()=>removeItem('strengths',it.id)}>×</button>
+          </div>
+        ))}
+        <button className="btn" onClick={()=>addItem('strengths',{id:rid(), icon:"bulb", label:""})}>+ Add strength</button>
+      </section>
+    ),
+
+    hobbies:(col)=>(
+      <section className="mb-6">
+        <SectionBar name="hobbies" label={state.sectionNames.hobbies||'Hobbies'} col={col}/>
+        <div className="title-divider"></div>
+        {(state.hobbies||[]).map(it=>(
+          <div key={it.id} className="flex items-center gap-2 mb-2">
+            <span className="circle-icon" style={{color:accent}}><Icon name={it.icon||'camera'} className="w-4 h-4"/></span>
+            <span className="editable" contentEditable suppressContentEditableWarning
+                  onBlur={e=>updateInList('hobbies',it.id,x=>{ x.label=e.target.textContent; return x; })}>
+              {it.label}
+            </span>
+            <button className="chip danger ml-auto" onClick={()=>removeItem('hobbies',it.id)}>×</button>
+          </div>
+        ))}
+        <button className="btn" onClick={()=>addItem('hobbies',{id:rid(), icon:"camera", label:""})}>+ Add hobby</button>
+      </section>
+    ),
+
+    online:(col)=>(
+      <section className="mb-6">
+        <SectionBar name="online" label={state.sectionNames.online||'Online'} col={col}/>
+        <div className="title-divider"></div>
+        <div className="text-sm" style={{fontFamily:mFont}}>
+          <div>
+            Website: <span className="editable" contentEditable suppressContentEditableWarning
+                           onBlur={e=>setPath('online.website.url',e.target.textContent)}>{state.online?.website?.url||""}</span>
+          </div>
+          <div>
+            LinkedIn: <span className="editable" contentEditable suppressContentEditableWarning
+                           onBlur={e=>setPath('online.linkedin.url',e.target.textContent)}>{state.online?.linkedin?.url||""}</span>
+          </div>
+          <div>
+            GitHub: <span className="editable" contentEditable suppressContentEditableWarning
+                           onBlur={e=>setPath('online.github.url',e.target.textContent)}>{state.online?.github?.url||""}</span>
+          </div>
+        </div>
+      </section>
+    ),
+
+    laws:(col)=>(
+      <section className="mb-6">
+        <SectionBar name="laws" label={state.sectionNames.laws||'Laws'} col={col}/>
+        <div className="title-divider"></div>
+        <div className="text-xs text-neutral-600 editable whitespace-pre-line"
+             contentEditable suppressContentEditableWarning
+             onBlur={e=>{
+               const lines = e.target.textContent.split('\n');
+               setState(s=>{ const n=clone(s); n.laws=lines; scheduleSave(themed(n)); return n; });
+             }}>
+          {(state.laws||[]).join('\n')}
+        </div>
+      </section>
+    ),
+  };
+
+  /* --- UI: toolbar rows --- */
   const row1 = (
     <div className="toolbar-row row1">
       <div className="flex items-center gap-2">
@@ -242,9 +659,22 @@ function App(){
         <span className="text-neutral-400">/</span>
         <div className="truncate">{docName}</div>
       </div>
-      <div></div>
+      <div className="flex items-center gap-3">
+        {/* Add section palette */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-neutral-500">Add Section</span>
+          <select className="input" value={addType} onChange={e=>setAddType(e.target.value)}>
+            {allTypes.map(t=><option key={t} value={t}>{t}</option>)}
+          </select>
+          <select className="input" value={addCol} onChange={e=>setAddCol(e.target.value)}>
+            <option value="left">Left (1/3)</option>
+            <option value="right">Right (2/3)</option>
+          </select>
+          <button className="btn" onClick={addSection}>Add</button>
+        </div>
+      </div>
       <div className="flex items-center gap-2">
-        <button className="btn" onClick={()=>saveDoc({...state, _theme:{accent,fs,lh,heading:hFont,body:bFont,meta:mFont,h:hWeight,sub:subWeight}})}>Save</button>
+        <button className="btn" onClick={()=>saveDoc(themed(clone(state)))}>Save</button>
         <button className="btn-primary" onClick={()=>window.print()}>Export PDF</button>
       </div>
     </div>
@@ -252,58 +682,41 @@ function App(){
 
   const row2 = (
     <div className="toolbar-row row2">
-      {/* Template selector */}
-      <div className="col-span-3 flex items-center gap-2 min-w-0">
-        <span className="text-xs text-neutral-500 shrink-0">Template</span>
-        <select className="input w-full"
-          onChange={e=>{
-            const id=e.target.value;
-            const tpl=window.CV_TEMPLATES?.get?.(id);
-            if(!tpl) return;
-            const migrated = tpl.migrate ? tpl.migrate(state) : state;
-            setState(migrated);
-            scheduleSave(migrated);
-          }}>
+      <div className="col-span-3 flex items-center gap-2">
+        <span className="text-xs text-neutral-500">Template</span>
+        <select className="input w-full" onChange={e=>{
+          const t=window.CV_TEMPLATES?.get?.(e.target.value);
+          if(!t) return;
+          const merged = t.migrate ? t.migrate(state) : state;
+          setState(merged); scheduleSave(themed(clone(merged)));
+        }}>
           {(window.CV_TEMPLATES?.list?.()||[{id:'default',name:'Default'}]).map(t=>
             <option key={t.id} value={t.id}>{t.name}</option>
           )}
         </select>
       </div>
-
-      {/* Fonts preset */}
-      <div className="col-span-3 flex items-center gap-2 min-w-0">
-        <span className="text-xs text-neutral-500 shrink-0">Font preset</span>
-        <select className="input w-full"
-          onChange={e=>{
-            const p = FONT_PRESETS[parseInt(e.target.value)] || FONT_PRESETS[0];
-            setFs(p.fs); setLh(p.lh); setHFont(p.heading); setBFont(p.body); setMFont(p.meta); setHWeight(p.h); setSubWeight(p.sub);
-          }}>
+      <div className="col-span-3 flex items-center gap-2">
+        <span className="text-xs text-neutral-500">Font preset</span>
+        <select className="input w-full" onChange={e=>{
+          const p = FONT_PRESETS[parseInt(e.target.value)]||FONT_PRESETS[0];
+          setFs(p.fs); setLh(p.lh); setHFont(p.heading); setBFont(p.body); setMFont(p.meta); setHWeight(p.h); setSubWeight(p.sub);
+        }}>
           {FONT_PRESETS.map((p,i)=><option key={p.label} value={i}>{p.label}</option>)}
         </select>
       </div>
-
-      {/* Font size */}
       <div className="col-span-2 flex items-center gap-2">
         <span className="text-xs text-neutral-500">Size</span>
-        <input className="w-full" type="range" min="9" max="14" step="1" value={fs}
-               onChange={e=>setFs(parseInt(e.target.value))}/>
+        <input className="w-full" type="range" min="9" max="14" step="1" value={fs} onChange={e=>setFs(parseInt(e.target.value))}/>
         <span className="text-xs w-8 text-right">{fs}pt</span>
       </div>
-
-      {/* Line height */}
       <div className="col-span-2 flex items-center gap-2">
         <span className="text-xs text-neutral-500">Line</span>
-        <input className="w-full" type="range" min="1.2" max="1.8" step="0.05" value={lh}
-               onChange={e=>setLh(parseFloat(e.target.value))}/>
+        <input className="w-full" type="range" min="1.2" max="1.8" step="0.05" value={lh} onChange={e=>setLh(parseFloat(e.target.value))}/>
       </div>
-
-      {/* Accent color */}
       <div className="col-span-1 flex items-center gap-2">
         <span className="text-xs text-neutral-500">Accent</span>
         <input className="color" type="color" value={accent} onChange={e=>setAccent(e.target.value)}/>
       </div>
-
-      {/* Photo */}
       <div className="col-span-1 flex items-center gap-2">
         <span className="text-xs text-neutral-500">Photo</span>
         <button className="btn" onClick={()=>pickImage(url=>setPath('header.avatar',url))}>Upload</button>
@@ -320,27 +733,23 @@ function App(){
       </header>
 
       <main>
-        <div className="sheet"
-             style={{'--fs': fs+'pt', '--lh': lh, '--accent': accent, fontFamily: bFont}}>
-          {/* LEFT column */}
-          <div>
-            {/* Header block */}
-            <div className="flex items-start gap-4 mb-4">
+        <div className="sheet" style={{'--fs': fs+'pt', '--lh': lh, '--accent': accent, fontFamily: bFont}}>
+          {/* HEADER (full width) */}
+          <div className="sheet-header">
+            <div className="flex items-start gap-4 pb-4" style={{borderBottom:'1px solid var(--rule)'}}>
               <div className="flex-1 min-w-0">
-                <div className="editable text-3xl leading-tight font-bold text-[var(--accent)]"
-                     style={{fontFamily:hFont, fontWeight:hWeight}}
+                <div className="editable text-3xl leading-tight"
+                     style={{color:accent, fontFamily:hFont, fontWeight:hWeight}}
                      contentEditable suppressContentEditableWarning
                      onBlur={e=>setPath('header.name', e.target.textContent)}>
                   {state.header.name}
                 </div>
-
                 <div className="editable text-lg"
-                     style={{fontFamily:hFont, fontWeight:subWeight}}
+                     style={{color:'#0f172a', fontFamily:hFont, fontWeight:subWeight}}
                      contentEditable suppressContentEditableWarning
                      onBlur={e=>setPath('header.role', e.target.textContent)}>
                   {state.header.role}
                 </div>
-
                 <div className="text-sm mt-2" style={{fontFamily:mFont}}>
                   {[
                     state.header.email, state.header.phone,
@@ -348,156 +757,27 @@ function App(){
                   ].filter(Boolean).join(' • ')}
                 </div>
               </div>
-
               <div className="avatar">
                 {state.header.avatar
                   ? <img src={state.header.avatar} className="w-full h-full object-cover" alt="avatar"/>
-                  : <span className="text-xs text-neutral-400">Photo</span>}
+                  : <button className="text-xs text-neutral-500" onClick={()=>pickImage(url=>setPath('header.avatar',url))}>Upload</button>}
               </div>
             </div>
-
-            {/* Summary */}
-            <div className="editable text-sm text-neutral-800 mb-6 whitespace-pre-line"
+            <div className="editable text-sm text-neutral-800 mt-3 whitespace-pre-line"
                  contentEditable suppressContentEditableWarning
                  onBlur={e=>setPath('summary', e.target.textContent)}>
               {state.summary}
             </div>
-
-            {/* Skills */}
-            <SectionTitle>{state.sectionNames.skills || 'SKILLS'}</SectionTitle>
-            <div className="mb-6">
-              {state.skills.map((g,i)=>(
-                <div key={i} className="mb-2">
-                  <div className="editable text-sm font-medium"
-                       style={{fontFamily:hFont, fontWeight:400}}
-                       contentEditable suppressContentEditableWarning
-                       onBlur={e=>{
-                         const v=deepClone(state.skills); v[i].group=e.target.textContent;
-                         const next={...state, skills:v}; setState(next); scheduleSave(next);
-                       }}>
-                    {g.group}
-                  </div>
-                  <div className="mt-1 flex flex-wrap gap-1" style={{fontFamily:mFont}}>
-                    {(g.items||[]).map((s,j)=><span key={j} className="px-2 py-0.5 border rounded-full text-sm">{s}</span>)}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Languages */}
-            <SectionTitle>{state.sectionNames.languages || 'LANGUAGES'}</SectionTitle>
-            <div className="mb-6">
-              {(state.languages||[]).map((l,i)=>(
-                <div key={i} className="flex items-center justify-between text-sm mb-1" style={{fontFamily:mFont}}>
-                  <span className="editable truncate" contentEditable suppressContentEditableWarning
-                        onBlur={e=>{
-                          const v=deepClone(state.languages); v[i].name=e.target.textContent;
-                          const next={...state, languages:v}; setState(next); scheduleSave(next);
-                        }}>{l.name}</span>
-                  <span className="text-xs meta ml-3">{l.level}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Strengths */}
-            <SectionTitle>{state.sectionNames.strengths || 'STRENGTHS'}</SectionTitle>
-            <div className="mb-6">
-              {(state.strengths||[]).map((it,i)=><div key={i} className="text-sm mb-1">{it.label}</div>)}
-            </div>
-
-            {/* Hobbies */}
-            <SectionTitle>{state.sectionNames.hobbies || 'HOBBIES'}</SectionTitle>
-            <div className="mb-6">
-              {(state.hobbies||[]).map((it,i)=><div key={i} className="text-sm mb-1">{it.label}</div>)}
-            </div>
-
-            {/* Online */}
-            <SectionTitle>{state.sectionNames.online || 'ONLINE'}</SectionTitle>
-            <div className="mb-6 text-sm" style={{fontFamily:mFont}}>
-              {state.online?.linkedin?.url && <div>LinkedIn: {state.online.linkedin.url}</div>}
-              {state.online?.github?.url && <div>GitHub: {state.online.github.url}</div>}
-              {state.online?.website?.url && <div>Website: {state.online.website.url}</div>}
-            </div>
-
-            {/* Laws */}
-            <SectionTitle>{state.sectionNames.laws || 'LAWS'}</SectionTitle>
-            <div className="text-xs text-neutral-600 whitespace-pre-line">
-              {(state.laws||[]).join('\n')}
-            </div>
           </div>
 
-          {/* RIGHT column */}
+          {/* LEFT 1/3 */}
           <div>
-            {/* Experience */}
-            <SectionTitle>{state.sectionNames.experience || 'EXPERIENCE'}</SectionTitle>
-            <div className="mb-6">
-              {state.experience.map((ex,i)=>(
-                <div key={ex.id} className="mb-4">
-                  <div className="editable font-medium text-sm"
-                       contentEditable suppressContentEditableWarning
-                       onBlur={e=>{
-                         const v=deepClone(state.experience); v[i].title=e.target.textContent;
-                         const next={...state, experience:v}; setState(next); scheduleSave(next);
-                       }}>{ex.title}</div>
-                  <div className="text-sm" style={{color:accent}}>{ex.company}</div>
-                  <div className="text-xs meta mb-1">{ex.period} • {ex.location}</div>
-                  {(ex.bullets||[]).length>0 &&
-                    <ul className="list-disc pl-5 text-sm text-neutral-800">
-                      {ex.bullets.map((b,j)=><li key={j}>{b}</li>)}
-                    </ul>}
-                </div>
-              ))}
-            </div>
+            {state._orders.left.map(key => R[key]?.('left'))}
+          </div>
 
-            {/* Education */}
-            <SectionTitle>{state.sectionNames.education || 'EDUCATION'}</SectionTitle>
-            <div className="mb-6">
-              {state.education.map((ed,i)=>(
-                <div key={ed.id} className="mb-3">
-                  <div className="font-medium text-sm">{ed.degree}</div>
-                  <div className="text-sm" style={{color:accent}}>{ed.school}</div>
-                  <div className="text-xs meta">{ed.period} • {ed.location}{ed.gpa?` • GPA ${ed.gpa}`:''}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* Projects */}
-            <SectionTitle>{state.sectionNames.projects || 'PROJECTS'}</SectionTitle>
-            <div className="mb-6">
-              {state.projects.map((p,i)=>(
-                <div key={p.id} className="mb-3">
-                  <div className="font-medium text-sm">{p.name}</div>
-                  {p.domain && <div className="text-sm" style={{color:accent}}>{p.domain}</div>}
-                  <div className="text-xs meta">{p.period} • {p.location}</div>
-                  {(p.bullets||[]).length>0 &&
-                    <ul className="list-disc pl-5 text-sm text-neutral-800">
-                      {p.bullets.map((b,j)=><li key={j}>{b}</li>)}
-                    </ul>}
-                </div>
-              ))}
-            </div>
-
-            {/* Certifications */}
-            <SectionTitle>{state.sectionNames.certifications || 'CERTIFICATIONS'}</SectionTitle>
-            <div className="mb-6">
-              {state.certifications.map((c,i)=>(
-                <div key={c.id} className="mb-2">
-                  <div className="text-sm" style={{color:accent}}>{c.line1}</div>
-                  {c.line2 && <div className="text-sm">{c.line2}</div>}
-                </div>
-              ))}
-            </div>
-
-            {/* Awards */}
-            <SectionTitle>{state.sectionNames.awards || 'AWARDS'}</SectionTitle>
-            <div className="mb-6">
-              {state.awards.map((a,i)=>(
-                <div key={a.id} className="mb-2">
-                  <div className="font-medium text-sm">{a.line1}</div>
-                  {a.line2 && <div className="text-sm">{a.line2}</div>}
-                </div>
-              ))}
-            </div>
+          {/* RIGHT 2/3 */}
+          <div>
+            {state._orders.right.map(key => R[key]?.('right'))}
           </div>
         </div>
       </main>
@@ -505,16 +785,14 @@ function App(){
   );
 }
 
-/* mount safely */
-(function mount(){
-  try{
-    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
-  }catch(e){
-    console.error("Editor failed to mount:", e);
-    const r=document.getElementById('root');
-    if(r) r.innerHTML='<div style="padding:16px;color:#b91c1c;">Editor failed to load. Open the console for details.</div>';
-  }
-})();
+/* mount */
+try{
+  ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+}catch(e){
+  console.error('Editor mount failed:', e);
+  const r=document.getElementById('root');
+  if(r) r.innerHTML='<div style="padding:16px;color:#b91c1c;">Editor failed to load. Check console.</div>';
+}
 </script>
 </body>
 </html>
