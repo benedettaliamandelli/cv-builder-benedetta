@@ -8,30 +8,78 @@
 <link rel="stylesheet" href="./styles.css"/>
 <link rel="stylesheet" href="./fonts/fonts.css"/>
 
-<!-- UI libs (ok per GH Pages; per produzione builda con Vite/Webpack) -->
+<!-- Minimal safety styles -->
+<style>
+  :root{ --accent:#2563eb; --rule:#d1d5db; --toolbar-h:120px; }
+  body{ background:#f8fafc; padding-top:var(--toolbar-h); }
+  #toolbar{ position:fixed; top:0; left:0; right:0; z-index:50; background:rgba(255,255,255,.92); backdrop-filter:blur(8px); border-bottom:1px solid #e5e7eb; }
+  .row{ max-width:1600px; margin:0 auto; padding:.5rem 1rem; display:grid; gap:.5rem; }
+  .row.top{ grid-template-columns:auto 1fr auto; align-items:center; }
+  .row.controls{ grid-template-columns:repeat(12,minmax(0,1fr)); align-items:center; }
+  .btn{ padding:.45rem .7rem; border:1px solid #e5e7eb; border-radius:.5rem; background:#fff; }
+  .btn:hover{ background:#f9fafb; }
+  .btn-primary{ padding:.48rem .85rem; border:1px solid #111827; border-radius:.55rem; background:#111827; color:#fff; }
+  .btn-danger{ padding:.45rem .7rem; border:1px solid #fecaca; border-radius:.5rem; background:#fee2e2; color:#991b1b; }
+  .chip{ padding:.15rem .45rem; border:1px solid #e5e7eb; border-radius:.4rem; background:#fff; font-size:.8rem; }
+  .input{ border:1px solid #e5e7eb; border-radius:.45rem; padding:.35rem .6rem; background:#fff; min-width:0; }
+  .color{ width:40px; height:32px; padding:0; border:1px solid #e5e7eb; border-radius:.45rem; }
+
+  /* A4 sheet */
+  .sheet{ width:210mm; min-height:297mm; margin:14mm auto; background:#fff; color:#111827;
+          box-shadow:0 10px 25px rgba(0,0,0,.06); padding:18mm; font-size:var(--fs,11pt); line-height:var(--lh,1.45);
+          display:flex; flex-direction:column; gap:10mm; }
+  .band{ display:grid; gap:10mm; }
+  .band.single{ grid-template-columns:1fr; }
+  .band.c13-23{ grid-template-columns:1fr 2fr; }
+  .band.c23-13{ grid-template-columns:2fr 1fr; }
+  .col{ display:flex; flex-direction:column; gap:6mm; }
+
+  .secbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:.2rem; }
+  .secbar .title{ text-transform:uppercase; letter-spacing:.08em; font-size:11px; color:var(--accent); }
+  .title-divider{ height:1px; background:var(--rule); margin:.3rem 0 .7rem; }
+  .meta{ color:#6b7280; }
+
+  .editable[contenteditable="true"]{ cursor:text; }
+  .editable[contenteditable="true"]:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+
+  .avatar{ width:96px; height:96px; border-radius:9999px; overflow:hidden; border:1px solid #e5e7eb; background:#f3f4f6; display:flex; align-items:center; justify-content:center; }
+  .logo{ width:32px; height:32px; border-radius:9999px; overflow:hidden; border:1px solid #e5e7eb; background:#f3f4f6; flex:0 0 auto; }
+  .icon{ display:inline-block; width:1em; height:1em; background:currentColor; -webkit-mask:center/contain no-repeat; mask:center/contain no-repeat; }
+  .circle-icon{ display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:9999px; background:#e5e7eb; color:var(--accent); }
+
+  @media print{
+    body{ background:#fff!important; padding:0; }
+    #toolbar{ display:none!important; }
+    .sheet{ box-shadow:none!important; margin:0 auto; page-break-after:always; break-after:page; }
+    .sheet:last-child{ page-break-after:auto; }
+    @page{ size:A4; margin:14mm; }
+  }
+</style>
+
+<!-- UI libs -->
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-<!-- Firebase compat (opzionale) -->
+<!-- Firebase compat (optional) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-<!-- Storage/Auth shim -->
+<!-- Storage/Auth -->
 <script src="./auth.firebase.js"></script>
 <script src="./storage.firebase.js"></script>
 <script src="./storage.local.js"></script>
 
-<!-- Templates fallback (se i tuoi file non ci sono, creo un registry in runtime) -->
+<!-- Templates fallback (if your template files are missing) -->
 <script>
 (function ensureTemplates(){
   if (window.CV_TEMPLATES) return;
   const rid = ()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
-  const seedBase = ()=>({
+  const base = ()=>({
     header:{name:"JOHN DOE",role:"Medical Advisor",email:"john.doe@mail.com",phone:"+39 333 0000000",residence:"Milan, Italy",birthdate:"01/01/1995",avatar:""},
-    summary:"Short professional summary. Click to edit all text directly here.",
+    summary:"Short professional summary. Click to edit directly here.",
     sectionNames:{experience:"Experience",education:"Education",projects:"Projects",volunteering:"Volunteering",skills:"Skills",languages:"Languages",strengths:"Strengths",hobbies:"Hobbies",online:"Online",certifications:"Certifications",awards:"Awards",laws:"Laws"},
     experience:[{id:rid(),title:"Medical Advisor Intern",company:"Sanofi Oncology",period:"03/2025 – Present",location:"Milan, Italy",logo:"",bullets:["Managed MAPs (compassionate use)","Supported local studies & data collection"]}],
     education:[
@@ -49,113 +97,54 @@
     awards:[{id:rid(),icon:"award",line1:"Best Thesis Prize",line2:"Politecnico di Milano"}],
     laws:["I authorize the processing of personal data in accordance with GDPR 2016/679."],
     _theme:{accent:"#2563eb",fs:11,lh:1.45,heading:"var(--font-inter)",body:"var(--font-inter)",meta:"var(--font-inter)",h:600,sub:500},
-    /* Layout per-banda (row): type: '13-23' | '23-13' | 'single' */
     _layout:[
       {id:rid(), type:"single", left:["headerSummary"], right:[]},
-      {id:rid(), type:"13-23", left:["laws","skills","languages","strengths","hobbies","online"], right:["experience","education","projects","volunteering","certifications","awards"]},
+      {id:rid(), type:"13-23", left:["laws","skills","languages","strengths","hobbies","online"], right:["experience","education","projects","volunteering","certifications","awards"]}
     ]
   });
   window.CV_TEMPLATES = {
     list(){return[
-      {id:"default_13_23",name:"Two Columns 1/3–2/3",desc:"Left narrow, right wide", seed:()=>{const s=seedBase();s._layout=[s._layout[0],{id:Date.now()+"a",type:"13-23",left:["laws","skills","languages","strengths","hobbies","online"],right:["experience","education","projects","volunteering","certifications","awards"]}];return s;}},
-      {id:"default_23_13",name:"Two Columns 2/3–1/3",desc:"Left wide, right narrow", seed:()=>{const s=seedBase();s._layout=[s._layout[0],{id:Date.now()+"b",type:"23-13",left:["experience","education","projects"],right:["laws","skills","languages","online","awards"]}];return s;}},
-      {id:"single",name:"Single Column",desc:"One full column", seed:()=>{const s=seedBase();s._layout=[s._layout[0],{id:Date.now()+"c",type:"single",left:["experience","education","projects","volunteering","skills","languages","online","certifications","awards","strengths","hobbies","laws"],right:[]}];return s;}}
+      {id:"default_13_23",name:"Two Columns 1/3–2/3",desc:"Left narrow, right wide", seed:()=>{const s=base(); return s;}},
+      {id:"default_23_13",name:"Two Columns 2/3–1/3",desc:"Left wide, right narrow", seed:()=>{const s=base(); s._layout[1].type="23-13"; const tmp=s._layout[1].left; s._layout[1].left=s._layout[1].right; s._layout[1].right=tmp; return s;}},
+      {id:"single",name:"Single Column",desc:"One full column", seed:()=>{const s=base(); s._layout=[s._layout[0],{id:Date.now()+"s",type:"single",left:["experience","education","projects","volunteering","skills","languages","online","certifications","awards","strengths","hobbies","laws"],right:[]}]; return s;}}
     ]},
     get(id){ return this.list().find(t=>t.id===id)||this.list()[0]; },
     migrate(s){ return s; }
   };
 })();
 </script>
-
-<style>
-  :root{
-    --accent:#2563eb;
-    --rule:#d1d5db;
-    --toolbar-h: 120px;
-  }
-  body{ background:#f8fafc; padding-top:var(--toolbar-h); }
-  #toolbar{ position:fixed; top:0; left:0; right:0; z-index:50; background:rgba(255,255,255,.92); backdrop-filter: blur(8px);
-            border-bottom:1px solid #e5e7eb; }
-  .row{ max-width:1600px; margin:0 auto; padding:.5rem 1rem; display:grid; gap:.5rem; }
-  .row.top{ grid-template-columns:auto 1fr auto; align-items:center; }
-  .row.controls{ grid-template-columns:repeat(12, minmax(0,1fr)); align-items:center; }
-  .btn{ padding:.45rem .7rem; border:1px solid #e5e7eb; border-radius:.5rem; background:#fff; }
-  .btn:hover{ background:#f9fafb; }
-  .btn-primary{ padding:.48rem .85rem; border:1px solid #111827; border-radius:.55rem; background:#111827; color:#fff; }
-  .btn-danger{ padding:.45rem .7rem; border:1px solid #fecaca; border-radius:.5rem; background:#fee2e2; color:#991b1b; }
-  .chip{ padding:.15rem .45rem; border:1px solid #e5e7eb; border-radius:.4rem; background:#fff; font-size:.8rem; }
-  .input{ border:1px solid #e5e7eb; border-radius:.45rem; padding:.35rem .6rem; background:#fff; min-width:0; }
-  .color{ width:40px; height:32px; padding:0; border:1px solid #e5e7eb; border-radius:.45rem; }
-
-  /* Sheet A4 */
-  .sheet{
-    width:210mm; min-height:297mm; margin:14mm auto; background:#fff; color:#111827;
-    box-shadow:0 10px 25px rgba(0,0,0,.06);
-    padding:18mm 18mm;
-    font-size:var(--fs,11pt); line-height:var(--lh,1.45);
-    display:flex; flex-direction:column; gap:10mm;
-  }
-  /* Bands: each band can have its own layout */
-  .band{ display:grid; gap:10mm; }
-  .band.single{ grid-template-columns: 1fr; }
-  .band.c13-23{ grid-template-columns: 1fr 2fr; }
-  .band.c23-13{ grid-template-columns: 2fr 1fr; }
-  .col{ display:flex; flex-direction:column; gap:6mm; }
-
-  /* Section visuals */
-  .secbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:.2rem; }
-  .secbar .title{ text-transform:uppercase; letter-spacing:.08em; font-size:11px; color:var(--accent); }
-  .title-divider{ height:1px; background:var(--rule); margin:.3rem 0 .7rem; }
-  .meta{ color:#6b7280; }
-  .editable[contenteditable="true"]{ cursor:text; }
-  .editable[contenteditable="true"]:focus{ outline:2px solid var(--accent); outline-offset:1px; }
-  .avatar{ width:96px; height:96px; border-radius:9999px; overflow:hidden; border:1px solid #e5e7eb; background:#f3f4f6;
-           display:flex; align-items:center; justify-content:center; }
-  .logo{ width:32px; height:32px; border-radius:9999px; overflow:hidden; border:1px solid #e5e7eb; background:#f3f4f6; flex:0 0 auto; }
-
-  /* icons (follow color) */
-  .icon{ display:inline-block; width:1em; height:1em; background:currentColor; -webkit-mask:center/contain no-repeat; mask:center/contain no-repeat; }
-  .circle-icon{ display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:9999px; background:#e5e7eb; color:var(--accent); }
-
-  @media print{
-    body{ background:#fff!important; padding:0; }
-    #toolbar{ display:none!important; }
-    .sheet{ box-shadow:none!important; margin:0 auto; page-break-after:always; break-after:page; }
-    .sheet:last-child{ page-break-after:auto; }
-    @page{ size:A4; margin:14mm; }
-  }
-</style>
 </head>
 <body>
 <div id="root"></div>
 
+<!-- React app -->
 <script type="text/babel">
 const {useState,useEffect,useRef} = React;
 
-/* Helpers */
-const rid = () => Math.random().toString(36).slice(2)+Date.now().toString(36);
+/* ---------- utils ---------- */
+const rid = ()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
 const param = (k,d=null)=>{ try{ return new URL(location.href).searchParams.get(k) ?? d; }catch{return d;} };
 const uid = param('uid',null);
 const docName = param('doc','Default');
-const clone = (o)=> (typeof structuredClone==='function'? structuredClone(o) : JSON.parse(JSON.stringify(o)));
+const deepClone = (o)=> (typeof structuredClone==='function'? structuredClone(o) : JSON.parse(JSON.stringify(o)));
 
-/* Ensure StorageAPI exists */
+/* Ensure StorageAPI exists (fallback to localStorage) */
 (function(){
   if (window.StorageAPI) return;
   window.StorageAPI = {
     list: async ()=> Object.keys(localStorage).filter(k=>k.startsWith('cvdoc:')).map(k=>k.replace('cvdoc:','')).sort(),
-    save: async (name,data)=> { localStorage.setItem('cvdoc:'+name, JSON.stringify(data)); return true; },
-    load: async (name)=> { const raw=localStorage.getItem('cvdoc:'+name); return raw? JSON.parse(raw): null; },
-    remove: async (name)=> { localStorage.removeItem('cvdoc:'+name); return true; }
+    save: async (name,data)=>{ localStorage.setItem('cvdoc:'+name, JSON.stringify(data)); return true; },
+    load: async (name)=>{ const raw=localStorage.getItem('cvdoc:'+name); try{ return raw? JSON.parse(raw) : null; }catch{return null;} },
+    remove: async (name)=>{ localStorage.removeItem('cvdoc:'+name); return true; }
   };
 })();
 
-/* icons use mask from /icons */
-function Icon({name, className="", style={}}){
+/* Icons helper (color inherits currentColor) */
+function Icon({name,className="",style={}}){
   if(!name) return null;
   return <span className={"icon "+className} style={{...style, WebkitMask:`url(./icons/${name}.svg)`, mask:`url(./icons/${name}.svg)`}}/>;
 }
-/* picker */
+/* Image picker */
 function pickImage(cb){
   const i=document.createElement('input'); i.type='file'; i.accept='image/*';
   i.onchange=e=>{
@@ -172,19 +161,82 @@ const PRESETS = [
   {label:"Serif Head",     fs:11,lh:1.45, heading:"var(--font-serif)",  body:"var(--font-system)", meta:"var(--font-system)", h:600, sub:500},
 ];
 
-/* Load/Save */
-async function loadDoc(){
-  const firstTpl = window.CV_TEMPLATES.list()[0];
-  const seed = firstTpl.seed();
-  return (await StorageAPI.load(docName, uid)) || seed;
+/* ---------- robust loader + migrator ---------- */
+function safeSeed(){
+  const tpl = (window.CV_TEMPLATES && window.CV_TEMPLATES.list()[0]) || null;
+  return tpl ? tpl.seed() : {
+    header:{name:"JOHN DOE",role:"",email:"",phone:"",residence:"",birthdate:"",avatar:""},
+    summary:"",
+    sectionNames:{experience:"Experience",education:"Education",projects:"Projects",volunteering:"Volunteering",skills:"Skills",languages:"Languages",strengths:"Strengths",hobbies:"Hobbies",online:"Online",certifications:"Certifications",awards:"Awards",laws:"Laws"},
+    experience:[],education:[],projects:[],volunteering:[],skills:[],languages:[],strengths:[],hobbies:[],online:{},certifications:[],awards:[],laws:[],
+    _theme:{accent:"#2563eb",fs:11,lh:1.45,heading:"var(--font-inter)",body:"var(--font-inter)",meta:"var(--font-inter)",h:600,sub:500},
+    _layout:[{id:rid(),type:"single",left:["headerSummary"],right:[]}]
+  };
 }
-async function saveDoc(data){
-  return StorageAPI.save(docName, data, uid);
+function migrateDoc(raw){
+  let d = (raw && typeof raw==='object') ? deepClone(raw) : {};
+  const base = safeSeed();
+
+  // If doc was saved as "{}", fix everything
+  if (!d.header || typeof d.header!=='object') d.header = deepClone(base.header);
+  if (typeof d.summary!=='string') d.summary = base.summary;
+
+  const namesDefault = deepClone(base.sectionNames);
+  d.sectionNames = { ...namesDefault, ...(d.sectionNames||{}) };
+
+  // Ensure arrays exist
+  for (const k of ["experience","education","projects","volunteering","skills","languages","strengths","hobbies","certifications","awards","laws"]) {
+    if (!Array.isArray(d[k])) d[k] = [];
+  }
+  if (!d.online || typeof d.online!=='object') d.online = deepClone(base.online);
+
+  // Theme
+  const t = d._theme || {};
+  d._theme = {
+    accent: t.accent || base._theme.accent,
+    fs:     typeof t.fs==='number' ? t.fs : base._theme.fs,
+    lh:     typeof t.lh==='number' ? t.lh : base._theme.lh,
+    heading:t.heading || base._theme.heading,
+    body:   t.body || base._theme.body,
+    meta:   t.meta || base._theme.meta,
+    h:      typeof t.h==='number' ? t.h : base._theme.h,
+    sub:    typeof t.sub==='number' ? t.sub : base._theme.sub,
+  };
+
+  // Layout rows (critical)
+  if (!Array.isArray(d._layout) || d._layout.length===0) {
+    d._layout = deepClone(base._layout);
+  } else {
+    d._layout = d._layout.map(r=>{
+      if (!r || typeof r!=='object') return {id:rid(),type:"single",left:[],right:[]};
+      return {
+        id: r.id || rid(),
+        type: (r.type==="13-23"||r.type==="23-13"||r.type==="single") ? r.type : "single",
+        left: Array.isArray(r.left)? r.left.filter(Boolean) : [],
+        right:Array.isArray(r.right)? r.right.filter(Boolean) : [],
+      };
+    });
+  }
+
+  return d;
 }
 
-/* App */
+/* Load/Save */
+async function loadDoc(){
+  const raw = await (window.StorageAPI?.load?.(docName, uid));
+  // Raw could be a string "{}" from a wrong save; handle defensively
+  const parsed = (raw && typeof raw==='string') ? (()=>{
+    try{ return JSON.parse(raw); }catch{return {}; }
+  })() : raw;
+  return migrateDoc(parsed);
+}
+async function saveDoc(data){ return window.StorageAPI?.save?.(docName, data, uid); }
+
+/* ---------- App ---------- */
 function App(){
   const [s,setS] = useState(null);
+
+  // Theme state (kept in React state for live preview, mirrored into s._theme when saving)
   const [accent,setAccent] = useState("#2563eb");
   const [fs,setFs] = useState(11);
   const [lh,setLh] = useState(1.45);
@@ -198,36 +250,41 @@ function App(){
   const [addRow,setAddRow] = useState(-1);
   const [addSide,setAddSide] = useState("left");
 
-  useEffect(()=>{(async()=>{
-    const d = await loadDoc();
-    apply(d);
-  })();},[]);
+  const saveDeb = useRef(null);
 
-  function apply(d){
-    setS(d);
-    const t=d._theme||{};
-    setAccent(t.accent ?? "#2563eb"); setFs(t.fs ?? 11); setLh(t.lh ?? 1.45);
-    setHFont(t.heading||"var(--font-inter)"); setBFont(t.body||"var(--font-inter)"); setMFont(t.meta||"var(--font-inter)");
-    setHW(t.h ?? 600); setSubW(t.sub ?? 500);
+  useEffect(()=>{ (async()=>{
+    try{
+      const d = await loadDoc();
+      // apply theme
+      setAccent(d._theme.accent); setFs(d._theme.fs); setLh(d._theme.lh);
+      setHFont(d._theme.heading); setBFont(d._theme.body); setMFont(d._theme.meta);
+      setHW(d._theme.h); setSubW(d._theme.sub);
+      setS(d);
+    }catch(e){
+      console.error('Load failed, using seed', e);
+      const d = migrateDoc(null);
+      setS(d);
+    }
+  })(); },[]);
+
+  function withTheme(doc){
+    doc._theme = {accent:accent, fs:fs, lh:lh, heading:hFont, body:bFont, meta:mFont, h:hW, sub:subW};
+    return doc;
   }
-
-  const saveDeb = useRef(); 
-  function scheduleSave(next){
+  function scheduleSave(doc){
     clearTimeout(saveDeb.current);
-    saveDeb.current = setTimeout(()=>{ saveDoc(next).catch(()=>{}); }, 500);
-  }
-  function withTheme(next){
-    next._theme = {accent, fs, lh, heading:hFont, body:bFont, meta:mFont, h:hW, sub:subW};
-    return next;
+    saveDeb.current = setTimeout(()=>{ saveDoc(doc).catch(()=>{}); }, 400);
   }
 
-  if(!s) return <div className="p-6">Loading…</div>;
+  if (!s || !Array.isArray(s._layout)) {
+    return <div style="padding:16px">Loading…</div>;
+  }
 
-  /* Inline text setter by path */
+  /* text path setter */
   function setPath(path, value){
     const parts = path.split('.');
     setS(prev=>{
-      const n=clone(prev); let t=n;
+      const n=deepClone(prev); let t=n;
       for(let i=0;i<parts.length-1;i++) t=t[parts[i]];
       t[parts.at(-1)] = value;
       const themed = withTheme(n);
@@ -236,111 +293,100 @@ function App(){
     });
   }
 
-  /* Layout rows (bands) */
-  const TYPES = [
-    {id:"13-23", name:"Two columns 1/3 – 2/3"},
-    {id:"23-13", name:"Two columns 2/3 – 1/3"},
-    {id:"single", name:"Single column"},
-  ];
+  /* bands (rows) management */
+  const TYPES = [{id:"13-23",name:"1/3 – 2/3"},{id:"23-13",name:"2/3 – 1/3"},{id:"single",name:"Single"}];
+
   function addBand(type="13-23"){
-    setS(prev=>{
-      const n=clone(prev);
-      n._layout.push({id:rid(), type, left:[], right:[]});
-      return withTheme(n);
-    });
+    setS(prev=>{ const n=deepClone(prev); n._layout.push({id:rid(),type,left:[],right:[]}); const doc=withTheme(n); scheduleSave(doc); return doc; });
   }
-  function removeBand(rowId){
-    setS(prev=>{
-      const n=clone(prev);
-      n._layout = n._layout.filter(r=>r.id!==rowId);
-      return withTheme(n);
-    });
+  function removeBand(bandId){
+    setS(prev=>{ const n=deepClone(prev); n._layout = n._layout.filter(r=>r.id!==bandId); const doc=withTheme(n); scheduleSave(doc); return doc; });
   }
-  function moveBand(rowId,dir){
+  function moveBand(bandId,dir){
     setS(prev=>{
-      const n=clone(prev);
-      const i = n._layout.findIndex(r=>r.id===rowId); if(i<0) return prev;
-      const j = dir==='up'? i-1 : i+1; if(j<0 || j>=n._layout.length) return prev;
+      const n=deepClone(prev);
+      const i=n._layout.findIndex(r=>r.id===bandId); if(i<0) return prev;
+      const j=dir==='up'? i-1 : i+1; if(j<0||j>=n._layout.length) return prev;
       [n._layout[i],n._layout[j]]=[n._layout[j],n._layout[i]];
-      return withTheme(n);
+      const doc=withTheme(n); scheduleSave(doc); return doc;
     });
   }
-  function setBandType(rowId,type){
+  function setBandType(bandId,type){
     setS(prev=>{
-      const n=clone(prev);
-      const r = n._layout.find(x=>x.id===rowId); if(!r) return prev;
-      r.type = type;
-      return withTheme(n);
+      const n=deepClone(prev);
+      const r=n._layout.find(x=>x.id===bandId); if(!r) return prev;
+      r.type = (type==="13-23"||type==="23-13"||type==="single")? type : r.type;
+      const doc=withTheme(n); scheduleSave(doc); return doc;
     });
   }
 
-  /* Sections in bands */
+  /* section placement */
   const ALL_SECTIONS = ["experience","education","projects","volunteering","skills","languages","strengths","hobbies","online","certifications","awards","laws"];
   function placeSection(rowIdx, side, key){
     setS(prev=>{
-      const n=clone(prev);
+      const n=deepClone(prev);
+      // remove from all rows first
+      n._layout.forEach(b=>{ b.left=b.left.filter(k=>k!==key); b.right=b.right.filter(k=>k!==key); });
       const row = n._layout[rowIdx]; if(!row) return prev;
-      // remove anywhere else
-      n._layout.forEach(b=>{
-        b.left = b.left.filter(k=>k!==key);
-        b.right = b.right.filter(k=>k!==key);
-      });
-      // push here
-      (side==='left'? row.left : row.right).push(key);
-      return withTheme(n);
+      (side==='right'? row.right : row.left).push(key);
+      const doc=withTheme(n); scheduleSave(doc); return doc;
     });
   }
   function moveSectionWithin(rowIdx, side, key, dir){
     setS(prev=>{
-      const n=clone(prev);
-      const arr = (side==='left'? n._layout[rowIdx].left : n._layout[rowIdx].right);
+      const n=deepClone(prev);
+      const row=n._layout[rowIdx]; if(!row) return prev;
+      const arr = side==='right'? row.right : row.left;
       const i = arr.indexOf(key); if(i<0) return prev;
-      const j = dir==='up'? i-1 : i+1; if(j<0 || j>=arr.length) return prev;
+      const j = dir==='up'? i-1 : i+1; if(j<0||j>=arr.length) return prev;
       [arr[i],arr[j]]=[arr[j],arr[i]];
-      return withTheme(n);
+      const doc=withTheme(n); scheduleSave(doc); return doc;
     });
   }
-  function swapSectionSide(rowIdx, key){
+  function swapSectionSide(rowIdx,key){
     setS(prev=>{
-      const n=clone(prev);
-      const row=n._layout[rowIdx];
-      if(!row) return prev;
-      if(row.left.includes(key)){ row.left=row.left.filter(k=>k!==key); row.right.unshift(key); }
-      else if(row.right.includes(key)){ row.right=row.right.filter(k=>k!==key); row.left.unshift(key); }
-      return withTheme(n);
+      const n=deepClone(prev);
+      const row=n._layout[rowIdx]; if(!row) return prev;
+      if (row.left.includes(key)){ row.left=row.left.filter(k=>k!==key); row.right.unshift(key); }
+      else if (row.right.includes(key)){ row.right=row.right.filter(k=>k!==key); row.left.unshift(key); }
+      const doc=withTheme(n); scheduleSave(doc); return doc;
     });
   }
   function removeSectionFromRow(rowIdx,key){
     setS(prev=>{
-      const n=clone(prev);
-      const r=n._layout[rowIdx]; if(!r) return prev;
-      r.left = r.left.filter(k=>k!==key);
-      r.right = r.right.filter(k=>k!==key);
-      return withTheme(n);
+      const n=deepClone(prev);
+      const row=n._layout[rowIdx]; if(!row) return prev;
+      row.left=row.left.filter(k=>k!==key);
+      row.right=row.right.filter(k=>k!==key);
+      const doc=withTheme(n); scheduleSave(doc); return doc;
     });
   }
 
-  /* Items helpers */
+  /* list item helpers */
   function addItem(listKey, sample){
-    setS(prev=>{const n=clone(prev); n[listKey]=[...(n[listKey]||[]), sample]; return withTheme(n);});
+    setS(prev=>{ const n=deepClone(prev); if(!Array.isArray(n[listKey])) n[listKey]=[]; n[listKey].push(sample); const doc=withTheme(n); scheduleSave(doc); return doc; });
   }
   function removeItem(listKey,id){
-    setS(prev=>{const n=clone(prev); n[listKey]=(n[listKey]||[]).filter(x=>x.id!==id); return withTheme(n);});
+    setS(prev=>{ const n=deepClone(prev); n[listKey]=(n[listKey]||[]).filter(x=>x.id!==id); const doc=withTheme(n); scheduleSave(doc); return doc; });
   }
   function updateIn(listKey,id,fn){
-    setS(prev=>{const n=clone(prev); n[listKey]=n[listKey].map(x=>x.id===id? fn(clone(x)) : x); return withTheme(n);});
+    setS(prev=>{
+      const n=deepClone(prev);
+      n[listKey]=(n[listKey]]||[]).map(x=>x.id===id? fn(deepClone(x)) : x);
+      const doc=withTheme(n); scheduleSave(doc); return doc;
+    });
   }
 
-  /* Renderers (ALL text editable in A4) */
+  /* renderers */
   function SectionBar({name,label,rowIdx,side}){
     return (
       <div className="secbar">
-        <div className="title" style={{fontFamily:hFont, fontWeight:hW}}>{label}</div>
+        <div className="title" style={{fontFamily:hFont,fontWeight:hW}}>{label}</div>
         <div className="flex gap-1">
-          <button className="chip" title="Up" onClick={()=>moveSectionWithin(rowIdx,side,name,'up')}>↑</button>
-          <button className="chip" title="Down" onClick={()=>moveSectionWithin(rowIdx,side,name,'down')}>↓</button>
-          <button className="chip" title="Move to other column" onClick={()=>swapSectionSide(rowIdx,name)}>⇆</button>
-          <button className="chip" title="Remove from this row" onClick={()=>removeSectionFromRow(rowIdx,name)}>✕</button>
+          <button className="chip" onClick={()=>moveSectionWithin(rowIdx,side,name,'up')}>↑</button>
+          <button className="chip" onClick={()=>moveSectionWithin(rowIdx,side,name,'down')}>↓</button>
+          <button className="chip" onClick={()=>swapSectionSide(rowIdx,name)}>⇆</button>
+          <button className="chip" onClick={()=>removeSectionFromRow(rowIdx,name)}>✕</button>
         </div>
       </div>
     );
@@ -351,12 +397,10 @@ function App(){
       <section>
         <div className="flex items-start gap-5 pb-4" style={{borderBottom:'1px solid var(--rule)'}}>
           <div className="flex-1 min-w-0">
-            <div className="editable text-3xl leading-tight"
-                 style={{color:accent, fontFamily:hFont, fontWeight:hW}}
+            <div className="editable text-3xl leading-tight" style={{color:accent,fontFamily:hFont,fontWeight:hW}}
                  contentEditable suppressContentEditableWarning
                  onBlur={e=>setPath('header.name',e.target.textContent)}>{s.header.name}</div>
-            <div className="editable text-lg"
-                 style={{fontFamily:hFont, fontWeight:subW}}
+            <div className="editable text-lg" style={{fontFamily:hFont,fontWeight:subW}}
                  contentEditable suppressContentEditableWarning
                  onBlur={e=>setPath('header.role',e.target.textContent)}>{s.header.role}</div>
             <div className="text-sm mt-2" style={{fontFamily:mFont}}>
@@ -642,15 +686,15 @@ function App(){
         <div className="title-divider"></div>
         <div className="text-xs text-neutral-600 editable whitespace-pre-line"
              contentEditable suppressContentEditableWarning
-             onBlur={e=>setS(prev=>{const n=clone(prev);n.laws=e.target.textContent.split('\n');return withTheme(n);})}>
+             onBlur={e=>setS(prev=>{ const n=deepClone(prev); n.laws = e.target.textContent.split('\n'); const doc=withTheme(n); scheduleSave(doc); return doc; })}>
           {(s.laws||[]).join('\n')}
         </div>
       </section>
     ),
   };
 
-  function renderSection(key, ctx){
-    if(key==="headerSummary") return R.headerSummary(ctx);
+  function renderSection(key,ctx){
+    if (key==="headerSummary") return R.headerSummary(ctx);
     const Comp = R[key];
     return Comp ? Comp(ctx) : null;
   }
@@ -670,8 +714,8 @@ function App(){
           <span className="text-xs text-neutral-500">Template</span>
           <select className="input" onChange={e=>{
             const tpl = window.CV_TEMPLATES.get(e.target.value);
-            const data = tpl.seed();
-            data._theme = s._theme; // mantieni tema corrente
+            const data = migrateDoc(tpl.seed()); // ensure structure
+            data._theme = s._theme; // keep theme
             setS(data); scheduleSave(data);
           }}>
             {window.CV_TEMPLATES.list().map(t=><option key={t.id} value={t.id}>{t.name}</option>)}
@@ -679,7 +723,7 @@ function App(){
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="btn" onClick={()=>saveDoc(withTheme(clone(s)))}>Save</button>
+          <button className="btn" onClick={()=>saveDoc(withTheme(deepClone(s)))}>Save</button>
           <button className="btn-primary" onClick={()=>window.print()}>Export PDF</button>
         </div>
       </div>
@@ -690,28 +734,28 @@ function App(){
           <select className="input w-full" onChange={e=>{
             const p = PRESETS[parseInt(e.target.value)]||PRESETS[0];
             setFs(p.fs); setLh(p.lh); setHFont(p.heading); setBFont(p.body); setMFont(p.meta); setHW(p.h); setSubW(p.sub);
-            const themed = withTheme(clone(s)); scheduleSave(themed);
+            scheduleSave(withTheme(deepClone(s)));
           }}>
             {PRESETS.map((p,i)=><option key={p.label} value={i}>{p.label}</option>)}
           </select>
         </div>
         <div className="col-span-2 flex items-center gap-2">
           <span className="text-xs text-neutral-500">Size</span>
-          <input className="w-full" type="range" min="9" max="14" step="1" value={fs} onChange={e=>{setFs(parseInt(e.target.value)); scheduleSave(withTheme(clone(s)));}}/>
+          <input className="w-full" type="range" min="9" max="14" step="1" value={fs} onChange={e=>{setFs(parseInt(e.target.value)); scheduleSave(withTheme(deepClone(s)));}}/>
           <span className="text-xs w-8 text-right">{fs}pt</span>
         </div>
         <div className="col-span-2 flex items-center gap-2">
           <span className="text-xs text-neutral-500">Line</span>
-          <input className="w-full" type="range" min="1.2" max="1.8" step="0.05" value={lh} onChange={e=>{setLh(parseFloat(e.target.value)); scheduleSave(withTheme(clone(s)));}}/>
+          <input className="w-full" type="range" min="1.2" max="1.8" step="0.05" value={lh} onChange={e=>{setLh(parseFloat(e.target.value)); scheduleSave(withTheme(deepClone(s)));}}/>
         </div>
         <div className="col-span-2 flex items-center gap-2">
           <span className="text-xs text-neutral-500">Accent</span>
-          <input className="color" type="color" value={accent} onChange={e=>{setAccent(e.target.value); scheduleSave(withTheme(clone(s)));}}/>
+          <input className="color" type="color" value={accent} onChange={e=>{setAccent(e.target.value); scheduleSave(withTheme(deepClone(s)));}}/>
         </div>
         <div className="col-span-3 flex items-center gap-2">
           <span className="text-xs text-neutral-500">Add Section</span>
           <select className="input" value={addSec} onChange={e=>setAddSec(e.target.value)}>
-            {ALL_SECTIONS.map(k=><option key={k} value={k}>{k}</option>)}
+            {["headerSummary",...ALL_SECTIONS].map(k=><option key={k} value={k}>{k}</option>)}
           </select>
           <select className="input" value={addRow} onChange={e=>setAddRow(parseInt(e.target.value))}>
             <option value={-1}>Choose row…</option>
@@ -727,7 +771,7 @@ function App(){
     </header>
   );
 
-  /* Page (single A4; se serve, duplica .sheet con + band) */
+  /* Page */
   return (
     <>
       {Toolbar}
@@ -737,11 +781,11 @@ function App(){
             const cls = band.type==="single" ? "band single" : (band.type==="13-23"?"band c13-23":"band c23-13");
             return (
               <div className={cls} key={band.id}>
-                {/* band header controls */}
+                {/* Band controls */}
                 <div className="col-span-full -mt-4 -mb-2 flex items-center justify-between">
                   <div className="text-xs text-neutral-500">Row {idx+1}</div>
                   <div className="flex items-center gap-2">
-                    <select className="input" value={band.type} onChange={e=>setBandType(band.id, e.target.value)}>
+                    <select className="input" value={band.type} onChange={e=>setBandType(band.id,e.target.value)}>
                       <option value="13-23">1/3 – 2/3</option>
                       <option value="23-13">2/3 – 1/3</option>
                       <option value="single">Single</option>
@@ -753,15 +797,15 @@ function App(){
                   </div>
                 </div>
 
-                {/* LEFT */}
+                {/* Left column */}
                 <div className="col">
-                  { (band.type==="single" ? band.left : band.left).map(key=>(
+                  {band.left.map(key=>(
                     <div key={key}>{renderSection(key,{rowIdx:idx,side:'left'})}</div>
                   ))}
                 </div>
 
-                {/* RIGHT (if any) */}
-                { band.type!=="single" && (
+                {/* Right column */}
+                {band.type!=="single" && (
                   <div className="col">
                     {band.right.map(key=>(
                       <div key={key}>{renderSection(key,{rowIdx:idx,side:'right'})}</div>
@@ -777,7 +821,19 @@ function App(){
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+/* Safe mount AFTER DOM ready */
+(function mount(){
+  function start(){
+    const root = document.getElementById('root');
+    if(!root){ console.error('No #root element'); return; }
+    ReactDOM.createRoot(root).render(<App/>);
+  }
+  if (document.readyState==='loading') {
+    document.addEventListener('DOMContentLoaded', start, {once:true});
+  } else {
+    start();
+  }
+})();
 </script>
 </body>
 </html>
