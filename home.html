@@ -27,9 +27,75 @@
 <!-- Templates registry must be available before the Home app runs -->
 <script src="./templates/default.js?v=20251019"></script>
 <script src="./templates/minimal.js?v=20251019"></script>
+
+<!-- === Safety CSS for buttons/cards (kept tiny) === -->
+<style>
+  .btn{ padding:.4rem .7rem; border:1px solid #e5e7eb; border-radius:.5rem; background:white; }
+  .btn-primary{ padding:.45rem .8rem; border-radius:.5rem; background:#111827; color:white; }
+  .btn-danger{ padding:.4rem .7rem; border:1px solid #fecaca; background:#fee2e2; color:#991b1b; border-radius:.5rem; }
+  .card{ background:white; border:1px solid #e5e7eb; border-radius:1rem; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+  .diag{position:fixed;right:8px;bottom:8px;background:#111827;color:#fff;border-radius:8px;padding:8px 10px;font:12px/1.2 ui-sans-serif;opacity:.9;z-index:9999}
+</style>
 </head>
 <body class="bg-neutral-100">
 <div id="root"></div>
+
+
+<!-- === Fallbacks: only run if external scripts didn't register things === -->
+<script>
+  (function(){
+    // 2a) StorageAPI shim (localStorage) if not provided by your storage scripts
+    if (!window.StorageAPI) {
+      window.StorageAPI = {
+        async list(){ return Object.keys(localStorage).filter(k=>k.startsWith('cvdoc:')).map(k=>k.replace('cvdoc:','')).sort(); },
+        async save(name, data){ localStorage.setItem('cvdoc:'+name, JSON.stringify(data)); return true; },
+        async load(name){ const raw=localStorage.getItem('cvdoc:'+name); return raw? JSON.parse(raw): null; },
+        async remove(name){ localStorage.removeItem('cvdoc:'+name); return true; }
+      };
+      console.warn('[home] StorageAPI fallback active (Firebase/local scripts not ready).');
+    }
+
+    // 2b) CV_TEMPLATES shim if your template files didn’t register
+    var reg = window.CV_TEMPLATES;
+    var empty = !reg || !reg._all || Object.keys(reg._all).length===0;
+    if (empty) {
+      window.CV_TEMPLATES = {
+        _all:{},
+        list(){ return Object.values(this._all).map(({id,name,desc})=>({id,name,desc})); },
+        get(id){ return this._all[id]; }
+      };
+      (function(){ // minimal default template
+        const id='default', name='Default (Fallback)', desc='Inline fallback template';
+        function seed(){
+          return {
+            header:{ name:"JOHN DOE", role:"", email:"", phone:"", residence:"", birthdate:"", avatar:"" },
+            summary:"",
+            sectionNames:{ experience:"Experience", education:"Education", volunteering:"Volunteering", projects:"Projects", certifications:"Certifications", awards:"Awards", skills:"Skills", languages:"Languages", strengths:"Strengths", hobbies:"Hobbies", online:"Online", laws:"Laws" },
+            experience:[], education:[], volunteering:[], projects:[], certifications:[], awards:[], skills:[], languages:[], strengths:[], hobbies:[],
+            online:{}, laws:["I authorize the processing of personal data in accordance with GDPR 2016/679."],
+            _orders:{ left:["laws","skills","languages","strengths","hobbies","online","certifications","awards"], right:["experience","education","volunteering","projects"] },
+            _theme:{ accent:"#2563eb", fontSize:11, lineHeight:1.45 }
+          };
+        }
+        function migrate(old){ const s=seed(); return {...s, ...old, _orders:(old&&old._orders)||s._orders}; }
+        window.CV_TEMPLATES._all[id] = { id, name, desc, seed, migrate };
+      })();
+      console.warn('[home] CV_TEMPLATES fallback active (templates not loaded).');
+    }
+
+    // 2c) small diagnostics badge (helps confirm what loaded on Pages)
+    setTimeout(function(){
+      try{
+        var t = window.CV_TEMPLATES?.list?.().length ?? 0;
+        var el = document.createElement('div');
+        el.className = 'diag';
+        el.textContent = 'tpls:'+t+' guest:'+(new URL(location.href).searchParams.get('guest')==='1');
+        document.body.appendChild(el);
+        setTimeout(()=>el.remove(), 6000);
+      }catch{}
+    }, 0);
+  })();
+</script>
 
 <script type="text/babel">
 const { useEffect, useState } = React;
