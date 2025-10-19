@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="./styles.css"/>
 <link rel="stylesheet" href="./fonts/fonts.css"/>
 
-<!-- Minimal safety styles (kept tiny, does not override your CSS) -->
+<!-- Minimal safety styles -->
 <style>
   :root { --rule:#d1d5db; }
   .icon{ display:inline-block; width:1em; height:1em; background:currentColor; }
@@ -58,7 +58,7 @@
 <div id="root"></div>
 
 <script type="text/babel">
-const {useState,useEffect} = React;
+const {useState,useEffect,useRef} = React;
 
 /* -------- utils -------- */
 const rid=()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
@@ -79,7 +79,7 @@ function safeDefaultSeed(){
     summary:"",
     sectionNames:{ experience:"Experience", education:"Education", volunteering:"Volunteering", projects:"Projects", certifications:"Certifications", awards:"Awards", skills:"Skills", languages:"Languages", strengths:"Strengths", hobbies:"Hobbies", online:"Online", laws:"Laws" },
     experience:[], education:[], volunteering:[], projects:[], certifications:[], awards:[], skills:[], languages:[], strengths:[], hobbies:[],
-    online:{}, laws:[],
+    online:{}, laws:["I authorize the processing of personal data in accordance with GDPR 2016/679."],
     _orders:{ left:["laws","skills","languages","strengths","hobbies","online","certifications","awards"], right:["experience","education","volunteering","projects"] },
     _theme:{ accent:"#2563eb", fontSize:11, lineHeight:1.45 }
   };
@@ -98,9 +98,14 @@ function pickImage(cb){
 /* icon as color-following mask */
 function Icon({name, className="", style={}}){
   if(!name) return null;
-  const s = { ...style };
-  const cls = `icon ${className}`;
-  return <span className={cls} style={{...s, WebkitMask:`url(./icons/${name}.svg) center/contain no-repeat`, mask:`url(./icons/${name}.svg) center/contain no-repeat`}}/>;
+  return <span
+    className={`icon ${className}`}
+    style={{
+      ...style,
+      WebkitMask:`url(./icons/${name}.svg) center/contain no-repeat`,
+      mask:`url(./icons/${name}.svg) center/contain no-repeat`
+    }}
+  />;
 }
 
 /* fonts presets come from /fonts/fonts.css variables */
@@ -119,6 +124,7 @@ async function saveDoc(data){ return StorageAPI.save(docName, data, uid); }
 
 /* -------- main app -------- */
 function App(){
+  // STATE HOOKS (must be first, and always in the same order)
   const [state,setState] = useState(null);
   const [accent,setAccent] = useState("#2563eb");
   const [fontSize,setFontSize] = useState(11);
@@ -129,6 +135,7 @@ function App(){
   const [hWeight,setHWeight] = useState(FONT_PRESETS[0].hWeight);
   const [subWeight,setSubWeight] = useState(FONT_PRESETS[0].subWeight);
 
+  // EFFECTS (must run on every render order)
   useEffect(()=>{(async()=>{
     try{
       const d=await loadDoc();
@@ -154,7 +161,26 @@ function App(){
     }
   }
 
-  if(!state) return <div className="p-6">Loading…</div>;
+  // ✅ REF + EFFECT moved ABOVE any early-return to respect hook order
+  const logoMap = useRef({});
+  useEffect(()=>{
+    fetch('./images/logos.json')
+      .then(r=>r.json())
+      .then(j=>{ logoMap.current=j; })
+      .catch(()=>{ logoMap.current={}; });
+  },[]);
+
+  // Helper
+  function guessLogo(word){
+    const map = logoMap.current || {}; if(!word) return "";
+    const k = String(word||"").toLowerCase();
+    const hit = Object.keys(map).find(key => k.includes(key));
+    return hit ? ('./images/'+map[hit]) : "";
+  }
+
+  if(!state){
+    return <div className="p-6 text-neutral-600">Loading…</div>;
+  }
 
   /* move items in arrays */
   function moveItem(arrKey, idx, dir){
@@ -199,15 +225,6 @@ function App(){
     );
   }
 
-  /* auto-logo by keyword map */
-  const logoMap = React.useRef(null);
-  useEffect(()=>{ fetch('./images/logos.json').then(r=>r.json()).then(j=>logoMap.current=j).catch(()=>{}); },[]);
-  function guessLogo(word){
-    const map = logoMap.current || {}; if(!word) return "";
-    const k = word.toLowerCase();
-    const hit = Object.keys(map).find(key => k.includes(key));
-    return hit ? ('./images/'+map[hit]) : "";
-  }
   /* renderers — icons colored by currentColor (inherit accent) */
   const R = {
     education:(col)=>(
@@ -218,15 +235,12 @@ function App(){
           <div key={ed.id} className="mb-3" style={{fontFamily:bodyFont}}>
             <div className="flex justify-between items-baseline">
               <div className="mb-0.5" style={{fontWeight:hWeight}}>{ed.degree}</div>
-              {/* right-aligned date */}
               <div className="text-sm meta">{ed.period}{ed.gpa?`  |  GPA ${ed.gpa}`:""}</div>
             </div>
             <div className="text-sm"><span style={{color:accent}}>{ed.school}</span></div>
-            <div className="text-sm meta mt-0.5 inline-flex items-center gap-2" style={{color:"#6b7280"}}>
+            <div className="text-sm meta mt-0.5 inline-flex items-center gap-2">
               <Icon name="location" className="w-4 h-4" style={{color:accent}}/> {ed.location}
             </div>
-
-            {/* inline item controls */}
             <div className="mt-1 flex gap-1">
               <button className="chip" onClick={()=>moveItem('education',i,'up')}>↑</button>
               <button className="chip" onClick={()=>moveItem('education',i,'down')}>↓</button>
@@ -319,7 +333,7 @@ function App(){
               <div style={{fontWeight:hWeight}}>{p.name}</div>
               <div className="text-sm meta">{p.period}</div>
             </div>
-            <div className="meta text-sm flex items-center gap-4" style={{color:"#6b7280"}}>
+            <div className="meta text-sm flex items-center gap-4">
               <span className="inline-flex items-center gap-2"><Icon name="location" className="w-4 h-4" style={{color:accent}}/>{p.location}</span>
             </div>
             {p.domain && <div className="mt-1" style={{color:accent, fontWeight:hWeight}}>{p.domain}</div>}
@@ -606,23 +620,22 @@ function App(){
 
 /* --- mount after DOM is ready --- */
 function mountApp(){
-    try{
-      const rootEl = document.getElementById('root');
-      if(!rootEl){ console.error('No #root element'); return; }
-      ReactDOM.createRoot(rootEl).render(<App/>);
-    }catch(e){
-      console.error('Editor bootstrap failed:', e);
-      const r=document.getElementById('root');
-      if(r) r.innerHTML='<div style="padding:16px;color:#b91c1c;">Editor failed to load. Check the console for details.</div>';
-    }
+  try{
+    const rootEl = document.getElementById('root');
+    if(!rootEl){ console.error('No #root element'); return; }
+    ReactDOM.createRoot(rootEl).render(<App/>);
+  }catch(e){
+    console.error('Editor bootstrap failed:', e);
+    const r=document.getElementById('root');
+    if(r) r.innerHTML='<div style="padding:16px;color:#b91c1c;">Editor failed to load. Check the console for details.</div>';
   }
+}
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', mountApp);
-  } else {
-    // DOM already ready → mount immediately
-    mountApp();
-  }
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', mountApp);
+} else {
+  mountApp();
+}
 </script>
 </body>
 </html>
