@@ -43,9 +43,10 @@ function isGuest() {
 /* Track auth and mirror to window.AuthUser for non-React code */
 function useAuth(){
   const [user, setUser] = useState(null);
+
   useEffect(()=>{
+    // If Auth isn't available (no Firebase config), stay in guest mode
     if (!window.Auth || !window.Auth.onAuthChange) {
-      // guest/local mode
       setUser(null);
       window.AuthUser = null;
       return;
@@ -56,9 +57,10 @@ function useAuth(){
     });
     return off;
   },[]);
+
   return {
     user,
-    signIn: window.Auth?.signInWithGoogle || (()=>alert('Google sign-in unavailable (Firebase not configured). Use guest mode.')),
+    signIn: window.Auth?.signInWithGoogle || (async()=>alert('Google sign-in unavailable (Firebase not configured). Use guest mode.')),
     signOut: window.Auth?.signOut || (async()=>{})
   };
 }
@@ -67,9 +69,16 @@ function Home(){
   const { user, signIn, signOut } = useAuth();
   const [docs, setDocs] = useState([]);
   const [tpls, setTpls] = useState([]);
+  const [loadingDocs, setLoadingDocs] = useState(true);
+  const [err, setErr] = useState("");
 
   useEffect(()=>{
-    setTpls(window.CV_TEMPLATES ? window.CV_TEMPLATES.list() : []);
+    try {
+      setTpls(window.CV_TEMPLATES ? window.CV_TEMPLATES.list() : []);
+    } catch(e) {
+      console.warn('Templates not ready:', e);
+      setTpls([]);
+    }
   },[]);
 
   // guard: if not authenticated and not guest → bounce to login
@@ -82,12 +91,17 @@ function Home(){
   }, [user]);
 
   async function refresh(){
+    setLoadingDocs(true);
+    setErr("");
     try {
       const all = await window.StorageAPI.list(user?.uid);
       setDocs(all);
     } catch (e) {
       console.warn('List failed:', e);
+      setErr("Unable to load your CVs. You can still create a new one.");
       setDocs([]);
+    } finally {
+      setLoadingDocs(false);
     }
   }
   useEffect(()=>{ refresh(); }, [user]);
@@ -100,8 +114,8 @@ function Home(){
 
     // Template registry (defensive)
     const reg = window.CV_TEMPLATES;
-    const tplId = (reg && reg.list && reg.list()[0]?.id) || 'default';
-    const tpl = (reg && reg.get && reg.get(tplId)) || { seed: ()=> ({ _orders:{ left:[], right:[] }, header:{ name:"JOHN DOE" } }) };
+    const firstId = (reg && reg.list && reg.list()[0]?.id) || 'default';
+    const tpl = (reg && reg.get && reg.get(firstId)) || { seed: ()=> ({ _orders:{ left:[], right:[] }, header:{ name:"JOHN DOE" } }) };
     const payload = tpl.seed ? tpl.seed() : { _orders:{ left:[], right:[] }, header:{ name:"JOHN DOE" } };
 
     try {
@@ -128,8 +142,8 @@ function Home(){
 
   async function removeDoc(n){
     if (!confirm(`Delete "${n}"?`)) return;
-    await window.StorageAPI.remove(n, user?.uid);
-    refresh();
+    try { await window.StorageAPI.remove(n, user?.uid); }
+    finally { refresh(); }
   }
 
   return (
@@ -154,7 +168,7 @@ function Home(){
 
       <section className="card p-4 mb-6">
         <div className="font-semibold mb-2">Templates</div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {tpls.map(t=>(
             <div key={t.id} className="border rounded p-3">
               <div className="font-medium">{t.name}</div>
@@ -171,18 +185,23 @@ function Home(){
 
       <section className="card p-4">
         <div className="font-semibold mb-2">Your CVs</div>
-        <div className="grid gap-2">
-          {docs.length===0 && <div className="text-sm text-neutral-500">No documents yet.</div>}
-          {docs.map(n=>(
-            <div key={n} className="flex items-center justify-between border rounded p-2">
-              <div>{n}</div>
-              <div className="flex items-center gap-2">
-                <button className="btn" onClick={()=>openDoc(n)}>Open</button>
-                <button className="btn-danger" onClick={()=>removeDoc(n)}>Delete</button>
+        {err && <div className="mb-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">{err}</div>}
+        {loadingDocs ? (
+          <div className="text-sm text-neutral-500">Loading…</div>
+        ) : (
+          <div className="grid gap-2">
+            {docs.length===0 && <div className="text-sm text-neutral-500">No documents yet.</div>}
+            {docs.map(n=>(
+              <div key={n} className="flex items-center justify-between border rounded p-2">
+                <div>{n}</div>
+                <div className="flex items-center gap-2">
+                  <button className="btn" onClick={()=>openDoc(n)}>Open</button>
+                  <button className="btn-danger" onClick={()=>removeDoc(n)}>Delete</button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

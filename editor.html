@@ -1,10 +1,3 @@
-<!-- Add this in <head> of pages that need Firebase (already done) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
-
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -15,17 +8,49 @@
 <link rel="stylesheet" href="./styles.css"/>
 <link rel="stylesheet" href="./fonts/fonts.css"/>
 
+<!-- Minimal safety styles (kept tiny, does not override your CSS) -->
+<style>
+  :root { --rule:#d1d5db; }
+  .icon{ display:inline-block; width:1em; height:1em; background:currentColor; }
+  .circle-icon{ display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:9999px; background:#e5e7eb; color:#2563eb; }
+  .logo{ width:32px; height:32px; border-radius:9999px; overflow:hidden; border:1px solid #e5e7eb; flex:0 0 auto;}
+  .btn{ padding:.4rem .7rem; border:1px solid #e5e7eb; border-radius:.5rem; background:white; }
+  .btn-primary{ padding:.45rem .8rem; border-radius:.5rem; background:#111827; color:white; }
+  .btn-danger{ padding:.4rem .7rem; border:1px solid #fecaca; background:#fee2e2; color:#991b1b; border-radius:.5rem; }
+  .chip{ padding:.15rem .45rem; border:1px solid #e5e7eb; border-radius:.4rem; background:white; font-size:.8rem; }
+  .input{ border:1px solid #e5e7eb; border-radius:.4rem; padding:.35rem .5rem; background:white; }
+  .range{ width:140px; }
+  .color-swatch{ width:36px; height:28px; padding:0; border:1px solid #e5e7eb; border-radius:.4rem; }
+  .card{ background:white; border:1px solid #e5e7eb; border-radius:1rem; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+  .title-divider{ height:1px; background:var(--rule); margin:.25rem 0 .5rem; }
+  .meta{ color:#6b7280; }
+  @media print{
+    body.print-mode .sheet{ break-inside: avoid; box-shadow:none !important; }
+    #toolbar, #leftPane{ display:none!important; }
+    body{ background:white!important; }
+    @page{ size:A4; margin:14mm; }
+  }
+  .sheet{ box-shadow:0 10px 25px rgba(0,0,0,.06); background:white; }
+  .sidebar-scroll{ max-height: calc(100vh - 140px); overflow:auto; padding-bottom: 24px; }
+</style>
+
+<!-- UI libs -->
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<!-- Firebase SDKs (ok even if not configured yet) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <!-- Storage/Auth -->
 <script src="./auth.firebase.js"></script>
 <script src="./storage.firebase.js"></script>
 <script src="./storage.local.js"></script>
 
-<!-- Templates -->
+<!-- Templates: MUST load before the React app -->
 <script src="./templates/default.template.js"></script>
 <script src="./templates/minimal.template.js"></script>
 </head>
@@ -33,13 +58,32 @@
 <div id="root"></div>
 
 <script type="text/babel">
-const {useState,useEffect,useMemo} = React;
+const {useState,useEffect} = React;
 
 /* -------- utils -------- */
 const rid=()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
 const param = (k, d=null)=> { try{ return new URL(location.href).searchParams.get(k) ?? d; }catch{return d;} };
 const uid  = param('uid', null);
 const docName = param('doc','Default');
+
+/* guard: ensure template registry exists */
+function safeDefaultSeed(){
+  const reg = window.CV_TEMPLATES;
+  try{
+    const tpl = reg?.get?.('default');
+    if (tpl?.seed) return tpl.seed();
+  }catch(e){}
+  // minimal blank seed if templates failed to load
+  return {
+    header:{ name:"JOHN DOE", role:"", email:"", phone:"", residence:"", birthdate:"", avatar:"" },
+    summary:"",
+    sectionNames:{ experience:"Experience", education:"Education", volunteering:"Volunteering", projects:"Projects", certifications:"Certifications", awards:"Awards", skills:"Skills", languages:"Languages", strengths:"Strengths", hobbies:"Hobbies", online:"Online", laws:"Laws" },
+    experience:[], education:[], volunteering:[], projects:[], certifications:[], awards:[], skills:[], languages:[], strengths:[], hobbies:[],
+    online:{}, laws:[],
+    _orders:{ left:["laws","skills","languages","strengths","hobbies","online","certifications","awards"], right:["experience","education","volunteering","projects"] },
+    _theme:{ accent:"#2563eb", fontSize:11, lineHeight:1.45 }
+  };
+}
 
 /* image upload */
 function pickImage(cb){
@@ -67,7 +111,10 @@ const FONT_PRESETS = [
 ];
 
 /* -------- storage -------- */
-async function loadDoc(){ return (await StorageAPI.load(docName, uid)) || window.CV_TEMPLATES.get('default').seed(); }
+async function loadDoc(){
+  const data = await StorageAPI.load(docName, uid);
+  return data || safeDefaultSeed();
+}
 async function saveDoc(data){ return StorageAPI.save(docName, data, uid); }
 
 /* -------- main app -------- */
@@ -82,26 +129,32 @@ function App(){
   const [hWeight,setHWeight] = useState(FONT_PRESETS[0].hWeight);
   const [subWeight,setSubWeight] = useState(FONT_PRESETS[0].subWeight);
 
-  useEffect(()=>{(async()=>{const d=await loadDoc(); applySeed(d);})();},[]);
+  useEffect(()=>{(async()=>{
+    try{
+      const d=await loadDoc();
+      applySeed(d);
+    }catch(e){
+      console.error('Load failed, using blank seed', e);
+      applySeed(safeDefaultSeed());
+    }
+  })();},[]);
+
   function applySeed(d){
     setState(d);
     if(d._theme){
       const t=d._theme;
-      setAccent(t.accent||accent); setFontSize(t.fontSize||fontSize); setLineHeight(t.lineHeight||lineHeight);
-      setHeadingFont(t.headingFont||headingFont); setBodyFont(t.bodyFont||bodyFont); setMetaFont(t.metaFont||metaFont);
-      setHWeight(t.hWeight||hWeight); setSubWeight(t.subWeight||subWeight);
+      setAccent(t.accent||"#2563eb");
+      setFontSize(t.fontSize||11);
+      setLineHeight(t.lineHeight||1.45);
+      setHeadingFont(t.headingFont||FONT_PRESETS[0].heading);
+      setBodyFont(t.bodyFont||FONT_PRESETS[0].body);
+      setMetaFont(t.metaFont||FONT_PRESETS[0].meta);
+      setHWeight(t.hWeight ?? 600);
+      setSubWeight(t.subWeight ?? 500);
     }
   }
 
   if(!state) return <div className="p-6">Loading…</div>;
-
-  /* computed icon color (section title color) */
-  const sectionTitle = (title)=>(
-    <div className="mb-2">
-      <div className="uppercase tracking-widest text-xs" style={{color:accent, fontFamily:headingFont, fontWeight:hWeight}}>{title}</div>
-      <div className="title-divider"></div>
-    </div>
-  );
 
   /* move items in arrays */
   function moveItem(arrKey, idx, dir){
@@ -132,7 +185,7 @@ function App(){
     });
   }
 
-  /* section title with inline controls */
+  /* section bar */
   function SectionBar({name,label,col}){
     return (
       <div className="flex items-center justify-between mb-1">
@@ -146,7 +199,7 @@ function App(){
     );
   }
 
-  /* auto-logo by keyword map (images/logos.json) */
+  /* auto-logo by keyword map */
   const logoMap = React.useRef(null);
   useEffect(()=>{ fetch('./images/logos.json').then(r=>r.json()).then(j=>logoMap.current=j).catch(()=>{}); },[]);
   function guessLogo(word){
@@ -155,7 +208,6 @@ function App(){
     const hit = Object.keys(map).find(key => k.includes(key));
     return hit ? ('./images/'+map[hit]) : "";
   }
-
   /* renderers — icons colored by currentColor (inherit accent) */
   const R = {
     education:(col)=>(
@@ -466,10 +518,11 @@ function App(){
           <div className="flex items-center gap-2">
             <span className="mini">Template</span>
             <select className="input" onChange={e=>{
-              const t=window.CV_TEMPLATES.get(e.target.value)||window.CV_TEMPLATES.get('default');
-              const merged = t.migrate(state); setState(merged);
+              const t=window.CV_TEMPLATES?.get(e.target.value)||window.CV_TEMPLATES?.get('default');
+              const merged = t?.migrate ? t.migrate(state) : state;
+              if (merged) setState(merged);
             }}>
-              {window.CV_TEMPLATES.list().map(t=><option key={t.id} value={t.id}>{t.name}</option>)}
+              {(window.CV_TEMPLATES?.list?.() || [{id:'default',name:'Default'}]).map(t=><option key={t.id} value={t.id}>{t.name}</option>)}
             </select>
           </div>
           <div className="flex items-center gap-2">
@@ -488,7 +541,7 @@ function App(){
         </div>
       </header>
 
-      {/* LEFT: small header editor only (scrollable) */}
+      {/* LEFT: header editor */}
       <aside id="leftPane" className="px-4">
         <div className="sticky top-[110px]">
           <div className="sidebar-scroll">
@@ -509,39 +562,37 @@ function App(){
         </div>
       </aside>
 
-      {/* RIGHT: A4 pages (fixed) */}
+      {/* RIGHT: A4 pages */}
       <section className="px-4">
         <div className="sticky top-[110px]">
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            {/* LEFT pile */}
             <div>
               {state._orders.left.map((sec,idx)=>(
-                <div key={idx} className="sheet card p-10 mx-auto mb-6" style={{width:"210mm",height:"297mm", lineHeight, fontFamily:bodyFont}}>
-                  {/* Header (first sheet only) */}
+                <div key={sec+'-'+idx} className="sheet card p-10 mx-auto mb-6" style={{width:"210mm",height:"297mm", lineHeight, fontFamily:bodyFont}}>
                   {idx===0 && (
-                    <div className="flex items-start gap-6 pb-4 border-b border-neutral-200">
-                      <div className="flex-1 min-w-0">
-                        <h1 className="text-3xl" style={{color:accent, fontFamily:headingFont, fontWeight:hWeight}}>{state.header.name}</h1>
-                        <div className="text-lg" style={{color:"#0f172a", fontFamily:headingFont, fontWeight:subWeight}}>{state.header.role}</div>
-                        <div className="text-sm text-neutral-800 mt-2" style={{fontFamily:metaFont}}>
-                          {[state.header.email,state.header.phone,state.header.residence,state.header.birthdate].filter(Boolean).join(" • ")}
+                    <>
+                      <div className="flex items-start gap-6 pb-4 border-b border-neutral-200">
+                        <div className="flex-1 min-w-0">
+                          <h1 className="text-3xl" style={{color:accent, fontFamily:headingFont, fontWeight:hWeight}}>{state.header.name}</h1>
+                          <div className="text-lg" style={{color:"#0f172a", fontFamily:headingFont, fontWeight:subWeight}}>{state.header.role}</div>
+                          <div className="text-sm text-neutral-800 mt-2" style={{fontFamily:metaFont}}>
+                            {[state.header.email,state.header.phone,state.header.residence,state.header.birthdate].filter(Boolean).join(" • ")}
+                          </div>
+                        </div>
+                        <div className="w-24 h-24 rounded-full bg-neutral-100 border overflow-hidden flex items-center justify-center">
+                          {state.header.avatar ? <img src={state.header.avatar} className="w-full h-full object-cover" alt="avatar"/> : <span className="text-xs text-neutral-400">Photo</span>}
                         </div>
                       </div>
-                      <div className="w-24 h-24 rounded-full bg-neutral-100 border overflow-hidden flex items-center justify-center">
-                        {state.header.avatar ? <img src={state.header.avatar} className="w-full h-full object-cover" alt="avatar"/> : <span className="text-xs text-neutral-400">Photo</span>}
-                      </div>
-                    </div>
+                      <p className="mt-4 text-neutral-800">{state.summary}</p>
+                    </>
                   )}
-                  {idx===0 && (<p className="mt-4 text-neutral-800">{state.summary}</p>)}
-                  {/* one section per sheet in this simplified pile */}
                   {R[sec]?.('left')}
                 </div>
               ))}
             </div>
-            {/* RIGHT pile */}
             <div>
               {state._orders.right.map((sec,idx)=>(
-                <div key={idx} className="sheet card p-10 mx-auto mb-6" style={{width:"210mm",height:"297mm", lineHeight, fontFamily:bodyFont}}>
+                <div key={sec+'-'+idx} className="sheet card p-10 mx-auto mb-6" style={{width:"210mm",height:"297mm", lineHeight, fontFamily:bodyFont}}>
                   {R[sec]?.('right')}
                 </div>
               ))}
@@ -553,7 +604,15 @@ function App(){
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+/* --- mount after DOM is ready --- */
+document.addEventListener('DOMContentLoaded', ()=>{
+  try{
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  }catch(e){
+    console.error('Editor bootstrap failed:', e);
+    const r=document.getElementById('root'); if(r) r.innerHTML='<div style="padding:16px;color:#b91c1c;">Editor failed to load. Check the console for details.</div>';
+  }
+});
 </script>
 </body>
 </html>
