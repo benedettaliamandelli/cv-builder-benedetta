@@ -10,49 +10,44 @@
 
 <!-- Minimal safety styles -->
 <style>
-  :root{ --accent:#2563eb; --rule:#d1d5db; --toolbar-h:120px; }
-  body{ background:#f8fafc; padding-top:var(--toolbar-h); }
-  #toolbar{ position:fixed; top:0; left:0; right:0; z-index:50; background:rgba(255,255,255,.92); backdrop-filter:blur(8px); border-bottom:1px solid #e5e7eb; }
-  .row{ max-width:1600px; margin:0 auto; padding:.5rem 1rem; display:grid; gap:.5rem; }
-  .row.top{ grid-template-columns:auto 1fr auto; align-items:center; }
-  .row.controls{ grid-template-columns:repeat(12,minmax(0,1fr)); align-items:center; }
-  .btn{ padding:.45rem .7rem; border:1px solid #e5e7eb; border-radius:.5rem; background:#fff; }
-  .btn:hover{ background:#f9fafb; }
-  .btn-primary{ padding:.48rem .85rem; border:1px solid #111827; border-radius:.55rem; background:#111827; color:#fff; }
-  .btn-danger{ padding:.45rem .7rem; border:1px solid #fecaca; border-radius:.5rem; background:#fee2e2; color:#991b1b; }
-  .chip{ padding:.15rem .45rem; border:1px solid #e5e7eb; border-radius:.4rem; background:#fff; font-size:.8rem; }
-  .input{ border:1px solid #e5e7eb; border-radius:.45rem; padding:.35rem .6rem; background:#fff; min-width:0; }
-  .color{ width:40px; height:32px; padding:0; border:1px solid #e5e7eb; border-radius:.45rem; }
+  :root {
+    --rule:#d1d5db;      /* thin gray line */
+    --sheet-w: 210mm;    /* A4 width */
+    --sheet-h: 297mm;    /* A4 height */
+  }
 
-  /* A4 sheet */
-  .sheet{ width:210mm; min-height:297mm; margin:14mm auto; background:#fff; color:#111827;
-          box-shadow:0 10px 25px rgba(0,0,0,.06); padding:18mm; font-size:var(--fs,11pt); line-height:var(--lh,1.45);
-          display:flex; flex-direction:column; gap:10mm; }
-  .band{ display:grid; gap:10mm; }
-  .band.single{ grid-template-columns:1fr; }
-  .band.c13-23{ grid-template-columns:1fr 2fr; }
-  .band.c23-13{ grid-template-columns:2fr 1fr; }
-  .col{ display:flex; flex-direction:column; gap:6mm; }
-
-  .secbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:.2rem; }
-  .secbar .title{ text-transform:uppercase; letter-spacing:.08em; font-size:11px; color:var(--accent); }
-  .title-divider{ height:1px; background:var(--rule); margin:.3rem 0 .7rem; }
+  /* Basic tokens */
+  .icon{ display:inline-block; width:1em; height:1em; background:currentColor; }
+  .circle-icon{ display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:9999px; background:#e5e7eb; color:var(--accent,#2563eb); }
+  .logo{ width:32px; height:32px; border-radius:9999px; overflow:hidden; border:1px solid #e5e7eb; flex:0 0 auto; }
+  .btn{ padding:.4rem .7rem; border:1px solid #e5e7eb; border-radius:.5rem; background:white; }
+  .btn-primary{ padding:.45rem .8rem; border-radius:.5rem; background:#111827; color:white; }
+  .btn-danger{ padding:.4rem .7rem; border:1px solid #fecaca; background:#fee2e2; color:#991b1b; border-radius:.5rem; }
+  .chip{ padding:.15rem .45rem; border:1px solid #e5e7eb; border-radius:.4rem; background:white; font-size:.8rem; }
+  .input{ border:1px solid #e5e7eb; border-radius:.4rem; padding:.35rem .5rem; background:white; }
+  .range{ width:140px; }
+  .color-swatch{ width:36px; height:28px; padding:0; border:1px solid #e5e7eb; border-radius:.4rem; }
+  .card{ background:white; border:1px solid #e5e7eb; border-radius:1rem; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+  .title-divider{ height:1px; background:var(--rule); margin:.25rem 0 .5rem; }
   .meta{ color:#6b7280; }
+  .tag{ padding:.15rem .45rem; border:1px solid #e5e7eb; border-radius:999px; font-size:.8rem; }
+  .editable{ outline: none; }
+  .editable[contenteditable="true"]:focus{ box-shadow: inset 0 0 0 2px rgba(37,99,235,.25); border-radius: .25rem; }
 
-  .editable[contenteditable="true"]{ cursor:text; }
-  .editable[contenteditable="true"]:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+  /* A4 sheets */
+  .sheet{ width:var(--sheet-w); min-height:var(--sheet-h); box-shadow:0 10px 25px rgba(0,0,0,.06); background:white; }
+  .sheet .grid-band{ display:grid; gap:24px; }
+  .band-single{ grid-template-columns: 1fr; }
+  .band-13-23{ grid-template-columns: 1fr 2fr; }
+  .band-23-13{ grid-template-columns: 2fr 1fr; }
 
-  .avatar{ width:96px; height:96px; border-radius:9999px; overflow:hidden; border:1px solid #e5e7eb; background:#f3f4f6; display:flex; align-items:center; justify-content:center; }
-  .logo{ width:32px; height:32px; border-radius:9999px; overflow:hidden; border:1px solid #e5e7eb; background:#f3f4f6; flex:0 0 auto; }
-  .icon{ display:inline-block; width:1em; height:1em; background:currentColor; -webkit-mask:center/contain no-repeat; mask:center/contain no-repeat; }
-  .circle-icon{ display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:9999px; background:#e5e7eb; color:var(--accent); }
+  .sidebar-scroll{ max-height: calc(100vh - 140px); overflow:auto; padding-bottom: 24px; }
 
   @media print{
-    body{ background:#fff!important; padding:0; }
-    #toolbar{ display:none!important; }
-    .sheet{ box-shadow:none!important; margin:0 auto; page-break-after:always; break-after:page; }
-    .sheet:last-child{ page-break-after:auto; }
-    @page{ size:A4; margin:14mm; }
+    body.print-mode .sheet{ break-after: page; box-shadow:none !important; }
+    #toolbar, #leftPane { display:none!important; }
+    body{ background:white!important; }
+    @page{ size: A4; margin: 14mm; }
   }
 </style>
 
@@ -62,7 +57,7 @@
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-<!-- Firebase compat (optional) -->
+<!-- Firebase SDKs (ok even if not configured yet) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -72,768 +67,961 @@
 <script src="./storage.firebase.js"></script>
 <script src="./storage.local.js"></script>
 
-<!-- Templates fallback (if your template files are missing) -->
-<script>
-(function ensureTemplates(){
-  if (window.CV_TEMPLATES) return;
-  const rid = ()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
-  const base = ()=>({
-    header:{name:"JOHN DOE",role:"Medical Advisor",email:"john.doe@mail.com",phone:"+39 333 0000000",residence:"Milan, Italy",birthdate:"01/01/1995",avatar:""},
-    summary:"Short professional summary. Click to edit directly here.",
-    sectionNames:{experience:"Experience",education:"Education",projects:"Projects",volunteering:"Volunteering",skills:"Skills",languages:"Languages",strengths:"Strengths",hobbies:"Hobbies",online:"Online",certifications:"Certifications",awards:"Awards",laws:"Laws"},
-    experience:[{id:rid(),title:"Medical Advisor Intern",company:"Sanofi Oncology",period:"03/2025 – Present",location:"Milan, Italy",logo:"",bullets:["Managed MAPs (compassionate use)","Supported local studies & data collection"]}],
-    education:[
-      {id:rid(),degree:"M.Sc. in Biomedical Engineering",school:"Politecnico di Milano",period:"03/2021 – 04/2024",location:"Milan, Italy",gpa:"105/110"},
-      {id:rid(),degree:"B.Sc. in Biomedical Engineering",school:"Politecnico di Milano",period:"09/2017 – 03/2021",location:"Milan, Italy",gpa:"88/100"}
-    ],
-    projects:[{id:rid(),name:"Alexa skill for cognitive training of stroke patients",domain:"E-Health",period:"09/2022 – 12/2022",location:"Politecnico di Milano",bullets:["Empowering/testing for MCI patients","Alexa voice interface (JS)","Reminder notifications"]}],
-    volunteering:[],
-    skills:[{id:rid(),group:"Programming",items:["Python","C/C++","JavaScript"]},{id:rid(),group:"AI/ML",items:["Classification","Regression","Clustering"]}],
-    languages:[{id:rid(),name:"Italian",level:"Native"},{id:rid(),name:"English",level:"C1"}],
-    strengths:[{id:rid(),icon:"bulb",label:"Problem solving"}],
-    hobbies:[{id:rid(),icon:"camera",label:"Photography"}],
-    online:{website:{label:"johndoe.com",url:"https://example.com"},linkedin:{label:"/in/johndoe",url:"https://linkedin.com/in/johndoe"},github:{label:"github.com/johndoe",url:"https://github.com/johndoe"}},
-    certifications:[{id:rid(),icon:"certificate",line1:"First Certificate Exam (B2)",line2:"Novartis"}],
-    awards:[{id:rid(),icon:"award",line1:"Best Thesis Prize",line2:"Politecnico di Milano"}],
-    laws:["I authorize the processing of personal data in accordance with GDPR 2016/679."],
-    _theme:{accent:"#2563eb",fs:11,lh:1.45,heading:"var(--font-inter)",body:"var(--font-inter)",meta:"var(--font-inter)",h:600,sub:500},
-    _layout:[
-      {id:rid(), type:"single", left:["headerSummary"], right:[]},
-      {id:rid(), type:"13-23", left:["laws","skills","languages","strengths","hobbies","online"], right:["experience","education","projects","volunteering","certifications","awards"]}
-    ]
-  });
-  window.CV_TEMPLATES = {
-    list(){return[
-      {id:"default_13_23",name:"Two Columns 1/3–2/3",desc:"Left narrow, right wide", seed:()=>{const s=base(); return s;}},
-      {id:"default_23_13",name:"Two Columns 2/3–1/3",desc:"Left wide, right narrow", seed:()=>{const s=base(); s._layout[1].type="23-13"; const tmp=s._layout[1].left; s._layout[1].left=s._layout[1].right; s._layout[1].right=tmp; return s;}},
-      {id:"single",name:"Single Column",desc:"One full column", seed:()=>{const s=base(); s._layout=[s._layout[0],{id:Date.now()+"s",type:"single",left:["experience","education","projects","volunteering","skills","languages","online","certifications","awards","strengths","hobbies","laws"],right:[]}]; return s;}}
-    ]},
-    get(id){ return this.list().find(t=>t.id===id)||this.list()[0]; },
-    migrate(s){ return s; }
-  };
-})();
-</script>
+<!-- Templates (must exist) -->
+<script src="./templates/default.js?v=20251019"></script>
+<script src="./templates/minimal.js?v=20251019"></script>
 </head>
-<body>
+<body class="bg-neutral-100">
 <div id="root"></div>
 
-<!-- React app -->
 <script type="text/babel">
-const {useState,useEffect,useRef} = React;
+/* =========================
+   Utilities + setup
+   ========================= */
+const {useState,useEffect,useMemo,useCallback,useRef} = React;
 
-/* ---------- utils ---------- */
-const rid = ()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
-const param = (k,d=null)=>{ try{ return new URL(location.href).searchParams.get(k) ?? d; }catch{return d;} };
-const uid = param('uid',null);
+const rid=()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
+const param = (k, d=null)=> { try{ return new URL(location.href).searchParams.get(k) ?? d; }catch{return d;} };
+const uid  = param('uid', null);
 const docName = param('doc','Default');
-const deepClone = (o)=> (typeof structuredClone==='function'? structuredClone(o) : JSON.parse(JSON.stringify(o)));
 
-/* Ensure StorageAPI exists (fallback to localStorage) */
-(function(){
-  if (window.StorageAPI) return;
-  window.StorageAPI = {
-    list: async ()=> Object.keys(localStorage).filter(k=>k.startsWith('cvdoc:')).map(k=>k.replace('cvdoc:','')).sort(),
-    save: async (name,data)=>{ localStorage.setItem('cvdoc:'+name, JSON.stringify(data)); return true; },
-    load: async (name)=>{ const raw=localStorage.getItem('cvdoc:'+name); try{ return raw? JSON.parse(raw) : null; }catch{return null;} },
-    remove: async (name)=>{ localStorage.removeItem('cvdoc:'+name); return true; }
-  };
-})();
+/* Deep clone small structures */
+const deepClone = (o)=> JSON.parse(JSON.stringify(o||{}));
 
-/* Icons helper (color inherits currentColor) */
-function Icon({name,className="",style={}}){
+/* Icons via CSS mask, color follows currentColor (we set currentColor from section accent) */
+function Icon({name, className="", style={}}){
   if(!name) return null;
-  return <span className={"icon "+className} style={{...style, WebkitMask:`url(./icons/${name}.svg)`, mask:`url(./icons/${name}.svg)`}}/>;
+  const s = { ...style };
+  const cls = `icon ${className}`;
+  return <span className={cls} style={{...s, WebkitMask:`url(./icons/${name}.svg) center/contain no-repeat`, mask:`url(./icons/${name}.svg) center/contain no-repeat`}}/>;
 }
-/* Image picker */
+
+/* Image picker -> DataURL */
 function pickImage(cb){
   const i=document.createElement('input'); i.type='file'; i.accept='image/*';
   i.onchange=e=>{
     const f=e.target.files?.[0]; if(!f) return;
-    const r=new FileReader(); r.onload=()=>cb(String(r.result)); r.readAsDataURL(f);
+    const r=new FileReader(); r.onload=()=> cb(String(r.result)); r.readAsDataURL(f);
   };
   i.click();
 }
 
-/* Font presets */
-const PRESETS = [
-  {label:"Inter (default)",fs:11,lh:1.45, heading:"var(--font-inter)", body:"var(--font-inter)", meta:"var(--font-inter)", h:600, sub:500},
-  {label:"System Clean",   fs:11,lh:1.45, heading:"var(--font-system)", body:"var(--font-system)", meta:"var(--font-system)", h:600, sub:500},
-  {label:"Serif Head",     fs:11,lh:1.45, heading:"var(--font-serif)",  body:"var(--font-system)", meta:"var(--font-system)", h:600, sub:500},
+/* Font presets (linked to fonts/fonts.css variables you have) */
+const FONT_PRESETS = [
+  {label:"Default (Inter)", heading:"var(--font-inter)", body:"var(--font-inter)", meta:"var(--font-inter)", hWeight:600, subWeight:500},
+  {label:"Serif Head / Sans Body", heading:"var(--font-serif)", body:"var(--font-system)", meta:"var(--font-system)", hWeight:600, subWeight:500},
+  {label:"System Clean", heading:"var(--font-system)", body:"var(--font-system)", meta:"var(--font-system)", hWeight:600, subWeight:500},
 ];
 
-/* ---------- robust loader + migrator ---------- */
-function safeSeed(){
-  const tpl = (window.CV_TEMPLATES && window.CV_TEMPLATES.list()[0]) || null;
-  return tpl ? tpl.seed() : {
-    header:{name:"JOHN DOE",role:"",email:"",phone:"",residence:"",birthdate:"",avatar:""},
-    summary:"",
-    sectionNames:{experience:"Experience",education:"Education",projects:"Projects",volunteering:"Volunteering",skills:"Skills",languages:"Languages",strengths:"Strengths",hobbies:"Hobbies",online:"Online",certifications:"Certifications",awards:"Awards",laws:"Laws"},
-    experience:[],education:[],projects:[],volunteering:[],skills:[],languages:[],strengths:[],hobbies:[],online:{},certifications:[],awards:[],laws:[],
-    _theme:{accent:"#2563eb",fs:11,lh:1.45,heading:"var(--font-inter)",body:"var(--font-inter)",meta:"var(--font-inter)",h:600,sub:500},
-    _layout:[{id:rid(),type:"single",left:["headerSummary"],right:[]}]
+/* =========================
+   Migration & Safe Seed
+   ========================= */
+function safeTemplateSeed(){
+  const reg = window.CV_TEMPLATES;
+  try{
+    const tpl = reg?.get?.('default');
+    if (tpl?.seed) return tpl.seed();
+  }catch(e){}
+  // tiny safe fallback
+  return {
+    header:{ name:"JOHN DOE", role:"", email:"", phone:"", residence:"", birthdate:"", avatar:"" },
+    summary:"Click to edit your profile summary.",
+    sectionNames:{ experience:"Experience", education:"Education", volunteering:"Volunteering", projects:"Projects", certifications:"Certifications", awards:"Awards", skills:"Skills", languages:"Languages", strengths:"Strengths", hobbies:"Hobbies", online:"Online", laws:"Laws" },
+    experience:[], education:[], volunteering:[], projects:[], certifications:[], awards:[], skills:[], languages:[], strengths:[], hobbies:[],
+    online:{}, laws:["I authorize the processing of personal data in accordance with GDPR 2016/679."],
+    /* Layout: array of pages, each page has rows; each row has type & left/right stacks of section keys */
+    _layout: [{
+      id: rid(),
+      page: 1,
+      rows: [
+        { id: rid(), type:"single", left:["headerSummary"], right:[] },
+        { id: rid(), type:"23-13", left:["experience"], right:["skills","languages","online","laws"] },
+        { id: rid(), type:"13-23", left:["certifications","awards","strengths","hobbies"], right:["education","volunteering","projects"] }
+      ]
+    }],
+    _theme:{ accent:"#2563eb", fontSize:11, lineHeight:1.45, headingFont:FONT_PRESETS[0].heading, bodyFont:FONT_PRESETS[0].body, metaFont:FONT_PRESETS[0].meta, hWeight:600, subWeight:500 }
   };
 }
+
+/* Normalize any raw doc to the full shape we expect */
 function migrateDoc(raw){
-  let d = (raw && typeof raw==='object') ? deepClone(raw) : {};
-  const base = safeSeed();
-
-  // If doc was saved as "{}", fix everything
-  if (!d.header || typeof d.header!=='object') d.header = deepClone(base.header);
-  if (typeof d.summary!=='string') d.summary = base.summary;
-
-  const namesDefault = deepClone(base.sectionNames);
-  d.sectionNames = { ...namesDefault, ...(d.sectionNames||{}) };
-
-  // Ensure arrays exist
-  for (const k of ["experience","education","projects","volunteering","skills","languages","strengths","hobbies","certifications","awards","laws"]) {
-    if (!Array.isArray(d[k])) d[k] = [];
-  }
-  if (!d.online || typeof d.online!=='object') d.online = deepClone(base.online);
-
-  // Theme
-  const t = d._theme || {};
-  d._theme = {
-    accent: t.accent || base._theme.accent,
-    fs:     typeof t.fs==='number' ? t.fs : base._theme.fs,
-    lh:     typeof t.lh==='number' ? t.lh : base._theme.lh,
-    heading:t.heading || base._theme.heading,
-    body:   t.body || base._theme.body,
-    meta:   t.meta || base._theme.meta,
-    h:      typeof t.h==='number' ? t.h : base._theme.h,
-    sub:    typeof t.sub==='number' ? t.sub : base._theme.sub,
+  const d = deepClone(raw) || {};
+  // header
+  d.header = d.header || { name:"JOHN DOE", role:"", email:"", phone:"", residence:"", birthdate:"", avatar:"" };
+  d.summary = (typeof d.summary === 'string' ? d.summary : "");
+  d.sectionNames = d.sectionNames || {
+    experience:"Experience", education:"Education", volunteering:"Volunteering", projects:"Projects",
+    certifications:"Certifications", awards:"Awards", skills:"Skills", languages:"Languages",
+    strengths:"Strengths", hobbies:"Hobbies", online:"Online", laws:"Laws"
   };
 
-  // Layout rows (critical)
+  // arrays
+  const arrKeys = ["experience","education","volunteering","projects","certifications","awards","skills","languages","strengths","hobbies"];
+  arrKeys.forEach(k=>{ if(!Array.isArray(d[k])) d[k]=[]; });
+
+  d.online = d.online || {};
+  d.laws = Array.isArray(d.laws) ? d.laws : (d.laws ? [String(d.laws)] : []);
+
+  // theme
+  d._theme = d._theme || {};
+  d._theme.accent = d._theme.accent || "#2563eb";
+  d._theme.fontSize = d._theme.fontSize || 11;
+  d._theme.lineHeight = d._theme.lineHeight || 1.45;
+  d._theme.headingFont = d._theme.headingFont || FONT_PRESETS[0].heading;
+  d._theme.bodyFont = d._theme.bodyFont || FONT_PRESETS[0].body;
+  d._theme.metaFont = d._theme.metaFont || FONT_PRESETS[0].meta;
+  d._theme.hWeight = (d._theme.hWeight ?? 600);
+  d._theme.subWeight = (d._theme.subWeight ?? 500);
+
+  // layout: pages -> rows
   if (!Array.isArray(d._layout) || d._layout.length===0) {
-    d._layout = deepClone(base._layout);
+    d._layout = [{
+      id: rid(),
+      page: 1,
+      rows: [
+        { id: rid(), type:"single", left:["headerSummary"], right:[] },
+        { id: rid(), type:"23-13", left:["experience"], right:["skills","languages","online","laws"] }
+      ]
+    }];
   } else {
-    d._layout = d._layout.map(r=>{
-      if (!r || typeof r!=='object') return {id:rid(),type:"single",left:[],right:[]};
-      return {
-        id: r.id || rid(),
-        type: (r.type==="13-23"||r.type==="23-13"||r.type==="single") ? r.type : "single",
-        left: Array.isArray(r.left)? r.left.filter(Boolean) : [],
-        right:Array.isArray(r.right)? r.right.filter(Boolean) : [],
-      };
-    });
+    d._layout = d._layout.map(pg => ({
+      id: pg?.id || rid(),
+      page: typeof pg?.page === 'number' ? pg.page : 1,
+      rows: Array.isArray(pg?.rows) ? pg.rows.map(r => ({
+        id: r?.id || rid(),
+        type: (["single","13-23","23-13"].includes(r?.type) ? r.type : "single"),
+        left: Array.isArray(r?.left) ? r.left.filter(Boolean) : [],
+        right: Array.isArray(r?.right) ? r.right.filter(Boolean) : []
+      })) : []
+    }));
   }
 
   return d;
 }
 
-/* Load/Save */
+/* Storage helpers */
 async function loadDoc(){
   const raw = await (window.StorageAPI?.load?.(docName, uid));
-  // Raw could be a string "{}" from a wrong save; handle defensively
-  const parsed = (raw && typeof raw==='string') ? (()=>{
-    try{ return JSON.parse(raw); }catch{return {}; }
-  })() : raw;
+  const parsed = (raw && typeof raw === 'string')
+    ? (() => { try { return JSON.parse(raw); } catch { return {}; } })()
+    : raw;
   return migrateDoc(parsed);
 }
 async function saveDoc(data){ return window.StorageAPI?.save?.(docName, data, uid); }
 
-/* ---------- App ---------- */
+/* =========================
+   App
+   ========================= */
 function App(){
-  const [s,setS] = useState(null);
+  /* Start with a safe document so the first render never crashes */
+  const [s,setS] = useState(()=> migrateDoc(null));
 
-  // Theme state (kept in React state for live preview, mirrored into s._theme when saving)
-  const [accent,setAccent] = useState("#2563eb");
-  const [fs,setFs] = useState(11);
-  const [lh,setLh] = useState(1.45);
-  const [hFont,setHFont] = useState("var(--font-inter)");
-  const [bFont,setBFont] = useState("var(--font-inter)");
-  const [mFont,setMFont] = useState("var(--font-inter)");
-  const [hW,setHW] = useState(600);
-  const [subW,setSubW] = useState(500);
+  const [accent,setAccent] = useState(s._theme.accent);
+  const [fontSize,setFontSize] = useState(s._theme.fontSize);
+  const [lineHeight,setLineHeight] = useState(s._theme.lineHeight);
+  const [headingFont,setHeadingFont] = useState(s._theme.headingFont);
+  const [bodyFont,setBodyFont] = useState(s._theme.bodyFont);
+  const [metaFont,setMetaFont] = useState(s._theme.metaFont);
+  const [hWeight,setHWeight] = useState(s._theme.hWeight);
+  const [subWeight,setSubWeight] = useState(s._theme.subWeight);
 
-  const [addSec,setAddSec] = useState("experience");
-  const [addRow,setAddRow] = useState(-1);
-  const [addSide,setAddSide] = useState("left");
-
-  const saveDeb = useRef(null);
-
-  useEffect(()=>{ (async()=>{
+  /* Load the real doc once */
+  useEffect(()=>{(async()=>{
     try{
-      const d = await loadDoc();
-      // apply theme
-      setAccent(d._theme.accent); setFs(d._theme.fs); setLh(d._theme.lh);
-      setHFont(d._theme.heading); setBFont(d._theme.body); setMFont(d._theme.meta);
-      setHW(d._theme.h); setSubW(d._theme.sub);
+      const d=await loadDoc();
       setS(d);
+      if(d._theme){
+        const t=d._theme;
+        setAccent(t.accent); setFontSize(t.fontSize); setLineHeight(t.lineHeight);
+        setHeadingFont(t.headingFont); setBodyFont(t.bodyFont); setMetaFont(t.metaFont);
+        setHWeight(t.hWeight); setSubWeight(t.subWeight);
+      }
     }catch(e){
-      console.error('Load failed, using seed', e);
-      const d = migrateDoc(null);
-      setS(d);
+      console.error('Load failed. Using safe seed.', e);
+      setS(migrateDoc(null));
     }
-  })(); },[]);
+  })();},[]);
 
-  function withTheme(doc){
-    doc._theme = {accent:accent, fs:fs, lh:lh, heading:hFont, body:bFont, meta:mFont, h:hW, sub:subW};
-    return doc;
-  }
-  function scheduleSave(doc){
-    clearTimeout(saveDeb.current);
-    saveDeb.current = setTimeout(()=>{ saveDoc(doc).catch(()=>{}); }, 400);
+  /* Push theme into CSS custom prop for icon bubbles, etc. */
+  useEffect(()=>{
+    document.documentElement.style.setProperty('--accent', accent);
+  },[accent]);
+
+  /* Generic updaters */
+  const setThemeIntoDoc = useCallback((doc)=>({
+    ...doc,
+    _theme:{ accent, fontSize, lineHeight, headingFont, bodyFont, metaFont, hWeight, subWeight }
+  }),[accent,fontSize,lineHeight,headingFont,bodyFont,metaFont,hWeight,subWeight]);
+
+  async function saveNow(){
+    const payload = setThemeIntoDoc(s);
+    await saveDoc(payload);
+    alert('Saved');
   }
 
-  if (!s || !Array.isArray(s._layout)) {
-    return <div style="padding:16px">Loading…</div>;
-  }
-
-  /* text path setter */
-  function setPath(path, value){
-    const parts = path.split('.');
-    setS(prev=>{
-      const n=deepClone(prev); let t=n;
-      for(let i=0;i<parts.length-1;i++) t=t[parts[i]];
-      t[parts.at(-1)] = value;
-      const themed = withTheme(n);
-      scheduleSave(themed);
-      return themed;
+  function exportPDF(){
+    const payload = setThemeIntoDoc(s);
+    saveDoc(payload).then(()=>{
+      document.body.classList.add('print-mode');
+      window.print();
+      setTimeout(()=>document.body.classList.remove('print-mode'), 300);
     });
   }
 
-  /* bands (rows) management */
-  const TYPES = [{id:"13-23",name:"1/3 – 2/3"},{id:"23-13",name:"2/3 – 1/3"},{id:"single",name:"Single"}];
-
-  function addBand(type="13-23"){
-    setS(prev=>{ const n=deepClone(prev); n._layout.push({id:rid(),type,left:[],right:[]}); const doc=withTheme(n); scheduleSave(doc); return doc; });
-  }
-  function removeBand(bandId){
-    setS(prev=>{ const n=deepClone(prev); n._layout = n._layout.filter(r=>r.id!==bandId); const doc=withTheme(n); scheduleSave(doc); return doc; });
-  }
-  function moveBand(bandId,dir){
-    setS(prev=>{
-      const n=deepClone(prev);
-      const i=n._layout.findIndex(r=>r.id===bandId); if(i<0) return prev;
-      const j=dir==='up'? i-1 : i+1; if(j<0||j>=n._layout.length) return prev;
-      [n._layout[i],n._layout[j]]=[n._layout[j],n._layout[i]];
-      const doc=withTheme(n); scheduleSave(doc); return doc;
-    });
-  }
-  function setBandType(bandId,type){
-    setS(prev=>{
-      const n=deepClone(prev);
-      const r=n._layout.find(x=>x.id===bandId); if(!r) return prev;
-      r.type = (type==="13-23"||type==="23-13"||type==="single")? type : r.type;
-      const doc=withTheme(n); scheduleSave(doc); return doc;
-    });
-  }
-
-  /* section placement */
-  const ALL_SECTIONS = ["experience","education","projects","volunteering","skills","languages","strengths","hobbies","online","certifications","awards","laws"];
-  function placeSection(rowIdx, side, key){
-    setS(prev=>{
-      const n=deepClone(prev);
-      // remove from all rows first
-      n._layout.forEach(b=>{ b.left=b.left.filter(k=>k!==key); b.right=b.right.filter(k=>k!==key); });
-      const row = n._layout[rowIdx]; if(!row) return prev;
-      (side==='right'? row.right : row.left).push(key);
-      const doc=withTheme(n); scheduleSave(doc); return doc;
-    });
-  }
-  function moveSectionWithin(rowIdx, side, key, dir){
-    setS(prev=>{
-      const n=deepClone(prev);
-      const row=n._layout[rowIdx]; if(!row) return prev;
-      const arr = side==='right'? row.right : row.left;
-      const i = arr.indexOf(key); if(i<0) return prev;
-      const j = dir==='up'? i-1 : i+1; if(j<0||j>=arr.length) return prev;
-      [arr[i],arr[j]]=[arr[j],arr[i]];
-      const doc=withTheme(n); scheduleSave(doc); return doc;
-    });
-  }
-  function swapSectionSide(rowIdx,key){
-    setS(prev=>{
-      const n=deepClone(prev);
-      const row=n._layout[rowIdx]; if(!row) return prev;
-      if (row.left.includes(key)){ row.left=row.left.filter(k=>k!==key); row.right.unshift(key); }
-      else if (row.right.includes(key)){ row.right=row.right.filter(k=>k!==key); row.left.unshift(key); }
-      const doc=withTheme(n); scheduleSave(doc); return doc;
-    });
-  }
-  function removeSectionFromRow(rowIdx,key){
-    setS(prev=>{
-      const n=deepClone(prev);
-      const row=n._layout[rowIdx]; if(!row) return prev;
-      row.left=row.left.filter(k=>k!==key);
-      row.right=row.right.filter(k=>k!==key);
-      const doc=withTheme(n); scheduleSave(doc); return doc;
-    });
-  }
-
-  /* list item helpers */
-  function addItem(listKey, sample){
-    setS(prev=>{ const n=deepClone(prev); if(!Array.isArray(n[listKey])) n[listKey]=[]; n[listKey].push(sample); const doc=withTheme(n); scheduleSave(doc); return doc; });
-  }
-  function removeItem(listKey,id){
-    setS(prev=>{ const n=deepClone(prev); n[listKey]=(n[listKey]||[]).filter(x=>x.id!==id); const doc=withTheme(n); scheduleSave(doc); return doc; });
-  }
-  function updateIn(listKey,id,fn){
-    setS(prev=>{
-      const n=deepClone(prev);
-      n[listKey]=(n[listKey]]||[]).map(x=>x.id===id? fn(deepClone(x)) : x);
-      const doc=withTheme(n); scheduleSave(doc); return doc;
-    });
-  }
-
-  /* renderers */
-  function SectionBar({name,label,rowIdx,side}){
+  /* Inline content editing (contentEditable) */
+  function CE({value, onChange, className="", style={}, placeholder=""}){
+    const ref = useRef(null);
     return (
-      <div className="secbar">
-        <div className="title" style={{fontFamily:hFont,fontWeight:hW}}>{label}</div>
-        <div className="flex gap-1">
-          <button className="chip" onClick={()=>moveSectionWithin(rowIdx,side,name,'up')}>↑</button>
-          <button className="chip" onClick={()=>moveSectionWithin(rowIdx,side,name,'down')}>↓</button>
-          <button className="chip" onClick={()=>swapSectionSide(rowIdx,name)}>⇆</button>
-          <button className="chip" onClick={()=>removeSectionFromRow(rowIdx,name)}>✕</button>
-        </div>
+      <span
+        className={`editable ${className}`}
+        style={style}
+        contentEditable
+        suppressContentEditableWarning
+        onBlur={(e)=> onChange?.(e.currentTarget.textContent || "")}
+        onKeyDown={(e)=>{ if(e.key==="Enter"){ e.preventDefault(); e.currentTarget.blur(); } }}
+        ref={ref}
+      >
+        {value || placeholder}
+      </span>
+    );
+  }
+
+  /* Move section between rows/columns */
+  function removeFromRow(row, key, side){
+    const arr = side==="left" ? row.left : row.right;
+    const idx = arr.indexOf(key);
+    if(idx>=0) arr.splice(idx,1);
+  }
+  function addToRow(row, key, side, pos='end'){
+    const arr = side==="left" ? row.left : row.right;
+    if (pos==='start') arr.unshift(key);
+    else arr.push(key);
+  }
+
+  function moveSection({fromPage, fromRowId, fromSide, key, dir}){
+    setS(prev=>{
+      const draft = deepClone(prev);
+      const pg = draft._layout.find(p=>p.page===fromPage);
+      if(!pg) return prev;
+      const rows = pg.rows;
+      const i = rows.findIndex(r=>r.id===fromRowId);
+      if(i<0) return prev;
+
+      if(dir==='up' || dir==='down'){
+        const j = dir==='up'? i-1 : i+1;
+        if(j<0 || j>=rows.length) return prev;
+        // try to move into same side of adjacent row
+        removeFromRow(rows[i], key, fromSide);
+        addToRow(rows[j], key, fromSide, dir==='up'?'end':'start');
+      }else if(dir==='swap'){
+        // left <-> right in same row
+        removeFromRow(rows[i], key, fromSide);
+        addToRow(rows[i], key, fromSide==='left'?'right':'left', 'end');
+      }
+      return draft;
+    });
+  }
+
+  /* Row controls */
+  function addRow(pageNum, type="single", afterRowId=null){
+    setS(prev=>{
+      const draft=deepClone(prev);
+      const pg = draft._layout.find(p=>p.page===pageNum);
+      if(!pg) return prev;
+      const idx = afterRowId ? pg.rows.findIndex(r=>r.id===afterRowId) : (pg.rows.length-1);
+      const row = { id:rid(), type, left:[], right:[] };
+      pg.rows.splice(idx+1, 0, row);
+      return draft;
+    });
+  }
+  function deleteRow(pageNum, rowId){
+    setS(prev=>{
+      const draft=deepClone(prev);
+      const pg = draft._layout.find(p=>p.page===pageNum);
+      if(!pg) return prev;
+      if(pg.rows.length<=1) return prev; // keep at least one row
+      pg.rows = pg.rows.filter(r=>r.id!==rowId);
+      return draft;
+    });
+  }
+  function changeRowType(pageNum, rowId, type){
+    setS(prev=>{
+      const draft=deepClone(prev);
+      const pg = draft._layout.find(p=>p.page===pageNum);
+      if(!pg) return prev;
+      const r = pg.rows.find(x=>x.id===rowId);
+      if(!r) return prev;
+      r.type = type;
+      return draft;
+    });
+  }
+
+  /* Pages */
+  function addPage(){
+    setS(prev=>{
+      const draft = deepClone(prev);
+      const maxPage = Math.max(...draft._layout.map(p=>p.page));
+      draft._layout.push({
+        id: rid(),
+        page: maxPage+1,
+        rows: [{ id:rid(), type:"single", left:[], right:[] }]
+      });
+      return draft;
+    });
+  }
+  function deletePage(pageNum){
+    setS(prev=>{
+      const draft=deepClone(prev);
+      if(draft._layout.length<=1) return prev;
+      draft._layout = draft._layout.filter(p=>p.page!==pageNum);
+      // reindex pages
+      draft._layout.sort((a,b)=>a.page-b.page).forEach((p,i)=> p.page=i+1);
+      return draft;
+    });
+  }
+
+  /* Item-level reordering inside a section array (experience, education, etc.) */
+  function moveItem(arrKey, idx, dir){
+    setS(prev=>{
+      const doc = deepClone(prev);
+      const arr = doc[arrKey] || [];
+      const j = dir==='up' ? idx-1 : idx+1;
+      if (j<0 || j>=arr.length) return prev;
+      [arr[idx],arr[j]]=[arr[j],arr[idx]];
+      doc[arrKey]=arr;
+      return doc;
+    });
+  }
+
+  /* Helper: upload logo to arbitrary item */
+  function setLogo(arrKey, idx, url){
+    setS(prev=>{
+      const doc = deepClone(prev);
+      const arr = doc[arrKey] || [];
+      if(!arr[idx]) return prev;
+      arr[idx].logo = url;
+      doc[arrKey]=arr;
+      return doc;
+    });
+  }
+
+  /* Title component (section headings with line) */
+  function SectionTitle({title}){
+    return (
+      <div className="mb-2">
+        <div className="uppercase tracking-widest text-xs" style={{color:accent, fontFamily:headingFont, fontWeight:hWeight}}>{title}</div>
+        <div className="title-divider"></div>
       </div>
     );
   }
 
+  /* Renderers (inline editing on page) */
   const R = {
-    headerSummary:()=>(
-      <section>
-        <div className="flex items-start gap-5 pb-4" style={{borderBottom:'1px solid var(--rule)'}}>
+    headerSummary: ({page, rowId}) => (
+      <div className="pb-4 border-b border-neutral-200">
+        <div className="flex items-start gap-6">
           <div className="flex-1 min-w-0">
-            <div className="editable text-3xl leading-tight" style={{color:accent,fontFamily:hFont,fontWeight:hW}}
-                 contentEditable suppressContentEditableWarning
-                 onBlur={e=>setPath('header.name',e.target.textContent)}>{s.header.name}</div>
-            <div className="editable text-lg" style={{fontFamily:hFont,fontWeight:subW}}
-                 contentEditable suppressContentEditableWarning
-                 onBlur={e=>setPath('header.role',e.target.textContent)}>{s.header.role}</div>
-            <div className="text-sm mt-2" style={{fontFamily:mFont}}>
-              {[s.header.email,s.header.phone,s.header.residence,s.header.birthdate].filter(Boolean).join(' • ')}
+            <div className="text-3xl" style={{color:accent, fontFamily:headingFont, fontWeight:hWeight}}>
+              <CE value={s.header.name} onChange={(v)=>setS(prev=>({...prev, header:{...prev.header, name:v}}))} placeholder="JOHN DOE"/>
+            </div>
+            <div className="text-lg" style={{color:"#0f172a", fontFamily:headingFont, fontWeight:subWeight}}>
+              <CE value={s.header.role} onChange={(v)=>setS(prev=>({...prev, header:{...prev.header, role:v}}))} placeholder="Role / Position"/>
+            </div>
+            <div className="text-sm text-neutral-800 mt-2" style={{fontFamily:metaFont}}>
+              <CE
+                value={[s.header.email,s.header.phone,s.header.residence,s.header.birthdate].filter(Boolean).join(" • ")}
+                onChange={(v)=>{
+                  // You can parse back if you want; simplest keep whole line as one meta field
+                  setS(prev=>({...prev, header:{...prev.header, metaLine:v}}));
+                }}
+                placeholder="email • phone • city • birth"
+              />
             </div>
           </div>
-          <div className="avatar">
+          <div className="w-24 h-24 rounded-full bg-neutral-100 border overflow-hidden flex items-center justify-center">
             {s.header.avatar
               ? <img src={s.header.avatar} className="w-full h-full object-cover" alt="avatar"/>
-              : <button className="text-xs text-neutral-500" onClick={()=>pickImage(url=>setPath('header.avatar',url))}>Upload</button>}
+              : <span className="text-xs text-neutral-400">Photo</span>}
           </div>
         </div>
-        <div className="editable text-sm text-neutral-800 mt-3 whitespace-pre-line"
-             contentEditable suppressContentEditableWarning
-             onBlur={e=>setPath('summary',e.target.textContent)}>{s.summary}</div>
+        <div className="mt-4 text-neutral-800" style={{lineHeight}}>
+          <div
+            className="editable"
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={(e)=> setS(prev=>({...prev, summary:e.currentTarget.textContent || ""}))}
+          >{s.summary}</div>
+        </div>
+        <div className="mt-2 flex gap-2">
+          <button className="chip" onClick={()=> pickImage(url=> setS(prev=>({...prev, header:{...prev.header, avatar:url}})) )}>Upload photo</button>
+          {s.header.avatar && <button className="chip" onClick={()=> setS(prev=>({...prev, header:{...prev.header, avatar:""}}))}>Remove photo</button>}
+        </div>
+      </div>
+    ),
+
+    experience: ({page,rowId,side}) => (
+      <section className="mb-4">
+        <SectionTitle title={s.sectionNames.experience}/>
+        {(s.experience||[]).map((ex,i)=>{
+          const logo = ex.logo;
+          return (
+            <div key={ex.id||i} className="mb-3" style={{fontFamily:bodyFont}}>
+              <div className="flex items-start gap-3">
+                {logo ? <div className="logo mt-0.5"><img src={logo} className="w-full h-full object-cover" alt=""/></div> : null}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <div style={{fontWeight:hWeight}}>
+                      <CE value={ex.title} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.experience[i].title=v; return d;})} placeholder="Title"/>
+                    </div>
+                    <div className="text-sm meta">
+                      <CE value={ex.period} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.experience[i].period=v; return d;})} placeholder="YYYY – YYYY"/>
+                    </div>
+                  </div>
+                  <div className="text-sm">
+                    <span style={{color:accent}}>
+                      <CE value={ex.company} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.experience[i].company=v; return d;})} placeholder="Company"/>
+                    </span>
+                  </div>
+                  <div className="text-sm meta mt-0.5 inline-flex items-center gap-2">
+                    <Icon name="location" className="w-4 h-4"/>
+                    <CE value={ex.location} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.experience[i].location=v; return d;})} placeholder="City, Country"/>
+                  </div>
+                  {(ex.bullets||[]).length>0 && (
+                    <ul className="list-disc pl-5 mt-2 text-sm text-neutral-800">
+                      {ex.bullets.map((b,j)=>
+                        <li key={j}>
+                          <CE value={b} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.experience[i].bullets[j]=v; return d;})} placeholder="Bullet"/>
+                        </li>
+                      )}
+                    </ul>
+                  )}
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    <button className="chip" onClick={()=> moveItem('experience',i,'up')}>↑</button>
+                    <button className="chip" onClick={()=> moveItem('experience',i,'down')}>↓</button>
+                    <button className="chip" onClick={()=> pickImage(url=> setLogo('experience',i,url))}>Logo</button>
+                    {logo && <button className="chip" onClick={()=> setLogo('experience',i,"")}>Remove logo</button>}
+                    <button className="chip" onClick={()=> setS(prev=>{const d=deepClone(prev); d.experience[i].bullets=[...(d.experience[i].bullets||[]), ""]; return d;})}>+ Bullet</button>
+                    <button className="chip danger" onClick={()=> setS(prev=>{const d=deepClone(prev); d.experience.splice(i,1); return d;})}>Delete</button>
+                    {/* move section within layout */}
+                    <span className="ml-auto flex gap-1">
+                      <button className="chip" title="Row up" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'experience', dir:'up'})}>Row↑</button>
+                      <button className="chip" title="Row down" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'experience', dir:'down'})}>Row↓</button>
+                      <button className="chip" title="Swap column" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'experience', dir:'swap'})}>⇆</button>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+        <button className="btn" onClick={()=> setS(prev=>{const d=deepClone(prev); d.experience.push({id:rid(), title:"", company:"", period:"", location:"", logo:"", bullets:[]}); return d;})}>+ Add experience</button>
       </section>
     ),
-    experience:({rowIdx,side})=>(
-      <section>
-        <SectionBar name="experience" label={s.sectionNames.experience||'Experience'} rowIdx={rowIdx} side={side}/>
-        <div className="title-divider"></div>
-        {(s.experience||[]).map(ex=>(
-          <div key={ex.id} className="mb-3">
-            <div className="flex items-start gap-3">
-              {ex.logo ? <div className="logo"><img src={ex.logo} className="w-full h-full object-cover"/></div> : null}
-              <div className="flex-1 min-w-0">
-                <div className="editable font-medium text-sm" contentEditable suppressContentEditableWarning
-                     onBlur={e=>updateIn('experience',ex.id,it=>{it.title=e.target.textContent;return it;})}>{ex.title}</div>
-                <div className="text-sm" style={{color:accent}}>
-                  <span className="editable" contentEditable suppressContentEditableWarning
-                        onBlur={e=>updateIn('experience',ex.id,it=>{it.company=e.target.textContent;return it;})}>{ex.company}</span>
+
+    education: ({page,rowId,side}) => (
+      <section className="mb-4">
+        <SectionTitle title={s.sectionNames.education}/>
+        {(s.education||[]).map((ed,i)=>(
+          <div key={ed.id||i} className="mb-3" style={{fontFamily:bodyFont}}>
+            <div className="flex justify-between items-baseline">
+              <div className="mb-0.5" style={{fontWeight:hWeight}}>
+                <CE value={ed.degree} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.education[i].degree=v; return d;})} placeholder="Degree"/>
+              </div>
+              <div className="text-sm meta">
+                <CE value={ed.period} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.education[i].period=v; return d;})} placeholder="YYYY – YYYY"/>
+                { "  |  GPA " }
+                <CE value={ed.gpa||""} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.education[i].gpa=v; return d;})} placeholder="GPA"/>
+              </div>
+            </div>
+            <div className="text-sm">
+              <span style={{color:accent}}>
+                <CE value={ed.school} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.education[i].school=v; return d;})} placeholder="University"/>
+              </span>
+            </div>
+            <div className="text-sm meta mt-0.5 inline-flex items-center gap-2">
+              <Icon name="location" className="w-4 h-4"/>
+              <CE value={ed.location} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.education[i].location=v; return d;})} placeholder="City, Country"/>
+            </div>
+
+            <div className="mt-2 flex gap-1">
+              <button className="chip" onClick={()=> moveItem('education',i,'up')}>↑</button>
+              <button className="chip" onClick={()=> moveItem('education',i,'down')}>↓</button>
+              <button className="chip danger" onClick={()=> setS(prev=>{const d=deepClone(prev); d.education.splice(i,1); return d;})}>Delete</button>
+              <span className="ml-auto flex gap-1">
+                <button className="chip" title="Row up" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'education', dir:'up'})}>Row↑</button>
+                <button className="chip" title="Row down" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'education', dir:'down'})}>Row↓</button>
+                <button className="chip" title="Swap column" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'education', dir:'swap'})}>⇆</button>
+              </span>
+            </div>
+          </div>
+        ))}
+        <button className="btn" onClick={()=> setS(prev=>{const d=deepClone(prev); d.education.push({id:rid(), degree:"", school:"", period:"", location:"", gpa:""}); return d;})}>+ Add education</button>
+      </section>
+    ),
+
+    volunteering: ({page,rowId,side}) => (
+      <section className="mb-4">
+        <SectionTitle title={s.sectionNames.volunteering}/>
+        {(s.volunteering||[]).map((v,i)=>{
+          const logo=v.logo;
+          return (
+            <div key={v.id||i} className="mb-3" style={{fontFamily:bodyFont}}>
+              <div className="flex items-start gap-3">
+                {logo ? <div className="logo mt-0.5"><img src={logo} className="w-full h-full object-cover" alt=""/></div> : null}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <div style={{fontWeight:hWeight}}>
+                      <CE value={v.role} onChange={(val)=>setS(prev=>{const d=deepClone(prev); d.volunteering[i].role=val; return d;})} placeholder="Role"/>
+                    </div>
+                    <div className="text-sm meta">
+                      <CE value={v.period} onChange={(val)=>setS(prev=>{const d=deepClone(prev); d.volunteering[i].period=val; return d;})} placeholder="YYYY – YYYY"/>
+                    </div>
+                  </div>
+                  <div className="text-sm"><span style={{color:accent}}>
+                    <CE value={v.org} onChange={(val)=>setS(prev=>{const d=deepClone(prev); d.volunteering[i].org=val; return d;})} placeholder="Organization"/>
+                  </span></div>
+                  <div className="text-sm meta mt-0.5 inline-flex items-center gap-2">
+                    <Icon name="location" className="w-4 h-4"/>
+                    <CE value={v.location} onChange={(val)=>setS(prev=>{const d=deepClone(prev); d.volunteering[i].location=val; return d;})} placeholder="City, Country"/>
+                  </div>
+                  {(v.bullets||[]).length>0 && (
+                    <ul className="list-disc pl-5 mt-2 text-sm text-neutral-800">
+                      {v.bullets.map((b,j)=>
+                        <li key={j}>
+                          <CE value={b} onChange={(val)=>setS(prev=>{const d=deepClone(prev); d.volunteering[i].bullets[j]=val; return d;})} placeholder="Bullet"/>
+                        </li>
+                      )}
+                    </ul>
+                  )}
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    <button className="chip" onClick={()=> moveItem('volunteering',i,'up')}>↑</button>
+                    <button className="chip" onClick={()=> moveItem('volunteering',i,'down')}>↓</button>
+                    <button className="chip" onClick={()=> pickImage(url=> setLogo('volunteering',i,url))}>Logo</button>
+                    {logo && <button className="chip" onClick={()=> setLogo('volunteering',i,"")}>Remove logo</button>}
+                    <button className="chip" onClick={()=> setS(prev=>{const d=deepClone(prev); d.volunteering[i].bullets=[...(d.volunteering[i].bullets||[]), ""]; return d;})}>+ Bullet</button>
+                    <button className="chip danger" onClick={()=> setS(prev=>{const d=deepClone(prev); d.volunteering.splice(i,1); return d;})}>Delete</button>
+                    <span className="ml-auto flex gap-1">
+                      <button className="chip" title="Row up" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'volunteering', dir:'up'})}>Row↑</button>
+                      <button className="chip" title="Row down" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'volunteering', dir:'down'})}>Row↓</button>
+                      <button className="chip" title="Swap column" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'volunteering', dir:'swap'})}>⇆</button>
+                    </span>
+                  </div>
                 </div>
-                <div className="text-xs meta mb-1">
-                  <span className="editable" contentEditable suppressContentEditableWarning
-                        onBlur={e=>updateIn('experience',ex.id,it=>{it.period=e.target.textContent;return it;})}>{ex.period}</span> •
-                  <span className="editable ml-1" contentEditable suppressContentEditableWarning
-                        onBlur={e=>updateIn('experience',ex.id,it=>{it.location=e.target.textContent;return it;})}>{ex.location}</span>
-                </div>
-                {(ex.bullets||[]).length>0 &&
-                  <ul className="list-disc pl-5 text-sm text-neutral-800">
-                    {ex.bullets.map((b,i)=>(
-                      <li key={i} className="editable" contentEditable suppressContentEditableWarning
-                          onBlur={e=>updateIn('experience',ex.id,it=>{it.bullets[i]=e.target.textContent;return it;})}>{b}</li>
-                    ))}
-                  </ul>}
-                <div className="mt-1 flex gap-1">
-                  <button className="chip" onClick={()=>pickImage(url=>updateIn('experience',ex.id,it=>{it.logo=url;return it;}))}>Logo</button>
-                  {ex.logo && <button className="chip" onClick={()=>updateIn('experience',ex.id,it=>{it.logo="";return it;})}>Remove logo</button>}
-                  <button className="chip" onClick={()=>updateIn('experience',ex.id,it=>{it.bullets=[...(it.bullets||[]),"New bullet"];return it;})}>+ Bullet</button>
-                  <button className="chip danger" onClick={()=>removeItem('experience',ex.id)}>Delete</button>
-                </div>
+              </div>
+            </div>
+          );
+        })}
+        <button className="btn" onClick={()=> setS(prev=>{const d=deepClone(prev); d.volunteering.push({id:rid(), role:"", org:"", period:"", location:"", logo:"", bullets:[]}); return d;})}>+ Add volunteering</button>
+      </section>
+    ),
+
+    projects: ({page,rowId,side}) => (
+      <section className="mb-4">
+        <SectionTitle title={s.sectionNames.projects}/>
+        {(s.projects||[]).map((p,i)=>(
+          <div key={p.id||i} className="mb-3" style={{fontFamily:bodyFont}}>
+            <div className="flex items-baseline justify-between gap-2">
+              <div style={{fontWeight:hWeight}}>
+                <CE value={p.name} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.projects[i].name=v; return d;})} placeholder="Project title"/>
+              </div>
+              <div className="text-sm meta">
+                <CE value={p.period} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.projects[i].period=v; return d;})} placeholder="MM/YYYY – MM/YYYY"/>
+              </div>
+            </div>
+            <div className="meta text-sm flex items-center gap-4" style={{color:"#6b7280"}}>
+              <span className="inline-flex items-center gap-2">
+                <Icon name="location" className="w-4 h-4"/>
+                <CE value={p.location} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.projects[i].location=v; return d;})} placeholder="Place / Org"/>
+              </span>
+            </div>
+            {p.domain && <div className="mt-1" style={{color:accent, fontWeight:hWeight}}>
+              <CE value={p.domain} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.projects[i].domain=v; return d;})} placeholder="Domain (e.g., E-Health)"/>
+            </div>}
+            {(p.bullets||[]).length>0 && (
+              <ul className="list-disc pl-5 mt-2 text-sm text-neutral-800">
+                {p.bullets.map((b,j)=>
+                  <li key={j}>
+                    <CE value={b} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.projects[i].bullets[j]=v; return d;})} placeholder="Bullet"/>
+                  </li>
+                )}
+              </ul>
+            )}
+            <div className="mt-2 flex gap-1">
+              <button className="chip" onClick={()=> moveItem('projects',i,'up')}>↑</button>
+              <button className="chip" onClick={()=> moveItem('projects',i,'down')}>↓</button>
+              <button className="chip" onClick={()=> setS(prev=>{const d=deepClone(prev); d.projects[i].bullets=[...(d.projects[i].bullets||[]), ""]; return d;})}>+ Bullet</button>
+              <button className="chip danger" onClick={()=> setS(prev=>{const d=deepClone(prev); d.projects.splice(i,1); return d;})}>Delete</button>
+              <span className="ml-auto flex gap-1">
+                <button className="chip" title="Row up" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'projects', dir:'up'})}>Row↑</button>
+                <button className="chip" title="Row down" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'projects', dir:'down'})}>Row↓</button>
+                <button className="chip" title="Swap column" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'projects', dir:'swap'})}>⇆</button>
+              </span>
+            </div>
+          </div>
+        ))}
+        <button className="btn" onClick={()=> setS(prev=>{const d=deepClone(prev); d.projects.push({id:rid(), name:"", domain:"", period:"", location:"", bullets:[]}); return d;})}>+ Add project</button>
+      </section>
+    ),
+
+    certifications: ({page,rowId,side}) => (
+      <section className="mb-4">
+        <SectionTitle title={s.sectionNames.certifications}/>
+        {(s.certifications||[]).map((c,i)=>(
+          <div key={c.id||i} className="flex items-start gap-3 mb-3" style={{fontFamily:bodyFont}}>
+            {c.logo ? <div className="logo mt-0.5"><img src={c.logo} className="w-full h-full object-cover" alt=""/></div>
+                     : (c.icon ? <span className="circle-icon mt-0.5"><Icon name={c.icon} className="w-4 h-4"/></span> : null)}
+            <div className="flex-1 min-w-0">
+              <div style={{color:accent}}>
+                <CE value={c.line1||""} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.certifications[i].line1=v; return d;})} placeholder="Certification title"/>
+              </div>
+              <div className="text-neutral-900">
+                <CE value={c.line2||""} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.certifications[i].line2=v; return d;})} placeholder="Issuer / Notes"/>
+              </div>
+              <div className="mt-2 flex gap-1">
+                <button className="chip" onClick={()=> moveItem('certifications',i,'up')}>↑</button>
+                <button className="chip" onClick={()=> moveItem('certifications',i,'down')}>↓</button>
+                <button className="chip" onClick={()=> pickImage(url=> setLogo('certifications',i,url))}>Logo</button>
+                {c.logo && <button className="chip" onClick={()=> setLogo('certifications',i,"")}>Remove logo</button>}
+                <button className="chip danger" onClick={()=> setS(prev=>{const d=deepClone(prev); d.certifications.splice(i,1); return d;})}>Delete</button>
+                <span className="ml-auto flex gap-1">
+                  <button className="chip" title="Row up" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'certifications', dir:'up'})}>Row↑</button>
+                  <button className="chip" title="Row down" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'certifications', dir:'down'})}>Row↓</button>
+                  <button className="chip" title="Swap column" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'certifications', dir:'swap'})}>⇆</button>
+                </span>
               </div>
             </div>
           </div>
         ))}
-        <button className="btn" onClick={()=>addItem('experience',{id:rid(),title:"",company:"",period:"",location:"",logo:"",bullets:[]})}>+ Add experience</button>
+        <button className="btn" onClick={()=> setS(prev=>{const d=deepClone(prev); d.certifications.push({id:rid(), icon:"certificate", logo:"", line1:"", line2:""}); return d;})}>+ Add certification</button>
       </section>
     ),
-    education:({rowIdx,side})=>(
-      <section>
-        <SectionBar name="education" label={s.sectionNames.education||'Education'} rowIdx={rowIdx} side={side}/>
-        <div className="title-divider"></div>
-        {(s.education||[]).map(ed=>(
-          <div key={ed.id} className="mb-3">
-            <div className="font-medium text-sm editable" contentEditable suppressContentEditableWarning
-                 onBlur={e=>updateIn('education',ed.id,it=>{it.degree=e.target.textContent;return it;})}>{ed.degree}</div>
-            <div className="text-sm" style={{color:accent}}>
-              <span className="editable" contentEditable suppressContentEditableWarning
-                    onBlur={e=>updateIn('education',ed.id,it=>{it.school=e.target.textContent;return it;})}>{ed.school}</span>
-            </div>
-            <div className="text-xs meta">
-              <span className="editable" contentEditable suppressContentEditableWarning
-                    onBlur={e=>updateIn('education',ed.id,it=>{it.period=e.target.textContent;return it;})}>{ed.period}</span>
-              {typeof ed.gpa!=='undefined' && <> • GPA <span className="editable" contentEditable suppressContentEditableWarning
-                    onBlur={e=>updateIn('education',ed.id,it=>{it.gpa=e.target.textContent;return it;})}>{ed.gpa}</span></>}
-              <> • </>
-              <span className="editable" contentEditable suppressContentEditableWarning
-                    onBlur={e=>updateIn('education',ed.id,it=>{it.location=e.target.textContent;return it;})}>{ed.location}</span>
-            </div>
-            <div className="mt-1"><button className="chip danger" onClick={()=>removeItem('education',ed.id)}>Delete</button></div>
-          </div>
-        ))}
-        <button className="btn" onClick={()=>addItem('education',{id:rid(),degree:"",school:"",period:"",location:"",gpa:""})}>+ Add education</button>
-      </section>
-    ),
-    projects:({rowIdx,side})=>(
-      <section>
-        <SectionBar name="projects" label={s.sectionNames.projects||'Projects'} rowIdx={rowIdx} side={side}/>
-        <div className="title-divider"></div>
-        {(s.projects||[]).map(p=>(
-          <div key={p.id} className="mb-3">
-            <div className="font-medium text-sm editable" contentEditable suppressContentEditableWarning
-                 onBlur={e=>updateIn('projects',p.id,it=>{it.name=e.target.textContent;return it;})}>{p.name}</div>
-            {p.domain && <div className="text-sm editable" style={{color:accent}} contentEditable suppressContentEditableWarning
-                 onBlur={e=>updateIn('projects',p.id,it=>{it.domain=e.target.textContent;return it;})}>{p.domain}</div>}
-            <div className="text-xs meta">
-              <span className="editable" contentEditable suppressContentEditableWarning
-                    onBlur={e=>updateIn('projects',p.id,it=>{it.period=e.target.textContent;return it;})}>{p.period}</span>
-              <> • </>
-              <span className="editable" contentEditable suppressContentEditableWarning
-                    onBlur={e=>updateIn('projects',p.id,it=>{it.location=e.target.textContent;return it;})}>{p.location}</span>
-            </div>
-            {(p.bullets||[]).length>0 &&
-              <ul className="list-disc pl-5 text-sm text-neutral-800">
-                {p.bullets.map((b,i)=>(
-                  <li key={i} className="editable" contentEditable suppressContentEditableWarning
-                      onBlur={e=>updateIn('projects',p.id,it=>{it.bullets[i]=e.target.textContent;return it;})}>{b}</li>
-                ))}
-              </ul>}
-            <div className="mt-1 flex gap-1">
-              <button className="chip" onClick={()=>updateIn('projects',p.id,it=>{it.bullets=[...(it.bullets||[]),"New bullet"];return it;})}>+ Bullet</button>
-              <button className="chip danger" onClick={()=>removeItem('projects',p.id)}>Delete</button>
-            </div>
-          </div>
-        ))}
-        <button className="btn" onClick={()=>addItem('projects',{id:rid(),name:"",domain:"",period:"",location:"",bullets:[]})}>+ Add project</button>
-      </section>
-    ),
-    volunteering:({rowIdx,side})=>(
-      <section>
-        <SectionBar name="volunteering" label={s.sectionNames.volunteering||'Volunteering'} rowIdx={rowIdx} side={side}/>
-        <div className="title-divider"></div>
-        {(s.volunteering||[]).map(v=>(
-          <div key={v.id} className="mb-3">
-            <div className="flex items-start gap-3">
-              {v.logo ? <div className="logo"><img src={v.logo} className="w-full h-full object-cover"/></div> : null}
-              <div className="flex-1 min-w-0">
-                <div className="editable font-medium text-sm" contentEditable suppressContentEditableWarning
-                     onBlur={e=>updateIn('volunteering',v.id,it=>{it.role=e.target.textContent;return it;})}>{v.role}</div>
-                <div className="text-sm" style={{color:accent}}>
-                  <span className="editable" contentEditable suppressContentEditableWarning
-                        onBlur={e=>updateIn('volunteering',v.id,it=>{it.org=e.target.textContent;return it;})}>{v.org}</span>
-                </div>
-                <div className="text-xs meta">
-                  <span className="editable" contentEditable suppressContentEditableWarning
-                        onBlur={e=>updateIn('volunteering',v.id,it=>{it.period=e.target.textContent;return it;})}>{v.period}</span>
-                  <> • </>
-                  <span className="editable" contentEditable suppressContentEditableWarning
-                        onBlur={e=>updateIn('volunteering',v.id,it=>{it.location=e.target.textContent;return it;})}>{v.location}</span>
-                </div>
-                <div className="mt-1 flex gap-1">
-                  <button className="chip" onClick={()=>pickImage(url=>updateIn('volunteering',v.id,it=>{it.logo=url;return it;}))}>Logo</button>
-                  {v.logo && <button className="chip" onClick={()=>updateIn('volunteering',v.id,it=>{it.logo="";return it;})}>Remove logo</button>}
-                  <button className="chip danger" onClick={()=>removeItem('volunteering',v.id)}>Delete</button>
-                </div>
+
+    awards: ({page,rowId,side}) => (
+      <section className="mb-4">
+        <SectionTitle title={s.sectionNames.awards}/>
+        {(s.awards||[]).map((a,i)=>(
+          <div key={a.id||i} className="flex items-start gap-3 mb-3" style={{fontFamily:bodyFont}}>
+            {a.logo ? <div className="logo mt-0.5"><img src={a.logo} className="w-full h-full object-cover" alt=""/></div>
+                     : (a.icon ? <span className="circle-icon mt-0.5"><Icon name={a.icon} className="w-4 h-4"/></span> : null)}
+            <div className="flex-1 min-w-0">
+              <div className="text-neutral-900" style={{fontWeight:600}}>
+                <CE value={a.line1||""} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.awards[i].line1=v; return d;})} placeholder="Award title"/>
+              </div>
+              {true && <div className="text-neutral-900">
+                <CE value={a.line2||""} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.awards[i].line2=v; return d;})} placeholder="Issuer / Notes"/>
+              </div>}
+              <div className="mt-2 flex gap-1">
+                <button className="chip" onClick={()=> moveItem('awards',i,'up')}>↑</button>
+                <button className="chip" onClick={()=> moveItem('awards',i,'down')}>↓</button>
+                <button className="chip" onClick={()=> pickImage(url=> setLogo('awards',i,url))}>Logo</button>
+                {a.logo && <button className="chip" onClick={()=> setLogo('awards',i,"")}>Remove logo</button>}
+                <button className="chip danger" onClick={()=> setS(prev=>{const d=deepClone(prev); d.awards.splice(i,1); return d;})}>Delete</button>
+                <span className="ml-auto flex gap-1">
+                  <button className="chip" title="Row up" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'awards', dir:'up'})}>Row↑</button>
+                  <button className="chip" title="Row down" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'awards', dir:'down'})}>Row↓</button>
+                  <button className="chip" title="Swap column" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'awards', dir:'swap'})}>⇆</button>
+                </span>
               </div>
             </div>
           </div>
         ))}
-        <button className="btn" onClick={()=>addItem('volunteering',{id:rid(),role:"",org:"",period:"",location:"",logo:""})}>+ Add volunteering</button>
+        <button className="btn" onClick={()=> setS(prev=>{const d=deepClone(prev); d.awards.push({id:rid(), icon:"award", logo:"", line1:"", line2:""}); return d;})}>+ Add award</button>
       </section>
     ),
-    certifications:({rowIdx,side})=>(
-      <section>
-        <SectionBar name="certifications" label={s.sectionNames.certifications||'Certifications'} rowIdx={rowIdx} side={side}/>
-        <div className="title-divider"></div>
-        {(s.certifications||[]).map(c=>(
-          <div key={c.id} className="mb-2">
-            <div className="text-sm" style={{color:accent}}>
-              <span className="editable" contentEditable suppressContentEditableWarning
-                    onBlur={e=>updateIn('certifications',c.id,it=>{it.line1=e.target.textContent;return it;})}>{c.line1}</span>
+
+    skills: ({page,rowId,side}) => (
+      <section className="mb-4">
+        <SectionTitle title={s.sectionNames.skills}/>
+        {(s.skills||[]).map((g,i)=>(
+          <div key={g.id||i} className="mb-3">
+            <div className="text-sm" style={{fontFamily:headingFont, fontWeight:400}}>
+              <CE value={g.group||""} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.skills[i].group=v; return d;})} placeholder="Group name"/>
             </div>
-            {c.line2 && <div className="text-sm editable" contentEditable suppressContentEditableWarning
-                  onBlur={e=>updateIn('certifications',c.id,it=>{it.line2=e.target.textContent;return it;})}>{c.line2}</div>}
-            <div className="mt-1 flex gap-1">
-              <button className="chip" onClick={()=>pickImage(url=>updateIn('certifications',c.id,it=>{it.logo=url;return it;}))}>Logo</button>
-              {c.logo && <button className="chip" onClick={()=>updateIn('certifications',c.id,it=>{it.logo="";return it;})}>Remove logo</button>}
-              <button className="chip danger" onClick={()=>removeItem('certifications',c.id)}>Delete</button>
-            </div>
-          </div>
-        ))}
-        <button className="btn" onClick={()=>addItem('certifications',{id:rid(),icon:"certificate",line1:"",line2:"",logo:""})}>+ Add certification</button>
-      </section>
-    ),
-    awards:({rowIdx,side})=>(
-      <section>
-        <SectionBar name="awards" label={s.sectionNames.awards||'Awards'} rowIdx={rowIdx} side={side}/>
-        <div className="title-divider"></div>
-        {(s.awards||[]).map(a=>(
-          <div key={a.id} className="mb-2">
-            <div className="font-medium text-sm editable" contentEditable suppressContentEditableWarning
-                 onBlur={e=>updateIn('awards',a.id,it=>{it.line1=e.target.textContent;return it;})}>{a.line1}</div>
-            {a.line2 && <div className="text-sm editable" contentEditable suppressContentEditableWarning
-                 onBlur={e=>updateIn('awards',a.id,it=>{it.line2=e.target.textContent;return it;})}>{a.line2}</div>}
-            <div className="mt-1 flex gap-1">
-              <button className="chip" onClick={()=>pickImage(url=>updateIn('awards',a.id,it=>{it.logo=url;return it;}))}>Logo</button>
-              {a.logo && <button className="chip" onClick={()=>updateIn('awards',a.id,it=>{it.logo="";return it;})}>Remove logo</button>}
-              <button className="chip danger" onClick={()=>removeItem('awards',a.id)}>Delete</button>
-            </div>
-          </div>
-        ))}
-        <button className="btn" onClick={()=>addItem('awards',{id:rid(),icon:"award",line1:"",line2:"",logo:""})}>+ Add award</button>
-      </section>
-    ),
-    skills:({rowIdx,side})=>(
-      <section>
-        <SectionBar name="skills" label={s.sectionNames.skills||'Skills'} rowIdx={rowIdx} side={side}/>
-        <div className="title-divider"></div>
-        {(s.skills||[]).map(g=>(
-          <div key={g.id} className="mb-3">
-            <div className="text-sm editable" style={{fontFamily:hFont,fontWeight:400}}
-                 contentEditable suppressContentEditableWarning
-                 onBlur={e=>updateIn('skills',g.id,it=>{it.group=e.target.textContent;return it;})}>{g.group}</div>
-            <div className="mt-1 flex flex-wrap gap-1" style={{fontFamily:mFont}}>
-              {(g.items||[]).map((x,i)=>(
-                <span key={i} className="px-2 py-0.5 border rounded-full text-sm editable"
-                      contentEditable suppressContentEditableWarning
-                      onBlur={e=>updateIn('skills',g.id,it=>{it.items[i]=e.target.textContent;return it;})}>{x}</span>
+            <div className="mt-1 flex flex-wrap gap-2" style={{fontFamily:metaFont}}>
+              {(g.items||[]).map((txt,j)=>(
+                <span key={j} className="tag">
+                  <CE value={txt} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.skills[i].items[j]=v; return d;})} placeholder="Skill"/>
+                </span>
               ))}
             </div>
-            <div className="mt-1 flex gap-1">
-              <button className="chip" onClick={()=>updateIn('skills',g.id,it=>{it.items=[...(it.items||[]),"New skill"];return it;})}>+ Skill</button>
-              <button className="chip danger" onClick={()=>removeItem('skills',g.id)}>Delete group</button>
+            <div className="mt-2 flex gap-1">
+              <button className="chip" onClick={()=> setS(prev=>{const d=deepClone(prev); d.skills[i].items=[...(d.skills[i].items||[]), ""]; return d;})}>+ Skill</button>
+              <button className="chip" onClick={()=> moveItem('skills',i,'up')}>↑</button>
+              <button className="chip" onClick={()=> moveItem('skills',i,'down')}>↓</button>
+              <button className="chip danger" onClick={()=> setS(prev=>{const d=deepClone(prev); d.skills.splice(i,1); return d;})}>Delete group</button>
+              <span className="ml-auto flex gap-1">
+                <button className="chip" title="Row up" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'skills', dir:'up'})}>Row↑</button>
+                <button className="chip" title="Row down" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'skills', dir:'down'})}>Row↓</button>
+                <button className="chip" title="Swap column" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'skills', dir:'swap'})}>⇆</button>
+              </span>
             </div>
           </div>
         ))}
-        <button className="btn" onClick={()=>addItem('skills',{id:rid(),group:"",items:[]})}>+ Add group</button>
+        <button className="btn" onClick={()=> setS(prev=>{const d=deepClone(prev); d.skills.push({id:rid(), group:"", items:[]}); return d;})}>+ Add group</button>
       </section>
     ),
-    languages:({rowIdx,side})=>(
-      <section>
-        <SectionBar name="languages" label={s.sectionNames.languages||'Languages'} rowIdx={rowIdx} side={side}/>
-        <div className="title-divider"></div>
-        {(s.languages||[]).map(l=>(
-          <div key={l.id} className="flex items-center justify-between text-sm mb-1" style={{fontFamily:mFont}}>
-            <span className="editable truncate" contentEditable suppressContentEditableWarning
-                  onBlur={e=>updateIn('languages',l.id,it=>{it.name=e.target.textContent;return it;})}>{l.name}</span>
-            <span className="text-xs meta ml-3 editable" contentEditable suppressContentEditableWarning
-                  onBlur={e=>updateIn('languages',l.id,it=>{it.level=e.target.textContent;return it;})}>{l.level}</span>
-            <button className="chip danger ml-2" onClick={()=>removeItem('languages',l.id)}>×</button>
+
+    languages: ({page,rowId,side}) => (
+      <section className="mb-4">
+        <SectionTitle title={s.sectionNames.languages}/>
+        {(s.languages||[]).map((l,i)=>(
+          <div key={l.id||i} className="flex items-center justify-between min-w-0 mb-2" style={{fontFamily:metaFont}}>
+            <span className="truncate">
+              <CE value={l.name||""} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.languages[i].name=v; return d;})} placeholder="Language"/>
+            </span>
+            <div className="flex items-center gap-2">
+              <div className="flex gap-0.5">
+                {Array.from({length:5}).map((_,k)=>
+                  <span key={k}
+                        className={`h-2 w-5 rounded ${k<(l.score||0)?'bg-neutral-800':'bg-neutral-300'}`}
+                        onClick={()=> setS(prev=>{const d=deepClone(prev); d.languages[i].score = k+1; return d;})}
+                        title={`Level ${k+1}/5`}/>
+                )}
+              </div>
+              <span className="text-xs text-neutral-600">
+                <CE value={l.level||""} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.languages[i].level=v; return d;})} placeholder="A1…C2"/>
+              </span>
+            </div>
+            <div className="ml-2">
+              <button className="chip" onClick={()=> moveItem('languages',i,'up')}>↑</button>
+              <button className="chip" onClick={()=> moveItem('languages',i,'down')}>↓</button>
+              <button className="chip danger" onClick={()=> setS(prev=>{const d=deepClone(prev); d.languages.splice(i,1); return d;})}>×</button>
+            </div>
           </div>
         ))}
-        <button className="btn" onClick={()=>addItem('languages',{id:rid(),name:"",level:""})}>+ Add language</button>
+        <button className="btn" onClick={()=> setS(prev=>{const d=deepClone(prev); d.languages.push({id:rid(), name:"", score:3, level:""}); return d;})}>+ Add language</button>
       </section>
     ),
-    strengths:({rowIdx,side})=>(
-      <section>
-        <SectionBar name="strengths" label={s.sectionNames.strengths||'Strengths'} rowIdx={rowIdx} side={side}/>
-        <div className="title-divider"></div>
-        {(s.strengths||[]).map(it=>(
-          <div key={it.id} className="flex items-center gap-2 mb-2">
-            <span className="circle-icon" style={{color:accent}}><Icon name={it.icon||'bulb'} className="w-4 h-4"/></span>
-            <span className="editable" contentEditable suppressContentEditableWarning
-                  onBlur={e=>updateIn('strengths',it.id,x=>{x.label=e.target.textContent;return x;})}>{it.label}</span>
-            <button className="chip danger ml-auto" onClick={()=>removeItem('strengths',it.id)}>×</button>
+
+    strengths: ({page,rowId,side}) => (
+      <section className="mb-4">
+        <SectionTitle title={s.sectionNames.strengths}/>
+        {(s.strengths||[]).map((it,i)=>(
+          <div key={it.id||i} className="flex items-center gap-2 mb-2" style={{fontFamily:bodyFont}}>
+            {it.logo ? <div className="logo"><img src={it.logo} className="w-full h-full object-cover" alt=""/></div>
+                     : (it.icon ? <span className="circle-icon"><Icon name={it.icon} className="w-4 h-4"/></span> : null)}
+            <span>
+              <CE value={it.label||""} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.strengths[i].label=v; return d;})} placeholder="Strength"/>
+            </span>
+            <div className="ml-auto flex gap-1">
+              <button className="chip" onClick={()=> moveItem('strengths',i,'up')}>↑</button>
+              <button className="chip" onClick={()=> moveItem('strengths',i,'down')}>↓</button>
+              <button className="chip" onClick={()=> pickImage(url=> setLogo('strengths',i,url))}>Logo</button>
+              {it.logo && <button className="chip" onClick={()=> setLogo('strengths',i,"")}>Remove logo</button>}
+              <button className="chip danger" onClick={()=> setS(prev=>{const d=deepClone(prev); d.strengths.splice(i,1); return d;})}>×</button>
+              <button className="chip" title="Row up" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'strengths', dir:'up'})}>Row↑</button>
+              <button className="chip" title="Row down" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'strengths', dir:'down'})}>Row↓</button>
+              <button className="chip" title="Swap column" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'strengths', dir:'swap'})}>⇆</button>
+            </div>
           </div>
         ))}
-        <button className="btn" onClick={()=>addItem('strengths',{id:rid(),icon:"bulb",label:""})}>+ Add strength</button>
+        <button className="btn" onClick={()=> setS(prev=>{const d=deepClone(prev); d.strengths.push({id:rid(), icon:"bulb", logo:"", label:""}); return d;})}>+ Add strength</button>
       </section>
     ),
-    hobbies:({rowIdx,side})=>(
-      <section>
-        <SectionBar name="hobbies" label={s.sectionNames.hobbies||'Hobbies'} rowIdx={rowIdx} side={side}/>
-        <div className="title-divider"></div>
-        {(s.hobbies||[]).map(it=>(
-          <div key={it.id} className="flex items-center gap-2 mb-2">
-            <span className="circle-icon" style={{color:accent}}><Icon name={it.icon||'camera'} className="w-4 h-4"/></span>
-            <span className="editable" contentEditable suppressContentEditableWarning
-                  onBlur={e=>updateIn('hobbies',it.id,x=>{x.label=e.target.textContent;return x;})}>{it.label}</span>
-            <button className="chip danger ml-auto" onClick={()=>removeItem('hobbies',it.id)}>×</button>
+
+    hobbies: ({page,rowId,side}) => (
+      <section className="mb-4">
+        <SectionTitle title={s.sectionNames.hobbies}/>
+        {(s.hobbies||[]).map((it,i)=>(
+          <div key={it.id||i} className="flex items-center gap-2 mb-2" style={{fontFamily:bodyFont}}>
+            {it.logo ? <div className="logo"><img src={it.logo} className="w-full h-full object-cover" alt=""/></div>
+                     : (it.icon ? <span className="circle-icon"><Icon name={it.icon} className="w-4 h-4"/></span> : null)}
+            <span>
+              <CE value={it.label||""} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.hobbies[i].label=v; return d;})} placeholder="Hobby"/>
+            </span>
+            <div className="ml-auto flex gap-1">
+              <button className="chip" onClick={()=> moveItem('hobbies',i,'up')}>↑</button>
+              <button className="chip" onClick={()=> moveItem('hobbies',i,'down')}>↓</button>
+              <button className="chip" onClick={()=> pickImage(url=> setLogo('hobbies',i,url))}>Logo</button>
+              {it.logo && <button className="chip" onClick={()=> setLogo('hobbies',i,"")}>Remove logo</button>}
+              <button className="chip danger" onClick={()=> setS(prev=>{const d=deepClone(prev); d.hobbies.splice(i,1); return d;})}>×</button>
+              <button className="chip" title="Row up" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'hobbies', dir:'up'})}>Row↑</button>
+              <button className="chip" title="Row down" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'hobbies', dir:'down'})}>Row↓</button>
+              <button className="chip" title="Swap column" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'hobbies', dir:'swap'})}>⇆</button>
+            </div>
           </div>
         ))}
-        <button className="btn" onClick={()=>addItem('hobbies',{id:rid(),icon:"camera",label:""})}>+ Add hobby</button>
+        <button className="btn" onClick={()=> setS(prev=>{const d=deepClone(prev); d.hobbies.push({id:rid(), icon:"camera", logo:"", label:""}); return d;})}>+ Add hobby</button>
       </section>
     ),
-    online:({rowIdx,side})=>(
-      <section>
-        <SectionBar name="online" label={s.sectionNames.online||'Online'} rowIdx={rowIdx} side={side}/>
-        <div className="title-divider"></div>
-        <div className="text-sm" style={{fontFamily:mFont}}>
-          <div>Website: <span className="editable" contentEditable suppressContentEditableWarning
-                         onBlur={e=>setPath('online.website.url',e.target.textContent)}>{s.online?.website?.url||""}</span></div>
-          <div>LinkedIn: <span className="editable" contentEditable suppressContentEditableWarning
-                         onBlur={e=>setPath('online.linkedin.url',e.target.textContent)}>{s.online?.linkedin?.url||""}</span></div>
-          <div>GitHub: <span className="editable" contentEditable suppressContentEditableWarning
-                         onBlur={e=>setPath('online.github.url',e.target.textContent)}>{s.online?.github?.url||""}</span></div>
+
+    online: ({page,rowId,side}) => (
+      <section className="mb-4">
+        <SectionTitle title={s.sectionNames.online}/>
+        <div className="text-sm flex flex-col gap-2" style={{fontFamily:metaFont}}>
+          <div className="flex items-center gap-2">
+            <span className="circle-icon"><Icon name="linkedin" className="w-4 h-4"/></span>
+            <CE value={s.online?.linkedin?.label||""} onChange={(v)=> setS(prev=>{const d=deepClone(prev); d.online.linkedin = d.online.linkedin || {}; d.online.linkedin.label=v; return d;})} placeholder="/in/johndoe"/>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="circle-icon"><Icon name="github" className="w-4 h-4"/></span>
+            <CE value={s.online?.github?.label||""} onChange={(v)=> setS(prev=>{const d=deepClone(prev); d.online.github = d.online.github || {}; d.online.github.label=v; return d;})} placeholder="github.com/you"/>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="circle-icon"><Icon name="globe" className="w-4 h-4"/></span>
+            <CE value={s.online?.website?.label||""} onChange={(v)=> setS(prev=>{const d=deepClone(prev); d.online.website = d.online.website || {}; d.online.website.label=v; return d;})} placeholder="yourdomain.com"/>
+          </div>
         </div>
       </section>
     ),
-    laws:({rowIdx,side})=>(
-      <section>
-        <SectionBar name="laws" label={s.sectionNames.laws||'Laws'} rowIdx={rowIdx} side={side}/>
-        <div className="title-divider"></div>
-        <div className="text-xs text-neutral-600 editable whitespace-pre-line"
-             contentEditable suppressContentEditableWarning
-             onBlur={e=>setS(prev=>{ const n=deepClone(prev); n.laws = e.target.textContent.split('\n'); const doc=withTheme(n); scheduleSave(doc); return doc; })}>
-          {(s.laws||[]).join('\n')}
+
+    laws: ({page,rowId,side}) => (
+      <section className="mb-4">
+        <SectionTitle title={s.sectionNames.laws}/>
+        <div className="text-xs text-neutral-500" style={{fontFamily:metaFont}}>
+          <div
+            className="editable"
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={(e)=> setS(prev=>({...prev, laws: [e.currentTarget.textContent||""]}))}
+          >{(s.laws||[]).join('\n')}</div>
         </div>
       </section>
     ),
   };
 
-  function renderSection(key,ctx){
-    if (key==="headerSummary") return R.headerSummary(ctx);
-    const Comp = R[key];
-    return Comp ? Comp(ctx) : null;
+  /* Toolbar & Controls */
+  function TemplatePicker(){
+    const list = (window.CV_TEMPLATES?.list?.() || [{id:'default',name:'Default'}]);
+    return (
+      <select className="input" onChange={(e)=>{
+        const t=window.CV_TEMPLATES?.get?.(e.target.value)||window.CV_TEMPLATES?.get?.('default');
+        const merged = t?.migrate ? t.migrate(s) : s;
+        if (merged) setS(merged);
+      }}>
+        {list.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}
+      </select>
+    );
   }
 
-  /* Toolbar */
-  const Toolbar = (
-    <header id="toolbar">
-      <div className="row top">
-        <div className="flex items-center gap-2">
+  return (
+    <div className="min-h-screen grid grid-cols-1 xl:grid-cols-[420px,1fr] gap-6">
+      {/* TOP BAR */}
+      <header id="toolbar" className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-neutral-200">
+        <div className="max-w-[1600px] mx-auto px-4 py-2 flex items-center gap-2">
           <a className="btn" href="./home.html">← Home</a>
-          <div className="font-semibold">CV Studio</div>
+          <div className="font-semibold tracking-tight">CV Studio</div>
           <span className="text-neutral-400">/</span>
           <div className="truncate">{docName}</div>
+          <div className="ml-auto flex items-center gap-2">
+            <button className="btn" onClick={saveNow}>Save</button>
+            <button className="btn-primary" onClick={exportPDF}>Export PDF</button>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-neutral-500">Template</span>
-          <select className="input" onChange={e=>{
-            const tpl = window.CV_TEMPLATES.get(e.target.value);
-            const data = migrateDoc(tpl.seed()); // ensure structure
-            data._theme = s._theme; // keep theme
-            setS(data); scheduleSave(data);
-          }}>
-            {window.CV_TEMPLATES.list().map(t=><option key={t.id} value={t.id}>{t.name}</option>)}
-          </select>
+        <div className="max-w-[1600px] mx-auto px-4 pb-2 grid grid-cols-1 md:grid-cols-7 gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-neutral-600">Template</span>
+            <TemplatePicker/>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-neutral-600">Font preset</span>
+            <select className="input" onChange={e=>{
+              const p = FONT_PRESETS[parseInt(e.target.value)]||FONT_PRESETS[0];
+              setHeadingFont(p.heading); setBodyFont(p.body); setMetaFont(p.meta); setHWeight(p.hWeight); setSubWeight(p.subWeight);
+            }}>
+              {FONT_PRESETS.map((p,i)=><option key={p.label} value={i}>{p.label}</option>)}
+            </select>
+          </div>
+          <div className="flex items-center gap-2"><span className="text-xs text-neutral-600">Size</span><input className="range" type="range" min="9" max="14" step="1" value={fontSize} onChange={e=>setFontSize(parseInt(e.target.value))}/></div>
+          <div className="flex items-center gap-2"><span className="text-xs text-neutral-600">Line</span><input className="range" type="range" min="1.2" max="1.8" step="0.05" value={lineHeight} onChange={e=>setLineHeight(parseFloat(e.target.value))}/></div>
+          <div className="flex items-center gap-2"><span className="text-xs text-neutral-600">Accent</span><input className="color-swatch" type="color" value={accent} onChange={e=>setAccent(e.target.value)}/></div>
+          <div className="flex items-center gap-2"><span className="text-xs text-neutral-600">Photo</span><button className="btn" onClick={()=>pickImage(url=>setS(prev=>({...prev,header:{...prev.header,avatar:url}})))}>Upload</button></div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-neutral-600">Pages</span>
+            <button className="btn" onClick={addPage}>+ Page</button>
+            {s._layout.length>1 && <button className="btn-danger" onClick={()=> deletePage(s._layout[s._layout.length-1].page)}>– Last</button>}
+          </div>
         </div>
+      </header>
 
-        <div className="flex items-center gap-2">
-          <button className="btn" onClick={()=>saveDoc(withTheme(deepClone(s)))}>Save</button>
-          <button className="btn-primary" onClick={()=>window.print()}>Export PDF</button>
-        </div>
-      </div>
-
-      <div className="row controls">
-        <div className="col-span-3 flex items-center gap-2">
-          <span className="text-xs text-neutral-500">Font preset</span>
-          <select className="input w-full" onChange={e=>{
-            const p = PRESETS[parseInt(e.target.value)]||PRESETS[0];
-            setFs(p.fs); setLh(p.lh); setHFont(p.heading); setBFont(p.body); setMFont(p.meta); setHW(p.h); setSubW(p.sub);
-            scheduleSave(withTheme(deepClone(s)));
-          }}>
-            {PRESETS.map((p,i)=><option key={p.label} value={i}>{p.label}</option>)}
-          </select>
-        </div>
-        <div className="col-span-2 flex items-center gap-2">
-          <span className="text-xs text-neutral-500">Size</span>
-          <input className="w-full" type="range" min="9" max="14" step="1" value={fs} onChange={e=>{setFs(parseInt(e.target.value)); scheduleSave(withTheme(deepClone(s)));}}/>
-          <span className="text-xs w-8 text-right">{fs}pt</span>
-        </div>
-        <div className="col-span-2 flex items-center gap-2">
-          <span className="text-xs text-neutral-500">Line</span>
-          <input className="w-full" type="range" min="1.2" max="1.8" step="0.05" value={lh} onChange={e=>{setLh(parseFloat(e.target.value)); scheduleSave(withTheme(deepClone(s)));}}/>
-        </div>
-        <div className="col-span-2 flex items-center gap-2">
-          <span className="text-xs text-neutral-500">Accent</span>
-          <input className="color" type="color" value={accent} onChange={e=>{setAccent(e.target.value); scheduleSave(withTheme(deepClone(s)));}}/>
-        </div>
-        <div className="col-span-3 flex items-center gap-2">
-          <span className="text-xs text-neutral-500">Add Section</span>
-          <select className="input" value={addSec} onChange={e=>setAddSec(e.target.value)}>
-            {["headerSummary",...ALL_SECTIONS].map(k=><option key={k} value={k}>{k}</option>)}
-          </select>
-          <select className="input" value={addRow} onChange={e=>setAddRow(parseInt(e.target.value))}>
-            <option value={-1}>Choose row…</option>
-            {s._layout.map((r,i)=><option key={r.id} value={i}>Row {i+1}</option>)}
-          </select>
-          <select className="input" value={addSide} onChange={e=>setAddSide(e.target.value)}>
-            <option value="left">Left</option>
-            <option value="right">Right</option>
-          </select>
-          <button className="btn" onClick={()=>{ if(addRow<0) return alert('Choose a row'); placeSection(addRow, addSide, addSec); }}>Add</button>
-        </div>
-      </div>
-    </header>
-  );
-
-  /* Page */
-  return (
-    <>
-      {Toolbar}
-      <main>
-        <div className="sheet" style={{'--fs':fs+'pt','--lh':lh,'--accent':accent, fontFamily:bFont}}>
-          {s._layout.map((band,idx)=>{
-            const cls = band.type==="single" ? "band single" : (band.type==="13-23"?"band c13-23":"band c23-13");
-            return (
-              <div className={cls} key={band.id}>
-                {/* Band controls */}
-                <div className="col-span-full -mt-4 -mb-2 flex items-center justify-between">
-                  <div className="text-xs text-neutral-500">Row {idx+1}</div>
-                  <div className="flex items-center gap-2">
-                    <select className="input" value={band.type} onChange={e=>setBandType(band.id,e.target.value)}>
-                      <option value="13-23">1/3 – 2/3</option>
-                      <option value="23-13">2/3 – 1/3</option>
-                      <option value="single">Single</option>
-                    </select>
-                    <button className="chip" onClick={()=>moveBand(band.id,'up')}>↑ Row</button>
-                    <button className="chip" onClick={()=>moveBand(band.id,'down')}>↓ Row</button>
-                    <button className="chip btn-danger" onClick={()=>removeBand(band.id)}>Remove Row</button>
-                    <button className="chip" onClick={()=>addBand(band.type)}>+ Row</button>
-                  </div>
+      {/* LEFT: Section name editor & quick add */}
+      <aside id="leftPane" className="px-4">
+        <div className="sticky top-[110px]">
+          <div className="sidebar-scroll">
+            <div className="card p-4 mb-4">
+              <div className="font-semibold mb-2">Section labels</div>
+              {Object.keys(s.sectionNames).map(k=>(
+                <div key={k} className="text-sm grid grid-cols-[120px,1fr] items-center gap-2 mb-1">
+                  <div className="text-neutral-500">{k}</div>
+                  <input className="input" value={s.sectionNames[k]} onChange={(e)=> setS(prev=>{const d=deepClone(prev); d.sectionNames[k]=e.target.value; return d;})}/>
                 </div>
+              ))}
+            </div>
 
-                {/* Left column */}
-                <div className="col">
-                  {band.left.map(key=>(
-                    <div key={key}>{renderSection(key,{rowIdx:idx,side:'left'})}</div>
+            <div className="card p-4 mb-4">
+              <div className="font-semibold mb-2">Add rows / layout</div>
+              {s._layout.map(pg=>(
+                <div key={pg.id} className="mb-3">
+                  <div className="text-sm font-medium">Page {pg.page}</div>
+                  {pg.rows.map(r=>(
+                    <div key={r.id} className="flex items-center gap-2 mt-1">
+                      <select className="input" value={r.type} onChange={(e)=> changeRowType(pg.page, r.id, e.target.value)}>
+                        <option value="single">Single</option>
+                        <option value="13-23">1/3 – 2/3</option>
+                        <option value="23-13">2/3 – 1/3</option>
+                      </select>
+                      <button className="btn" onClick={()=> addRow(pg.page, r.type, r.id)}>+ below</button>
+                      {pg.rows.length>1 && <button className="btn-danger" onClick={()=> deleteRow(pg.page, r.id)}>Delete row</button>}
+                    </div>
                   ))}
                 </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </aside>
 
-                {/* Right column */}
-                {band.type!=="single" && (
-                  <div className="col">
-                    {band.right.map(key=>(
-                      <div key={key}>{renderSection(key,{rowIdx:idx,side:'right'})}</div>
+      {/* RIGHT: A4 Pages */}
+      <section className="px-4">
+        <div className="flex flex-col items-center gap-6 py-4">
+          {(s._layout || []).sort((a,b)=>a.page-b.page).map((pg)=>(
+            <div key={pg.id} className="sheet card p-10" style={{lineHeight, fontFamily:bodyFont, fontSize:`${fontSize}pt`}}>
+              {/* Rows */}
+              {(pg.rows || []).map((row)=>(
+                <div key={row.id} className={`grid-band ${row.type==='single'?'band-single':row.type==='13-23'?'band-13-23':'band-23-13'}`} style={{marginBottom:"18px"}}>
+                  {/* LEFT stack */}
+                  <div>
+                    {(row.left||[]).map((secKey, idx)=>(
+                      <div key={secKey+'-'+idx}>
+                        {R[secKey] ? R[secKey]({page:pg.page, rowId:row.id, side:'left'}) : <div className="text-sm text-red-600">Unknown section: {secKey}</div>}
+                      </div>
                     ))}
                   </div>
-                )}
-              </div>
-            );
-          })}
+                  {/* RIGHT stack (if two-col row) */}
+                  {row.type!=='single' && (
+                    <div>
+                      {(row.right||[]).map((secKey, idx)=>(
+                        <div key={secKey+'-'+idx}>
+                          {R[secKey] ? R[secKey]({page:pg.page, rowId:row.id, side:'right'}) : <div className="text-sm text-red-600">Unknown section: {secKey}</div>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ))}
         </div>
-      </main>
-    </>
+      </section>
+    </div>
   );
 }
 
-/* Safe mount AFTER DOM ready */
-(function mount(){
-  function start(){
-    const root = document.getElementById('root');
-    if(!root){ console.error('No #root element'); return; }
-    ReactDOM.createRoot(root).render(<App/>);
+/* Mount */
+function mountApp(){
+  try{
+    const rootEl = document.getElementById('root');
+    if(!rootEl){ console.error('No #root element'); return; }
+    ReactDOM.createRoot(rootEl).render(<App/>);
+  }catch(e){
+    console.error('Editor bootstrap failed:', e);
+    const r=document.getElementById('root');
+    if(r) r.innerHTML='<div style="padding:16px;color:#b91c1c;">Editor failed. Check the console.</div>';
   }
-  if (document.readyState==='loading') {
-    document.addEventListener('DOMContentLoaded', start, {once:true});
-  } else {
-    start();
-  }
-})();
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mountApp);
+else mountApp();
 </script>
 </body>
 </html>
