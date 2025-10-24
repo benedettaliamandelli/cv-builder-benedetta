@@ -78,7 +78,7 @@
 /* =========================
    Utilities + setup
    ========================= */
-const {useState,useEffect,useMemo,useCallback,useRef} = React;
+const {useState,useEffect,useCallback,useRef} = React;
 
 const rid=()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
 const param = (k, d=null)=> { try{ return new URL(location.href).searchParams.get(k) ?? d; }catch{return d;} };
@@ -116,39 +116,11 @@ const FONT_PRESETS = [
 /* =========================
    Migration & Safe Seed
    ========================= */
-function safeTemplateSeed(){
-  const reg = window.CV_TEMPLATES;
-  try{
-    const tpl = reg?.get?.('default');
-    if (tpl?.seed) return tpl.seed();
-  }catch(e){}
-  // tiny safe fallback
-  return {
-    header:{ name:"JOHN DOE", role:"", email:"", phone:"", residence:"", birthdate:"", avatar:"" },
-    summary:"Click to edit your profile summary.",
-    sectionNames:{ experience:"Experience", education:"Education", volunteering:"Volunteering", projects:"Projects", certifications:"Certifications", awards:"Awards", skills:"Skills", languages:"Languages", strengths:"Strengths", hobbies:"Hobbies", online:"Online", laws:"Laws" },
-    experience:[], education:[], volunteering:[], projects:[], certifications:[], awards:[], skills:[], languages:[], strengths:[], hobbies:[],
-    online:{}, laws:["I authorize the processing of personal data in accordance with GDPR 2016/679."],
-    /* Layout: array of pages, each page has rows; each row has type & left/right stacks of section keys */
-    _layout: [{
-      id: rid(),
-      page: 1,
-      rows: [
-        { id: rid(), type:"single", left:["headerSummary"], right:[] },
-        { id: rid(), type:"23-13", left:["experience"], right:["skills","languages","online","laws"] },
-        { id: rid(), type:"13-23", left:["certifications","awards","strengths","hobbies"], right:["education","volunteering","projects"] }
-      ]
-    }],
-    _theme:{ accent:"#2563eb", fontSize:11, lineHeight:1.45, headingFont:FONT_PRESETS[0].heading, bodyFont:FONT_PRESETS[0].body, metaFont:FONT_PRESETS[0].meta, hWeight:600, subWeight:500 }
-  };
-}
-
-/* Normalize any raw doc to the full shape we expect */
 function migrateDoc(raw){
   const d = deepClone(raw) || {};
   // header
   d.header = d.header || { name:"JOHN DOE", role:"", email:"", phone:"", residence:"", birthdate:"", avatar:"" };
-  d.summary = (typeof d.summary === 'string' ? d.summary : "");
+  d.summary = (typeof d.summary === 'string' ? d.summary : "Click to edit your profile summary.");
   d.sectionNames = d.sectionNames || {
     experience:"Experience", education:"Education", volunteering:"Volunteering", projects:"Projects",
     certifications:"Certifications", awards:"Awards", skills:"Skills", languages:"Languages",
@@ -160,7 +132,7 @@ function migrateDoc(raw){
   arrKeys.forEach(k=>{ if(!Array.isArray(d[k])) d[k]=[]; });
 
   d.online = d.online || {};
-  d.laws = Array.isArray(d.laws) ? d.laws : (d.laws ? [String(d.laws)] : []);
+  d.laws = Array.isArray(d.laws) ? d.laws : (d.laws ? [String(d.laws)] : ["I authorize the processing of personal data in accordance with GDPR 2016/679."]);
 
   // theme
   d._theme = d._theme || {};
@@ -180,7 +152,8 @@ function migrateDoc(raw){
       page: 1,
       rows: [
         { id: rid(), type:"single", left:["headerSummary"], right:[] },
-        { id: rid(), type:"23-13", left:["experience"], right:["skills","languages","online","laws"] }
+        { id: rid(), type:"23-13", left:["experience"], right:["skills","languages","online","laws"] },
+        { id: rid(), type:"13-23", left:["certifications","awards","strengths","hobbies"], right:["education","volunteering","projects"] }
       ]
     }];
   } else {
@@ -192,7 +165,7 @@ function migrateDoc(raw){
         type: (["single","13-23","23-13"].includes(r?.type) ? r.type : "single"),
         left: Array.isArray(r?.left) ? r.left.filter(Boolean) : [],
         right: Array.isArray(r?.right) ? r.right.filter(Boolean) : []
-      })) : []
+      })) : [{ id:rid(), type:"single", left:[], right:[] }]
     }));
   }
 
@@ -242,33 +215,31 @@ function App(){
     }
   })();},[]);
 
-  /* Push theme into CSS custom prop for icon bubbles, etc. */
-  useEffect(()=>{
-    document.documentElement.style.setProperty('--accent', accent);
-  },[accent]);
+  /* Push theme into CSS custom prop */
+  useEffect(()=>{ document.documentElement.style.setProperty('--accent', accent); },[accent]);
 
-  /* Generic updaters */
-  const setThemeIntoDoc = useCallback((doc)=>({
+  /* Attach theme onto doc when saving/printing */
+  const withTheme = useCallback((doc)=>({
     ...doc,
     _theme:{ accent, fontSize, lineHeight, headingFont, bodyFont, metaFont, hWeight, subWeight }
   }),[accent,fontSize,lineHeight,headingFont,bodyFont,metaFont,hWeight,subWeight]);
 
   async function saveNow(){
-    const payload = setThemeIntoDoc(s);
-    await saveDoc(payload);
+    const payload = withTheme(s);
+    await saveDoc?.(payload);
     alert('Saved');
   }
 
   function exportPDF(){
-    const payload = setThemeIntoDoc(s);
-    saveDoc(payload).then(()=>{
+    const payload = withTheme(s);
+    saveDoc?.(payload).then(()=>{
       document.body.classList.add('print-mode');
       window.print();
       setTimeout(()=>document.body.classList.remove('print-mode'), 300);
     });
   }
 
-  /* Inline content editing (contentEditable) */
+  /* Inline content editing */
   function CE({value, onChange, className="", style={}, placeholder=""}){
     const ref = useRef(null);
     return (
@@ -310,11 +281,9 @@ function App(){
       if(dir==='up' || dir==='down'){
         const j = dir==='up'? i-1 : i+1;
         if(j<0 || j>=rows.length) return prev;
-        // try to move into same side of adjacent row
         removeFromRow(rows[i], key, fromSide);
         addToRow(rows[j], key, fromSide, dir==='up'?'end':'start');
       }else if(dir==='swap'){
-        // left <-> right in same row
         removeFromRow(rows[i], key, fromSide);
         addToRow(rows[i], key, fromSide==='left'?'right':'left', 'end');
       }
@@ -374,13 +343,12 @@ function App(){
       const draft=deepClone(prev);
       if(draft._layout.length<=1) return prev;
       draft._layout = draft._layout.filter(p=>p.page!==pageNum);
-      // reindex pages
       draft._layout.sort((a,b)=>a.page-b.page).forEach((p,i)=> p.page=i+1);
       return draft;
     });
   }
 
-  /* Item-level reordering inside a section array (experience, education, etc.) */
+  /* Item-level reordering inside a section array */
   function moveItem(arrKey, idx, dir){
     setS(prev=>{
       const doc = deepClone(prev);
@@ -405,7 +373,7 @@ function App(){
     });
   }
 
-  /* Title component (section headings with line) */
+  /* Title component */
   function SectionTitle({title}){
     return (
       <div className="mb-2">
@@ -430,10 +398,7 @@ function App(){
             <div className="text-sm text-neutral-800 mt-2" style={{fontFamily:metaFont}}>
               <CE
                 value={[s.header.email,s.header.phone,s.header.residence,s.header.birthdate].filter(Boolean).join(" • ")}
-                onChange={(v)=>{
-                  // You can parse back if you want; simplest keep whole line as one meta field
-                  setS(prev=>({...prev, header:{...prev.header, metaLine:v}}));
-                }}
+                onChange={(v)=> setS(prev=>({...prev, header:{...prev.header, metaLine:v}}))}
                 placeholder="email • phone • city • birth"
               />
             </div>
@@ -502,7 +467,6 @@ function App(){
                     {logo && <button className="chip" onClick={()=> setLogo('experience',i,"")}>Remove logo</button>}
                     <button className="chip" onClick={()=> setS(prev=>{const d=deepClone(prev); d.experience[i].bullets=[...(d.experience[i].bullets||[]), ""]; return d;})}>+ Bullet</button>
                     <button className="chip danger" onClick={()=> setS(prev=>{const d=deepClone(prev); d.experience.splice(i,1); return d;})}>Delete</button>
-                    {/* move section within layout */}
                     <span className="ml-auto flex gap-1">
                       <button className="chip" title="Row up" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'experience', dir:'up'})}>Row↑</button>
                       <button className="chip" title="Row down" onClick={()=> moveSection({fromPage:page, fromRowId:rowId, fromSide:side, key:'experience', dir:'down'})}>Row↓</button>
@@ -529,7 +493,7 @@ function App(){
               </div>
               <div className="text-sm meta">
                 <CE value={ed.period} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.education[i].period=v; return d;})} placeholder="YYYY – YYYY"/>
-                { "  |  GPA " }
+                { (ed.gpa ? "  |  GPA " : "") }
                 <CE value={ed.gpa||""} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.education[i].gpa=v; return d;})} placeholder="GPA"/>
               </div>
             </div>
@@ -707,9 +671,9 @@ function App(){
               <div className="text-neutral-900" style={{fontWeight:600}}>
                 <CE value={a.line1||""} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.awards[i].line1=v; return d;})} placeholder="Award title"/>
               </div>
-              {true && <div className="text-neutral-900">
+              <div className="text-neutral-900">
                 <CE value={a.line2||""} onChange={(v)=>setS(prev=>{const d=deepClone(prev); d.awards[i].line2=v; return d;})} placeholder="Issuer / Notes"/>
-              </div>}
+              </div>
               <div className="mt-2 flex gap-1">
                 <button className="chip" onClick={()=> moveItem('awards',i,'up')}>↑</button>
                 <button className="chip" onClick={()=> moveItem('awards',i,'down')}>↓</button>
@@ -977,10 +941,8 @@ function App(){
         <div className="flex flex-col items-center gap-6 py-4">
           {(s._layout || []).sort((a,b)=>a.page-b.page).map((pg)=>(
             <div key={pg.id} className="sheet card p-10" style={{lineHeight, fontFamily:bodyFont, fontSize:`${fontSize}pt`}}>
-              {/* Rows */}
               {(pg.rows || []).map((row)=>(
                 <div key={row.id} className={`grid-band ${row.type==='single'?'band-single':row.type==='13-23'?'band-13-23':'band-23-13'}`} style={{marginBottom:"18px"}}>
-                  {/* LEFT stack */}
                   <div>
                     {(row.left||[]).map((secKey, idx)=>(
                       <div key={secKey+'-'+idx}>
@@ -988,7 +950,6 @@ function App(){
                       </div>
                     ))}
                   </div>
-                  {/* RIGHT stack (if two-col row) */}
                   {row.type!=='single' && (
                     <div>
                       {(row.right||[]).map((secKey, idx)=>(
