@@ -9,48 +9,49 @@
 <link rel="stylesheet" href="./fonts/fonts.css"/>
 
 <style>
-  :root{
+  :root {
     --accent:#2563eb;
     --rule:#e5e7eb;
-    --sheet-w:210mm;           /* A4 width */
-    --sheet-h:297mm;           /* A4 height */
+    --sheet-w:210mm;
+    --sheet-h:297mm;
     --toolbar-h:56px;
     --sidebar-w:360px;
     --bg:#f7f7fb;
   }
-
-  /* --- App chrome --- */
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:#111827;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial}
-
-  #toolbar{
-    position:fixed; inset:0 0 auto 0; height:var(--toolbar-h); z-index:50;
-    display:flex; align-items:center; gap:8px; padding:10px 14px;
-    background:#fffffff2; backdrop-filter:saturate(120%) blur(6px);
+  *{box-sizing:border-box;}
+  body {
+    margin:0;
+    background:var(--bg);
+    color:#111827;
+    font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial;
+  }
+  #toolbar {
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    display:flex;align-items:center;gap:8px;
+    padding:10px 14px;background:#fffffff2;
+    backdrop-filter:saturate(120%) blur(6px);
     border-bottom:1px solid var(--rule);
   }
-  .btn{border:1px solid var(--rule);background:white;border-radius:8px;padding:6px 10px;font-size:14px;cursor:pointer}
-  .btn:hover{background:#f3f4f6}
-  .btn-primary{background:var(--accent);border-color:var(--accent);color:white}
-  .btn-primary:hover{filter:brightness(.95)}
-  .btn-danger{background:#fee2e2;border-color:#fecaca;color:#991b1b}
-  .field{border:1px solid var(--rule);border-radius:8px;padding:6px 8px;font-size:14px}
+  .btn{border:1px solid var(--rule);background:white;border-radius:8px;padding:6px 10px;font-size:14px;cursor:pointer;}
+  .btn:hover{background:#f3f4f6;}
+  .btn-primary{background:var(--accent);border-color:var(--accent);color:white;}
+  .btn-primary:hover{filter:brightness(.95);}
+  .btn-danger{background:#fee2e2;border-color:#fecaca;color:#991b1b;}
+  .field{border:1px solid var(--rule);border-radius:8px;padding:6px 8px;font-size:14px;}
 
-  /* --- Two-pane layout --- */
-  .wrap{
+  .wrap {
     display:grid;
     grid-template-columns: var(--sidebar-w) 1fr;
     height:calc(100vh - var(--toolbar-h));
     margin-top:var(--toolbar-h);
   }
-  aside{
+  aside {
     border-right:1px solid var(--rule);
     background:#fff;
     overflow:auto;
     padding:14px;
   }
-  .preview{
-    position:relative;
+  .preview {
     overflow:auto;
     padding:24px;
     display:flex;
@@ -58,85 +59,62 @@
     align-items:flex-start;
   }
 
-  /* --- A4 pages --- */
-  .sheets{display:flex;flex-direction:column;gap:24px;align-items:center;width:100%}
-  .sheet{
-    width:var(--sheet-w); min-height:var(--sheet-h);
-    background:#fff; box-shadow:0 10px 30px rgba(0,0,0,.08);
+  .sheets {
+    display:flex;
+    flex-direction:column;
+    gap:24px;
+    align-items:center;
+    width:100%;
+  }
+  .sheet {
+    width:var(--sheet-w);
+    min-height:var(--sheet-h);
+    background:white;
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
     padding:18mm 16mm;
-    display:flex; flex-direction:column; gap:14px;
-    transform-origin:top center;  /* we will scale in JS */
+    display:flex;
+    flex-direction:column;
+    gap:14px;
   }
-
-  /* Content blocks */
-  .grid-band{display:grid;gap:18px}
-  .band-single{grid-template-columns:1fr}
-  .band-13-23{grid-template-columns:1fr 2fr}
-  .band-23-13{grid-template-columns:2fr 1fr}
-
-  .section{break-inside:avoid}
-  .sect-title{
-    text-transform:uppercase; letter-spacing:.08em; font-size:11px; font-weight:600;
-    color:var(--accent); border-bottom:1px solid var(--rule); padding-bottom:3px; margin-bottom:6px;
+  .sect-title {
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    font-size:11px;
+    font-weight:600;
+    color:var(--accent);
+    border-bottom:1px solid var(--rule);
+    padding-bottom:3px;
+    margin-bottom:6px;
   }
-  .editable[contenteditable="true"]{outline:0}
-  .editable[contenteditable="true"]:focus{box-shadow:inset 0 0 0 2px rgba(37,99,235,.25); border-radius:4px}
-  .avatar{width:96px;height:96px;border-radius:999px;overflow:hidden;border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;background:#f3f4f6;color:#94a3b8;font-size:11px}
-  .logo{width:28px;height:28px;border-radius:999px;overflow:hidden;border:1px solid var(--rule);flex:0 0 auto}
-  .chip{border:1px solid var(--rule);background:white;border-radius:6px;padding:2px 6px;font-size:12px;cursor:pointer}
-  .chip.danger{background:#fee2e2;border-color:#fecaca;color:#991b1b}
-  .row-ctrl{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .editable[contenteditable="true"]{outline:0;}
+  .editable[contenteditable="true"]:focus{box-shadow:inset 0 0 0 2px rgba(37,99,235,.25);border-radius:4px;}
 
-  /* --- Print only the sheets --- */
   @media print{
-    #toolbar, aside{display:none!important}
-    body{background:white!important}
-    .preview{padding:0!important}
-    .sheet{box-shadow:none!important; transform:none!important; break-after:page}
-    @page{size:A4;margin:14mm}
+    #toolbar,aside{display:none!important;}
+    body{background:white!important;}
+    .preview{padding:0!important;}
+    .sheet{box-shadow:none!important;break-after:page;}
+    @page{size:A4;margin:14mm;}
   }
 </style>
 
-<!-- React + Babel -->
+<!-- React -->
 <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-<!-- Optional Firebase (safe if missing) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
-<!-- Storage fallbacks -->
-<script src="./auth.firebase.js"></script>
-<script src="./storage.firebase.js"></script>
+<!-- Storage fallback -->
 <script src="./storage.local.js"></script>
-
-<!-- Templates (optional) -->
-<script src="./templates/default.js?v=20251024"></script>
-<script src="./templates/minimal.js?v=20251024"></script>
 </head>
 <body>
-  <!-- Toolbar -->
   <div id="toolbar">
     <a class="btn" href="./home.html">← Home</a>
     <button class="btn" id="addPageBtn">+ Page</button>
-    <button class="btn" id="addRowBtn">+ Row</button>
-    <select id="rowTypePick" class="field" style="max-width:180px">
-      <option value="single">Single</option>
-      <option value="13-23">1/3 – 2/3</option>
-      <option value="23-13">2/3 – 1/3</option>
-    </select>
-    <div style="width:1px;height:20px;background:var(--rule);margin:0 6px"></div>
-    <label class="btn" for="photoUpload">📷 Photo</label>
-    <input type="file" id="photoUpload" accept="image/*" style="display:none"/>
-    <div style="width:1px;height:20px;background:var(--rule);margin:0 6px"></div>
     <button class="btn" id="saveBtn">💾 Save</button>
     <button class="btn-primary" id="printBtn">⬇️ Export PDF</button>
     <span style="margin-left:auto;font-weight:600">CV Studio Editor</span>
   </div>
 
-  <!-- Two panes -->
   <div class="wrap">
     <aside>
       <div style="font-weight:600;margin-bottom:8px">Layout & Sections</div>
@@ -148,667 +126,71 @@
   </div>
 
 <script type="text/babel">
-const {useState,useEffect,useRef} = React;
-
-/* ---------- helpers ---------- */
-const rid=()=>Math.random().toString(36).slice(2)+Date.now().toString(36);
-const param=(k,d=null)=>{try{return new URL(location.href).searchParams.get(k)??d;}catch{return d;}};
-const uid = param('uid', null);
-const docName = param('doc','Default');
-
-const Storage = {
-  async load(){ try{ if(window.StorageAPI?.load){return await window.StorageAPI.load(docName, uid);} }catch{} 
-    const raw=localStorage.getItem('cvdoc:'+docName); return raw?JSON.parse(raw):null; },
-  async save(data){ try{ if(window.StorageAPI?.save){return await window.StorageAPI.save(docName,data,uid);} }catch{}
-    localStorage.setItem('cvdoc:'+docName, JSON.stringify(data)); }
-};
+const { useState, useEffect } = React;
+const rid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
 const SAFE_DOC = {
-  header:{name:"JOHN DOE",role:"Data Scientist / Biomedical Engineer",email:"john.doe@example.com",phone:"+39 333 0000000",residence:"Milan, Italy",birthdate:"01/01/1995",avatar:""},
-  summary:"Biomedical Engineer and Data Scientist passionate about AI-powered healthcare innovation.",
-  sectionNames:{
-    experience:"Experience", education:"Education", volunteering:"Volunteering", projects:"Projects",
-    certifications:"Certifications", awards:"Awards", skills:"Skills", languages:"Languages",
-    strengths:"Strengths", hobbies:"Hobbies", online:"Online", laws:"Laws"
-  },
-  experience:[], education:[], volunteering:[], projects:[], certifications:[], awards:[],
-  skills:[], languages:[], strengths:[], hobbies:[], online:{}, laws:["I authorize the processing of personal data in accordance with GDPR 2016/679."],
-  _theme:{accent:"#2563eb", fontSize:11, line:1.45},
-  _layout:[{ id:rid(), page:1,
-    rows:[
-      {id:rid(),type:"single",left:["headerSummary"],right:[]},
-      {id:rid(),type:"23-13",left:["experience"],right:["skills","languages","online","laws"]}
-    ]
-  }]
+  header:{name:"JOHN DOE",role:"Data Scientist",summary:"AI-focused engineer."},
+  _layout:[{id:rid(),page:1,rows:[{id:rid(),type:"single",left:["headerSummary"],right:[]}]}],
 };
 
-const SECTIONS_ORDER = [
-  "headerSummary","experience","education","volunteering","projects",
-  "certifications","awards","skills","languages","strengths","hobbies","online","laws"
-];
-
-/* ---------- App ---------- */
 function App(){
   const [doc,setDoc]=useState(SAFE_DOC);
-  const [fontSize,setFontSize]=useState(11);
-  const [line,setLine]=useState(1.45);
-  const [accent,setAccent]=useState("#2563eb");
-  const sheetsRef=useRef(null);      // container
-  const scaleRef=useRef(1);          // current scale
 
-  useEffect(()=>{(async()=>{
-    const loaded = await Storage.load();
-    const d = migrate(loaded||{});
-    setDoc(d); setFontSize(d._theme.fontSize||11); setLine(d._theme.line||1.45); setAccent(d._theme.accent||"#2563eb");
-    document.documentElement.style.setProperty('--accent', d._theme.accent||"#2563eb");
-  })();},[]);
+  const CE = ({value,onChange,className="",style={}})=>(
+    <div
+      className={`editable ${className}`}
+      style={style}
+      contentEditable
+      suppressContentEditableWarning
+      onBlur={(e)=>onChange(e.currentTarget.textContent)}>
+      {value}
+    </div>
+  );
 
-  // Auto-scale A4 to fit preview column
-  useEffect(()=>{
-    function fit(){
-      const cont = sheetsRef.current?.parentElement; if(!cont) return;
-      const pad = 48; // side padding
-      const maxW = cont.clientWidth - pad;
-      // A4 width in px at 96dpi ~ 794px; but we can measure a sheet element:
-      const sheet = sheetsRef.current.querySelector('.sheet');
-      if(!sheet){ return; }
-      const w = sheet.getBoundingClientRect().width; // current width (when scale=1)
-      const s = Math.min(1, maxW / w);
-      sheet.style.transform = `scale(${s})`;
-      // set same scale to all pages
-      sheetsRef.current.querySelectorAll('.sheet').forEach(el=>{
-        el.style.transform = `scale(${s})`;
-        el.style.marginBottom = `${24 * s}px`;
-      });
-      scaleRef.current = s;
-    }
-    const ro = new ResizeObserver(fit);
-    const node = document.querySelector('.preview');
-    if(node){ ro.observe(node); }
-    fit();
-    return ()=> ro.disconnect();
-  },[doc]);
-
-  function migrate(raw){
-    const d = JSON.parse(JSON.stringify(SAFE_DOC));
-    Object.assign(d.header, raw?.header||{});
-    d.summary = raw?.summary ?? d.summary;
-    d.sectionNames = {...d.sectionNames, ...(raw?.sectionNames||{})};
-    for (const k of ["experience","education","volunteering","projects","certifications","awards","skills","languages","strengths","hobbies"]){
-      if (Array.isArray(raw?.[k])) d[k]=raw[k];
-    }
-    d.online = raw?.online || d.online;
-    d.laws = Array.isArray(raw?.laws)? raw.laws : d.laws;
-    d._theme = {...d._theme, ...(raw?._theme||{})};
-    if (Array.isArray(raw?._layout) && raw._layout.length){
-      d._layout = raw._layout.map(p=>({
-        id:p.id||rid(), page: typeof p.page==='number'?p.page:1,
-        rows: Array.isArray(p.rows)? p.rows.map(r=>({
-          id:r.id||rid(),
-          type:(["single","13-23","23-13"].includes(r.type)?r.type:"single"),
-          left:Array.isArray(r.left)? r.left.filter(Boolean):[],
-          right:Array.isArray(r.right)? r.right.filter(Boolean):[],
-        })):[]
-      }));
-    }
-    return d;
-  }
-
-  function withTheme(d){ const n=JSON.parse(JSON.stringify(d)); n._theme={accent,fontSize,line}; return n; }
-  async function save(){ await Storage.save(withTheme(doc)); alert("Saved!"); }
-  function print(){ window.print(); }
-  function uploadPhoto(file){
-    if(!file) return;
-    const r=new FileReader(); r.onload=()=> setDoc(prev=>({...prev,header:{...prev.header,avatar:String(r.result)}}));
-    r.readAsDataURL(file);
-  }
-
-  /* layout ops */
+  function save(){localStorage.setItem("cvdoc:Default",JSON.stringify(doc));alert("Saved!");}
+  function print(){window.print();}
   function addPage(){
     setDoc(prev=>{
       const d=JSON.parse(JSON.stringify(prev));
-      const max = Math.max(...d._layout.map(p=>p.page));
-      d._layout.push({id:rid(),page:max+1,rows:[{id:rid(),type:"single",left:[],right:[]} ]});
-      return d;
-    });
-  }
-  function addRow(type="single"){
-    setDoc(prev=>{
-      const d=JSON.parse(JSON.stringify(prev));
-      const p=d._layout[d._layout.length-1];
-      p.rows.push({id:rid(),type,left:[],right:[]});
-      return d;
-    });
-  }
-  function changeRowType(pageId,rowId,type){
-    setDoc(prev=>{
-      const d=JSON.parse(JSON.stringify(prev));
-      const pg=d._layout.find(p=>p.id===pageId); if(!pg) return prev;
-      const r=pg.rows.find(x=>x.id===rowId); if(!r) return prev;
-      r.type=type; return d;
-    });
-  }
-  function deleteRow(pageId,rowId){
-    setDoc(prev=>{
-      const d=JSON.parse(JSON.stringify(prev));
-      const pg=d._layout.find(p=>p.id===pageId); if(!pg||pg.rows.length<=1) return prev;
-      pg.rows = pg.rows.filter(r=>r.id!==rowId);
-      return d;
-    });
-  }
-  function moveSection({pageId,rowId,side,key,dir}){
-    setDoc(prev=>{
-      const d=JSON.parse(JSON.stringify(prev));
-      const pg=d._layout.find(p=>p.id===pageId); if(!pg) return prev;
-      const rows=pg.rows; const i=rows.findIndex(r=>r.id===rowId); if(i<0) return prev;
-      const remove=(r)=>{const arr=(side==="left"?r.left:r.right); const idx=arr.indexOf(key); if(idx>=0) arr.splice(idx,1);}
-      const add=(r,sideTo,pos="end")=>{const arr=(sideTo==="left"?r.left:r.right); pos==="start"?arr.unshift(key):arr.push(key);}
-      if (dir==="swap"){ remove(rows[i]); add(rows[i], side==="left"?"right":"left","end"); }
-      else{ const j=dir==="up"?i-1:i+1; if(j<0||j>=rows.length) return prev; remove(rows[i]); add(rows[j],side, dir==="up"?"end":"start"); }
+      d._layout.push({id:rid(),page:d._layout.length+1,rows:[{id:rid(),type:"single",left:["headerSummary"],right:[]} ]});
       return d;
     });
   }
 
-  /* array helpers */
-  function mutSet(listKey, idx, field, value){
-    setDoc(prev=>{
-      const d=JSON.parse(JSON.stringify(prev));
-      d[listKey]=d[listKey]||[]; d[listKey][idx]??={};
-      d[listKey][idx][field]=value; return d;
-    });
-  }
-  function mutBullet(listKey, idx, bIdx, value){
-    setDoc(prev=>{
-      const d=JSON.parse(JSON.stringify(prev));
-      d[listKey][idx].bullets=d[listKey][idx].bullets||[];
-      d[listKey][idx].bullets[bIdx]=value; return d;
-    });
-  }
-  function addBullet(listKey, idx){
-    setDoc(prev=>{const d=JSON.parse(JSON.stringify(prev)); d[listKey][idx].bullets=d[listKey][idx].bullets||[]; d[listKey][idx].bullets.push(""); return d;});
-  }
-  function addItem(listKey, item){ setDoc(prev=>{const d=JSON.parse(JSON.stringify(prev)); d[listKey]=d[listKey]||[]; d[listKey].push(item); return d;}); }
-  function removeItem(listKey, idx){ setDoc(prev=>{const d=JSON.parse(JSON.stringify(prev)); d[listKey].splice(idx,1); return d;}); }
-  function reorderItem(listKey, idx, delta){
-    setDoc(prev=>{
-      const d=JSON.parse(JSON.stringify(prev));
-      const arr=d[listKey]||[]; const j=idx+delta; if(j<0||j>=arr.length) return prev;
-      [arr[idx],arr[j]]=[arr[j],arr[idx]]; return d;
-    });
-  }
-  function pickLogo(listKey, idx){
-    const i=document.createElement('input'); i.type='file'; i.accept='image/*';
-    i.onchange=e=>{
-      const f=e.target.files?.[0]; if(!f) return;
-      const r=new FileReader(); r.onload=()=> setDoc(prev=>{const d=JSON.parse(JSON.stringify(prev)); d[listKey][idx].logo=String(r.result); return d;});
-      r.readAsDataURL(f);
-    };
-    i.click();
-  }
+  useEffect(()=>{
+    document.getElementById("saveBtn").onclick=save;
+    document.getElementById("printBtn").onclick=print;
+    document.getElementById("addPageBtn").onclick=addPage;
+  },[doc]);
 
-  /* inline editable */
-  const CE = ({value,onCommit, className="",style={}, tag="div", placeholder=""})=>{
-    const ref=useRef(null);
-    useEffect(()=>{ if(ref.current && ref.current.innerText!==value){ ref.current.innerText=value||""; } },[value]);
-    const Tag = tag;
-    return <Tag className={`editable ${className}`} style={style}
-      contentEditable suppressContentEditableWarning
-      onBlur={(e)=>onCommit?.(e.currentTarget.innerText)}
-      onKeyDown={(e)=>{ if(e.key==="Enter"){ e.preventDefault(); e.currentTarget.blur(); } }}
-      ref={ref}>{value||placeholder}</Tag>;
-  };
+  const Header = () => (
+    <div style={{borderBottom:"1px solid var(--rule)",paddingBottom:"8px"}}>
+      <CE value={doc.header.name} onChange={(v)=>setDoc(p=>({...p,header:{...p.header,name:v}}))}
+          style={{fontSize:"22pt",fontWeight:700,color:"var(--accent)"}}/>
+      <CE value={doc.header.role} onChange={(v)=>setDoc(p=>({...p,header:{...p.header,role:v}}))}
+          style={{fontSize:"12pt",fontWeight:500,color:"#374151"}}/>
+      <CE value={doc.header.summary} onChange={(v)=>setDoc(p=>({...p,header:{...p.header,summary:v}}))}
+          style={{marginTop:"6px",fontSize:"10pt",color:"#111"}}/>
+    </div>
+  );
 
-  /* sections */
-  const R = {
-    headerSummary: ()=>{
-      return (
-        <div className="section" style={{borderBottom:`1px solid var(--rule)`,paddingBottom:8}}>
-          <div style={{display:"flex",gap:"12px",alignItems:"flex-start"}}>
-            <div style={{flex:1,minWidth:0}}>
-              <CE value={doc.header.name} onCommit={(v)=>setDoc(prev=>({...prev,header:{...prev.header,name:v}}))}
-                  style={{fontSize:"22pt",fontWeight:800,color:accent}}/>
-              <CE value={doc.header.role} onCommit={(v)=>setDoc(prev=>({...prev,header:{...prev.header,role:v}}))}
-                  style={{fontSize:"12pt",fontWeight:600,color:"#0f172a"}}/>
-              <CE value={[doc.header.email,doc.header.phone,doc.header.residence,doc.header.birthdate].filter(Boolean).join(" • ")}
-                  onCommit={(v)=>setDoc(prev=>({...prev,header:{...prev.header,metaLine:v}}))}
-                  style={{fontSize:"9.5pt",color:"#374151",marginTop:4}} placeholder="email • phone • city • birthdate"/>
-            </div>
-            <div className="avatar">
-              {doc.header.avatar ? <img src={doc.header.avatar} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/> : "Photo"}
-            </div>
-          </div>
-          <CE value={doc.summary} onCommit={(v)=>setDoc(prev=>({...prev,summary:v}))}
-              style={{marginTop:10,lineHeight:line,fontSize:`${fontSize}pt`}}/>
-        </div>
-      );
-    },
-
-    experience: ({pageId,rowId,side})=>(
-      <div className="section">
-        <CE value={doc.sectionNames.experience} onCommit={(v)=>setDoc(prev=>({...prev,sectionNames:{...prev.sectionNames,experience:v}}))}
-            className="sect-title"/>
-        {(doc.experience||[]).map((ex,i)=>(
-          <div key={ex.id||i} style={{marginBottom:10}}>
-            <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
-              {ex.logo ? <div className="logo"><img src={ex.logo} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/></div> : null}
-              <div style={{flex:1}}>
-                <div style={{display:"flex",justifyContent:"space-between",gap:8}}>
-                  <CE value={ex.title||""} onCommit={(v)=>mutSet('experience',i,'title',v)} style={{fontWeight:700}}/>
-                  <CE value={ex.period||""} onCommit={(v)=>mutSet('experience',i,'period',v)} style={{fontSize:"9pt",color:"#6b7280"}}/>
-                </div>
-                <div><span style={{color:accent}}><CE value={ex.company||""} onCommit={(v)=>mutSet('experience',i,'company',v)}/></span></div>
-                <div style={{fontSize:"9pt",color:"#6b7280"}}><CE value={ex.location||""} onCommit={(v)=>mutSet('experience',i,'location',v)} placeholder="City, Country"/></div>
-                {(ex.bullets||[]).map((b,j)=><div key={j} style={{fontSize:`${fontSize}pt`,lineHeight:line}}>• <CE value={b} onCommit={(v)=>mutBullet('experience',i,j,v)} placeholder="Achievement"/></div>)}
-                <div className="row-ctrl" style={{marginTop:6}}>
-                  <button className="chip" onClick={()=>reorderItem('experience',i,-1)}>↑</button>
-                  <button className="chip" onClick={()=>reorderItem('experience',i,1)}>↓</button>
-                  <button className="chip" onClick={()=>addBullet('experience',i)}>+ Bullet</button>
-                  <button className="chip" onClick={()=>pickLogo('experience',i)}>Logo</button>
-                  <button className="chip danger" onClick={()=>removeItem('experience',i)}>Delete</button>
-                  <span style="flex:1"></span>
-                  <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'experience',dir:'up'})}>Row↑</button>
-                  <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'experience',dir:'down'})}>Row↓</button>
-                  <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'experience',dir:'swap'})}>⇆</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-        <button className="btn" onClick={()=>addItem('experience',{id:rid(),title:"",company:"",period:"",location:"",logo:"",bullets:[]})}>+ Add experience</button>
-      </div>
-    ),
-
-    education: ({pageId,rowId,side})=>(
-      <div className="section">
-        <CE value={doc.sectionNames.education} onCommit={(v)=>setDoc(prev=>({...prev,sectionNames:{...prev.sectionNames,education:v}}))}
-            className="sect-title"/>
-        {(doc.education||[]).map((ed,i)=>(
-          <div key={ed.id||i} style={{marginBottom:10}}>
-            <div style={{display:"flex",justifyContent:"space-between"}}>
-              <CE value={ed.degree||""} onCommit={(v)=>mutSet('education',i,'degree',v)} style={{fontWeight:700}}/>
-              <div style={{fontSize:"9pt",color:"#6b7280"}}>
-                <CE value={ed.period||""} onCommit={(v)=>mutSet('education',i,'period',v)}/> { " | GPA " }
-                <CE value={ed.gpa||""} onCommit={(v)=>mutSet('education',i,'gpa',v)}/>
-              </div>
-            </div>
-            <div><span style={{color:accent}}><CE value={ed.school||""} onCommit={(v)=>mutSet('education',i,'school',v)}/></span></div>
-            <div style={{fontSize:"9pt",color:"#6b7280"}}><CE value={ed.location||""} onCommit={(v)=>mutSet('education',i,'location',v)} placeholder="City, Country"/></div>
-            <div className="row-ctrl" style={{marginTop:6}}>
-              <button className="chip" onClick={()=>reorderItem('education',i,-1)}>↑</button>
-              <button className="chip" onClick={()=>reorderItem('education',i,1)}>↓</button>
-              <button className="chip danger" onClick={()=>removeItem('education',i)}>Delete</button>
-              <span style="flex:1"></span>
-              <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'education',dir:'up'})}>Row↑</button>
-              <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'education',dir:'down'})}>Row↓</button>
-              <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'education',dir:'swap'})}>⇆</button>
-            </div>
-          </div>
-        ))}
-        <button className="btn" onClick={()=>addItem('education',{id:rid(),degree:"",school:"",period:"",location:"",gpa:""})}>+ Add education</button>
-      </div>
-    ),
-
-    volunteering: ({pageId,rowId,side})=>(
-      <div className="section">
-        <CE value={doc.sectionNames.volunteering} onCommit={(v)=>setDoc(prev=>({...prev,sectionNames:{...prev.sectionNames,volunteering:v}}))}
-            className="sect-title"/>
-        {(doc.volunteering||[]).map((v,i)=>(
-          <div key={v.id||i} style={{marginBottom:10}}>
-            <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
-              {v.logo ? <div className="logo"><img src={v.logo} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/></div> : null}
-              <div style={{flex:1}}>
-                <div style={{display:"flex",justifyContent:"space-between",gap:8}}>
-                  <CE value={v.role||""} onCommit={(x)=>mutSet('volunteering',i,'role',x)} style={{fontWeight:700}}/>
-                  <CE value={v.period||""} onCommit={(x)=>mutSet('volunteering',i,'period',x)} style={{fontSize:"9pt",color:"#6b7280"}}/>
-                </div>
-                <div><span style={{color:accent}}><CE value={v.org||""} onCommit={(x)=>mutSet('volunteering',i,'org',x)}/></span></div>
-                <div style={{fontSize:"9pt",color:"#6b7280"}}><CE value={v.location||""} onCommit={(x)=>mutSet('volunteering',i,'location',x)} placeholder="City, Country"/></div>
-                {(v.bullets||[]).map((b,j)=><div key={j} style={{fontSize:`${fontSize}pt`,lineHeight:line}}>• <CE value={b} onCommit={(x)=>mutBullet('volunteering',i,j,x)}/></div>)}
-                <div className="row-ctrl" style={{marginTop:6}}>
-                  <button className="chip" onClick={()=>reorderItem('volunteering',i,-1)}>↑</button>
-                  <button className="chip" onClick={()=>reorderItem('volunteering',i,1)}>↓</button>
-                  <button className="chip" onClick={()=>addBullet('volunteering',i)}>+ Bullet</button>
-                  <button className="chip" onClick={()=>pickLogo('volunteering',i)}>Logo</button>
-                  <button className="chip danger" onClick={()=>removeItem('volunteering',i)}>Delete</button>
-                  <span style="flex:1"></span>
-                  <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'volunteering',dir:'up'})}>Row↑</button>
-                  <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'volunteering',dir:'down'})}>Row↓</button>
-                  <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'volunteering',dir:'swap'})}>⇆</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-        <button className="btn" onClick={()=>addItem('volunteering',{id:rid(),role:"",org:"",period:"",location:"",logo:"",bullets:[]})}>+ Add volunteering</button>
-      </div>
-    ),
-
-    projects: ({pageId,rowId,side})=>(
-      <div className="section">
-        <CE value={doc.sectionNames.projects} onCommit={(v)=>setDoc(prev=>({...prev,sectionNames:{...prev.sectionNames,projects:v}}))}
-            className="sect-title"/>
-        {(doc.projects||[]).map((p,i)=>(
-          <div key={p.id||i} style={{marginBottom:10}}>
-            <div style={{display:"flex",justifyContent:"space-between",gap:8}}>
-              <CE value={p.name||""} onCommit={(v)=>mutSet('projects',i,'name',v)} style={{fontWeight:700}}/>
-              <CE value={p.period||""} onCommit={(v)=>mutSet('projects',i,'period',v)} style={{fontSize:"9pt",color:"#6b7280"}}/>
-            </div>
-            <div style={{fontSize:"9pt",color:"#6b7280"}}><CE value={p.location||""} onCommit={(v)=>mutSet('projects',i,'location',v)} placeholder="Place / Org"/></div>
-            <div style={{color:accent,fontWeight:600}}><CE value={p.domain||""} onCommit={(v)=>mutSet('projects',i,'domain',v)} placeholder="Domain"/></div>
-            {(p.bullets||[]).map((b,j)=><div key={j} style={{fontSize:`${fontSize}pt`,lineHeight:line}}>• <CE value={b} onCommit={(v)=>mutBullet('projects',i,j,v)}/></div>)}
-            <div className="row-ctrl" style={{marginTop:6}}>
-              <button className="chip" onClick={()=>reorderItem('projects',i,-1)}>↑</button>
-              <button className="chip" onClick={()=>reorderItem('projects',i,1)}>↓</button>
-              <button className="chip" onClick={()=>addBullet('projects',i)}>+ Bullet</button>
-              <button className="chip danger" onClick={()=>removeItem('projects',i)}>Delete</button>
-              <span style="flex:1"></span>
-              <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'projects',dir:'up'})}>Row↑</button>
-              <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'projects',dir:'down'})}>Row↓</button>
-              <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'projects',dir:'swap'})}>⇆</button>
-            </div>
-          </div>
-        ))}
-        <button className="btn" onClick={()=>addItem('projects',{id:rid(),name:"",domain:"",period:"",location:"",bullets:[]})}>+ Add project</button>
-      </div>
-    ),
-
-    certifications: ({pageId,rowId,side})=>(
-      <div className="section">
-        <CE value={doc.sectionNames.certifications} onCommit={(v)=>setDoc(prev=>({...prev,sectionNames:{...prev.sectionNames,certifications:v}}))}
-            className="sect-title"/>
-        {(doc.certifications||[]).map((c,i)=>(
-          <div key={c.id||i} style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:10}}>
-            {c.logo ? <div className="logo"><img src={c.logo} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/></div> : null}
-            <div style={{flex:1}}>
-              <div style={{color:accent}}><CE value={c.line1||""} onCommit={(v)=>mutSet('certifications',i,'line1',v)} placeholder="Title"/></div>
-              <div><CE value={c.line2||""} onCommit={(v)=>mutSet('certifications',i,'line2',v)} placeholder="Issuer / Notes"/></div>
-              <div className="row-ctrl" style={{marginTop:6}}>
-                <button className="chip" onClick={()=>reorderItem('certifications',i,-1)}>↑</button>
-                <button className="chip" onClick={()=>reorderItem('certifications',i,1)}>↓</button>
-                <button className="chip" onClick={()=>pickLogo('certifications',i)}>Logo</button>
-                <button className="chip danger" onClick={()=>removeItem('certifications',i)}>Delete</button>
-                <span style="flex:1"></span>
-                <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'certifications',dir:'up'})}>Row↑</button>
-                <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'certifications',dir:'down'})}>Row↓</button>
-                <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'certifications',dir:'swap'})}>⇆</button>
-              </div>
-            </div>
-          </div>
-        ))}
-        <button className="btn" onClick={()=>addItem('certifications',{id:rid(),line1:"",line2:"",logo:""})}>+ Add certification</button>
-      </div>
-    ),
-
-    awards: ({pageId,rowId,side})=>(
-      <div className="section">
-        <CE value={doc.sectionNames.awards} onCommit={(v)=>setDoc(prev=>({...prev,sectionNames:{...prev.sectionNames,awards:v}}))}
-            className="sect-title"/>
-        {(doc.awards||[]).map((a,i)=>(
-          <div key={a.id||i} style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:10}}>
-            {a.logo ? <div className="logo"><img src={a.logo} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/></div> : null}
-            <div style={{flex:1}}>
-              <div style={{fontWeight:700}}><CE value={a.line1||""} onCommit={(v)=>mutSet('awards',i,'line1',v)} placeholder="Award"/></div>
-              <div><CE value={a.line2||""} onCommit={(v)=>mutSet('awards',i,'line2',v)} placeholder="Issuer / Notes"/></div>
-              <div className="row-ctrl" style={{marginTop:6}}>
-                <button className="chip" onClick={()=>reorderItem('awards',i,-1)}>↑</button>
-                <button className="chip" onClick={()=>reorderItem('awards',i,1)}>↓</button>
-                <button className="chip" onClick={()=>pickLogo('awards',i)}>Logo</button>
-                <button className="chip danger" onClick={()=>removeItem('awards',i)}>Delete</button>
-                <span style="flex:1"></span>
-                <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'awards',dir:'up'})}>Row↑</button>
-                <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'awards',dir:'down'})}>Row↓</button>
-                <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'awards',dir:'swap'})}>⇆</button>
-              </div>
-            </div>
-          </div>
-        ))}
-        <button className="btn" onClick={()=>addItem('awards',{id:rid(),line1:"",line2:"",logo:""})}>+ Add award</button>
-      </div>
-    ),
-
-    skills: ({pageId,rowId,side})=>(
-      <div className="section">
-        <CE value={doc.sectionNames.skills} onCommit={(v)=>setDoc(prev=>({...prev,sectionNames:{...prev.sectionNames,skills:v}}))}
-            className="sect-title"/>
-        {(doc.skills||[]).map((g,i)=>(
-          <div key={g.id||i} style={{marginBottom:8}}>
-            <CE value={g.group||""} onCommit={(v)=>mutSet('skills',i,'group',v)} style={{fontWeight:600}} placeholder="Group"/>
-            <div style={{display:"flex",flexWrap:"wrap",gap:"6px",marginTop:4}}>
-              {(g.items||[]).map((t,j)=>
-                <span key={j} style="border:1px solid var(--rule);border-radius:999px;padding:3px 8px;font-size:11px">
-                  <CE value={t} onCommit={(v)=>mutBullet('skills',i,j,v)} placeholder="Skill"/>
-                </span>
-              )}
-            </div>
-            <div className="row-ctrl" style={{marginTop:6}}>
-              <button className="chip" onClick={()=>addBullet('skills',i)}>+ Skill</button>
-              <button className="chip" onClick={()=>reorderItem('skills',i,-1)}>↑</button>
-              <button className="chip" onClick={()=>reorderItem('skills',i,1)}>↓</button>
-              <button className="chip danger" onClick={()=>removeItem('skills',i)}>Delete group</button>
-              <span style="flex:1"></span>
-              <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'skills',dir:'up'})}>Row↑</button>
-              <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'skills',dir:'down'})}>Row↓</button>
-              <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'skills',dir:'swap'})}>⇆</button>
-            </div>
-          </div>
-        ))}
-        <button className="btn" onClick={()=>addItem('skills',{id:rid(),group:"",items:[]})}>+ Add group</button>
-      </div>
-    ),
-
-    languages: ({pageId,rowId,side})=>(
-      <div className="section">
-        <CE value={doc.sectionNames.languages} onCommit={(v)=>setDoc(prev=>({...prev,sectionNames:{...prev.sectionNames,languages:v}}))}
-            className="sect-title"/>
-        {(doc.languages||[]).map((l,i)=>(
-          <div key={l.id||i} style={{display:"flex",alignItems:"center",gap:8,margin-bottom:6}}>
-            <CE value={l.name||""} onCommit={(v)=>mutSet('languages',i,'name',v)} placeholder="Language"/>
-            <div style="margin-left:auto"></div>
-            <CE value={l.level||""} onCommit={(v)=>mutSet('languages',i,'level',v)} placeholder="A1…C2" style={{fontSize:"11px",color:"#6b7280"}}/>
-            <button className="chip" onClick={()=>reorderItem('languages',i,-1)}>↑</button>
-            <button className="chip" onClick={()=>reorderItem('languages',i,1)}>↓</button>
-            <button className="chip danger" onClick={()=>removeItem('languages',i)}>×</button>
-          </div>
-        ))}
-        <button className="btn" onClick={()=>addItem('languages',{id:rid(),name:"",level:"B2"})}>+ Add language</button>
-      </div>
-    ),
-
-    strengths: ({pageId,rowId,side})=>(
-      <div className="section">
-        <CE value={doc.sectionNames.strengths} onCommit={(v)=>setDoc(prev=>({...prev,sectionNames:{...prev.sectionNames,strengths:v}}))}
-            className="sect-title"/>
-        {(doc.strengths||[]).map((it,i)=>(
-          <div key={it.id||i} style={{display:"flex",alignItems:"center",gap:8,margin-bottom:6}}>
-            {it.logo ? <div className="logo"><img src={it.logo} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/></div> : null}
-            <CE value={it.label||""} onCommit={(v)=>mutSet('strengths',i,'label',v)} placeholder="Strength"/>
-            <div style="margin-left:auto"></div>
-            <button className="chip" onClick={()=>pickLogo('strengths',i)}>Logo</button>
-            <button className="chip" onClick={()=>reorderItem('strengths',i,-1)}>↑</button>
-            <button className="chip" onClick={()=>reorderItem('strengths',i,1)}>↓</button>
-            <button className="chip danger" onClick={()=>removeItem('strengths',i)}>×</button>
-            <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'strengths',dir:'up'})}>Row↑</button>
-            <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'strengths',dir:'down'})}>Row↓</button>
-            <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'strengths',dir:'swap'})}>⇆</button>
-          </div>
-        ))}
-        <button className="btn" onClick={()=>addItem('strengths',{id:rid(),label:""})}>+ Add strength</button>
-      </div>
-    ),
-
-    hobbies: ({pageId,rowId,side})=>(
-      <div className="section">
-        <CE value={doc.sectionNames.hobbies} onCommit={(v)=>setDoc(prev=>({...prev,sectionNames:{...prev.sectionNames,hobbies:v}}))}
-            className="sect-title"/>
-        {(doc.hobbies||[]).map((it,i)=>(
-          <div key={it.id||i} style={{display:"flex",alignItems:"center",gap:8,margin-bottom:6}}>
-            {it.logo ? <div className="logo"><img src={it.logo} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/></div> : null}
-            <CE value={it.label||""} onCommit={(v)=>mutSet('hobbies',i,'label',v)} placeholder="Hobby"/>
-            <div style="margin-left:auto"></div>
-            <button className="chip" onClick={()=>pickLogo('hobbies',i)}>Logo</button>
-            <button className="chip" onClick={()=>reorderItem('hobbies',i,-1)}>↑</button>
-            <button className="chip" onClick={()=>reorderItem('hobbies',i,1)}>↓</button>
-            <button className="chip danger" onClick={()=>removeItem('hobbies',i)}>×</button>
-            <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'hobbies',dir:'up'})}>Row↑</button>
-            <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'hobbies',dir:'down'})}>Row↓</button>
-            <button className="chip" onClick={()=>moveSection({pageId,rowId,side,key:'hobbies',dir:'swap'})}>⇆</button>
-          </div>
-        ))}
-        <button className="btn" onClick={()=>addItem('hobbies',{id:rid(),label:"",logo:""})}>+ Add hobby</button>
-      </div>
-    ),
-
-    online: ()=>(
-      <div className="section">
-        <CE value={doc.sectionNames.online} onCommit={(v)=>setDoc(prev=>({...prev,sectionNames:{...prev.sectionNames,online:v}}))}
-            className="sect-title"/>
-        <div style={{display:"grid",gap:6,fontSize:"10pt"}}>
-          <CE value={doc.online?.linkedin?.label||""} onCommit={(v)=>setDoc(p=>({...p,online:{...p.online,linkedin:{...(p.online?.linkedin||{}),label:v}}}))} placeholder="LinkedIn"/>
-          <CE value={doc.online?.github?.label||""} onCommit={(v)=>setDoc(p=>({...p,online:{...p.online,github:{...(p.online?.github||{}),label:v}}}))} placeholder="GitHub"/>
-          <CE value={doc.online?.website?.label||""} onCommit={(v)=>setDoc(p=>({...p,online:{...p.online,website:{...(p.online?.website||{}),label:v}}}))} placeholder="Website"/>
-        </div>
-      </div>
-    ),
-
-    laws: ()=>(
-      <div className="section">
-        <CE value={doc.sectionNames.laws} onCommit={(v)=>setDoc(prev=>({...prev,sectionNames:{...prev.sectionNames,laws:v}}))}
-            className="sect-title"/>
-        <CE value={(doc.laws||[]).join('\n')} onCommit={(v)=>setDoc(prev=>({...prev,laws:[v]}))}
-            style={{fontSize:"9pt",color:"#6b7280"}}/>
-      </div>
-    ),
-  };
-
-  /* --- Sidebar UI (simple & clear) --- */
-  function Sidebar(){
-    return (
-      <div>
+  return (
+    <>
+      <div className="sheets">
         {doc._layout.map(pg=>(
-          <div key={pg.id} style="border:1px solid var(--rule);border-radius:10px;padding:10px;margin-bottom:10px;background:#fff">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-              <div style="font-weight:600">Page {pg.page}</div>
-              {doc._layout.length>1 && (
-                <button className="btn-danger" onClick={()=>setDoc(prev=>{
-                  const d=JSON.parse(JSON.stringify(prev));
-                  d._layout=d._layout.filter(p=>p.id!==pg.id);
-                  d._layout.sort((a,b)=>a.page-b.page).forEach((p,i)=>p.page=i+1);
-                  return d;
-                })}>Delete page</button>
-              )}
-            </div>
-
-            {pg.rows.map(r=>(
-              <div key={r.id} style="border:1px dashed var(--rule);border-radius:8px;padding:8px;margin-bottom:8px">
-                <div className="row-ctrl">
-                  <select className="field" style="max-width:160px" value={r.type} onChange={e=>changeRowType(pg.id,r.id,e.target.value)}>
-                    <option value="single">Single</option>
-                    <option value="13-23">1/3 – 2/3</option>
-                    <option value="23-13">2/3 – 1/3</option>
-                  </select>
-                  {pg.rows.length>1 && <button className="btn-danger" onClick={()=>deleteRow(pg.id,r.id)}>Delete row</button>}
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-                  <div>
-                    <div style="font-size:12px;color:#6b7280;margin-bottom:4px">Left</div>
-                    {(r.left||[]).map((k,i)=><div key={k+i} style="font-size:12px;padding:4px 6px;border:1px solid var(--rule);border-radius:6px;margin-bottom:4px;background:#fafafa">{k}</div>)}
-                  </div>
-                  <div>
-                    <div style="font-size:12px;color:#6b7280;margin-bottom:4px">Right</div>
-                    {(r.right||[]).map((k,i)=><div key={k+i} style="font-size:12px;padding:4px 6px;border:1px solid var(--rule);border-radius:6px;margin-bottom:4px;background:#fafafa">{k}</div>)}
-                  </div>
-                </div>
-                <div style="margin-top:8px">
-                  <select className="field" id={"addSec-"+r.id}>
-                    {SECTIONS_ORDER.map(k=><option value={k} key={k}>{k}</option>)}
-                  </select>
-                  <div className="row-ctrl" style="margin-top:6px">
-                    <button className="btn" onClick={()=>{
-                      const sel=document.getElementById("addSec-"+r.id).value;
-                      setDoc(prev=>{
-                        const d=JSON.parse(JSON.stringify(prev));
-                        const row = d._layout.find(p=>p.id===pg.id).rows.find(x=>x.id===r.id);
-                        if (row.type==="single"){ if(!row.left.includes(sel)) row.left.push(sel); }
-                        else { if(!row.left.includes(sel) && !row.right.includes(sel)) row.left.push(sel); }
-                        return d;
-                      });
-                    }}>+ to Left</button>
-                    {r.type!=="single" && <button className="btn" onClick={()=>{
-                      const sel=document.getElementById("addSec-"+r.id).value;
-                      setDoc(prev=>{
-                        const d=JSON.parse(JSON.stringify(prev));
-                        const row = d._layout.find(p=>p.id===pg.id).rows.find(x=>x.id===r.id);
-                        if (row.type!=="single" && !row.left.includes(sel) && !row.right.includes(sel)) row.right.push(sel);
-                        return d;
-                      });
-                    }}>+ to Right</button>}
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="sheet" key={pg.id}>
+            <Header/>
+            <div className="sect-title" contentEditable suppressContentEditableWarning>Experience</div>
+            <p contentEditable suppressContentEditableWarning style={{fontSize:"10pt",lineHeight:1.45}}>Add your experience here...</p>
           </div>
         ))}
       </div>
-    );
-  }
-
-  /* --- Mount toolbar events --- */
-  useEffect(()=>{
-    document.getElementById('saveBtn').onclick = save;
-    document.getElementById('printBtn').onclick = print;
-    document.getElementById('addPageBtn').onclick = addPage;
-    document.getElementById('addRowBtn').onclick = ()=> addRow(document.getElementById('rowTypePick').value);
-    document.getElementById('photoUpload').onchange = (e)=> uploadPhoto(e.target.files?.[0]);
-  },[doc,accent,fontSize,line]);
-
-  /* --- Render sidebar & sheets --- */
-  useEffect(()=>{
-    ReactDOM.render(<Sidebar/>, document.getElementById('sidebar'));
-
-    const Sheets = ()=>{
-      const fs = `${fontSize}pt`;
-      return (
-        <div ref={sheetsRef}>
-          {doc._layout.sort((a,b)=>a.page-b.page).map(pg=>(
-            <div className="sheet" key={pg.id} style={{fontSize:fs,lineHeight:line}}>
-              {pg.rows.map(r=>{
-                const klass = r.type==='single'?'band-single':(r.type==='13-23'?'band-13-23':'band-23-13');
-                return (
-                  <div key={r.id} className={`grid-band ${klass}`}>
-                    <div>
-                      {(r.left||[]).map((key,idx)=>
-                        <div key={key+'-'+idx}>
-                          {R[key] ? R[key]({pageId:pg.id,rowId:r.id,side:'left'}) : <div style={{color:"#dc2626",fontSize:"10pt"}}>Unknown section: {key}</div>}
-                        </div>
-                      )}
-                    </div>
-                    {r.type!=='single' &&
-                      <div>
-                        {(r.right||[]).map((key,idx)=>
-                          <div key={key+'-'+idx}>
-                            {R[key] ? R[key]({pageId:pg.id,rowId:r.id,side:'right'}) : <div style={{color:"#dc2626",fontSize:"10pt"}}>Unknown section: {key}</div>}
-                          </div>
-                        )}
-                      </div>}
-                  </div>
-                );
-              })}
-            </div>
-          ))}
-        </div>
-      );
-    };
-    ReactDOM.render(<Sheets/>, document.getElementById('sheets'));
-  },[doc,accent,fontSize,line]);
-
-  return null;
+    </>
+  );
 }
 
-/* Boot */
-ReactDOM.createRoot(document.createElement('div')).render(<div/>);
-ReactDOM.createRoot(document.getElementById('sidebar')).render(<div/>);
-ReactDOM.createRoot(document.getElementById('sheets')).render(<div/>);
-ReactDOM.createRoot(document.body.appendChild(document.createElement('div'))).render(<App/>);
+ReactDOM.createRoot(document.getElementById("sheets")).render(<App/>);
 </script>
 </body>
 </html>
