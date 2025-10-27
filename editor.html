@@ -7,215 +7,201 @@
 
 <style>
   :root{
-    --accent:#2563eb;
+    --accent:#2b8bd8;
     --rule:#e5e7eb;
     --bg:#f6f7fb;
     --sheet-w:210mm;
     --sheet-h:297mm;
-    --toolbar-h:56px;
-    --sidebar-w:360px;
-    --pad-sheet:18mm 16mm;
+    --pad:18mm 16mm;
+    --rail-w:240px;
+    --topbar-h:56px;
   }
   *{box-sizing:border-box}
   html,body,#root{height:100%}
   body{margin:0;background:var(--bg);color:#111827;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial}
 
-  .toolbar{
-    height:var(--toolbar-h);display:flex;gap:8px;align-items:center;
-    padding:10px 14px;background:#fffffff2;border-bottom:1px solid var(--rule);
-    position:sticky;top:0;z-index:50;backdrop-filter:saturate(120%) blur(6px)
+  /* Top bar */
+  .topbar{
+    height:var(--topbar-h);display:flex;align-items:center;gap:8px;padding:10px 14px;
+    border-bottom:1px solid var(--rule);background:#fffffff2;backdrop-filter:saturate(120%) blur(6px);position:sticky;top:0;z-index:40
   }
   .btn{border:1px solid var(--rule);background:#fff;border-radius:8px;padding:6px 10px;font-size:14px;cursor:pointer}
   .btn:hover{background:#f3f4f6}
   .btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
   .btn-primary:hover{filter:brightness(.96)}
   .btn-danger{background:#fee2e2;border-color:#fecaca;color:#991b1b}
-  .field{border:1px solid var(--rule);border-radius:8px;padding:6px 8px;font-size:14px;background:#fff;min-width:120px}
+  .field{border:1px solid var(--rule);border-radius:8px;padding:6px 8px;font-size:14px;background:#fff}
 
-  .wrap{display:grid;grid-template-columns:var(--sidebar-w) 1fr;height:calc(100% - var(--toolbar-h))}
-  aside{border-right:1px solid var(--rule);background:#fff;overflow:auto;padding:14px}
-  .preview{overflow:auto;padding:24px;display:flex;justify-content:flex-end;align-items:flex-start}
-  .sheets{display:flex;flex-direction:column;gap:24px;align-items:flex-end;width:100%}
+  /* Main split */
+  .main{display:grid;grid-template-columns:var(--rail-w) 1fr;height:calc(100% - var(--topbar-h))}
+  .rail{
+    background:#fff;border-right:1px solid var(--rule);padding:10px 8px;overflow:auto
+  }
+  .rail-group{margin:8px 0 14px}
+  .rail-title{font-size:12px;color:#6b7280;margin:0 8px 6px}
+  .rail-item{
+    display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;margin:6px 0;border:1px solid var(--rule);
+    background:#fff;border-radius:10px;cursor:pointer;font-weight:500
+  }
+  .rail-item:hover{background:#f6f7fb}
+  .rail-item .k{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:#eef6ff;color:#1e40af;font-weight:700}
 
-  .sheet{width:var(--sheet-w);min-height:var(--sheet-h);background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.08);padding:var(--pad-sheet);display:flex;flex-direction:column;gap:14px}
-  .row{display:grid;gap:18px;position:relative}
+  /* Canvas area */
+  .canvas{overflow:auto;padding:24px;display:flex;justify-content:center;align-items:flex-start}
+  .stack{display:flex;flex-direction:column;gap:24px;align-items:center;width:100%}
+
+  /* Sheet + rows */
+  .sheet{width:var(--sheet-w);min-height:var(--sheet-h);background:#fff;box-shadow:0 12px 36px rgba(0,0,0,.08);padding:var(--pad)}
+  .row{display:grid;gap:18px;position:relative;margin-bottom:14px}
   .single{grid-template-columns:1fr}
-  .col-13-23{grid-template-columns:1fr 2fr}
-  .col-23-13{grid-template-columns:2fr 1fr}
+  .r-13-23{grid-template-columns:1fr 2fr}
+  .r-23-13{grid-template-columns:2fr 1fr}
 
-  .row-tools{position:absolute;right:-8px;top:-12px;display:flex;gap:6px;z-index:2}
+  /* Row tools (floating) */
+  .row-tools{position:absolute;left:-12px;top:-12px;display:flex;gap:6px;z-index:2}
   .chip{border:1px solid var(--rule);background:#fff;border-radius:999px;padding:4px 8px;font-size:12px;cursor:pointer}
   .chip:hover{background:#f3f4f6}
 
-  .col-tools{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
-  .sect-pill{border:1px dashed var(--rule);border-radius:999px;padding:2px 8px;font-size:11px;background:#fafafa}
-  .pill-btn{border:none;background:none;color:#6b7280;cursor:pointer;margin-left:6px}
-  .pill-btn:hover{color:#111827}
+  /* Column tools + pills */
+  .col-tools{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+  .pill{border:1px dashed var(--rule);background:#fafafa;border-radius:999px;padding:2px 8px;font-size:11px}
+  .pill .x{border:none;background:none;margin-left:6px;color:#6b7280;cursor:pointer}
+  .pill .x:hover{color:#111827}
 
-  .sect-title{margin-bottom:6px;padding-bottom:3px;border-bottom:1px solid var(--rule);text-transform:uppercase;letter-spacing:.08em;font-size:11px;font-weight:600;color:var(--accent)}
+  /* Section styling */
+  .title{margin-bottom:6px;padding-bottom:3px;border-bottom:1px solid var(--rule);
+         text-transform:uppercase;letter-spacing:.08em;font-size:11px;font-weight:650;color:var(--accent)}
   .meta{color:#6b7280}
   .editable[contenteditable="true"]{outline:0}
-  .editable[contenteditable="true"]:focus{box-shadow:inset 0 0 0 2px rgba(37,99,235,.25);border-radius:4px}
+  .editable[contenteditable="true"]:focus{box-shadow:inset 0 0 0 2px rgba(43,139,216,.25);border-radius:4px}
 
   @media print{
-    .toolbar, aside{display:none!important}
+    .topbar,.rail{display:none!important}
     body{background:#fff!important}
-    .preview{padding:0!important}
+    .canvas{padding:0!important}
     .sheet{box-shadow:none!important;break-after:page}
     @page{size:A4;margin:14mm}
   }
 </style>
-
-<!-- React + Babel -->
-<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-<!-- Storage adapters (se presenti) -->
-<script src="./storage.local.js"></script>
-<script src="./storage.firebase.js"></script>
 </head>
 <body>
 <div id="root"></div>
 
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
 <script type="text/babel" data-presets="env,react">
 const {useState,useEffect} = React;
 const rid = () => Math.random().toString(36).slice(2)+Date.now().toString(36);
-const param = (k,d=null)=>{try{return new URL(location.href).searchParams.get(k)??d}catch{return d}};
-const uid = param('uid',null);
-const docName = param('doc','Default');
-const clone = o => JSON.parse(JSON.stringify(o??{}));
-
-/* Storage fallback */
-const Store = {
-  async load(name, uid){
-    if (window.StorageAPI?.load) return window.StorageAPI.load(name, uid);
-    try{ return JSON.parse(localStorage.getItem("cvdoc:"+name) || "null"); }catch{return null}
-  },
-  async save(name, data, uid){
-    if (window.StorageAPI?.save) return window.StorageAPI.save(name, data, uid);
-    localStorage.setItem("cvdoc:"+name, JSON.stringify(data));
-  }
+const param=(k,d=null)=>{try{return new URL(location.href).searchParams.get(k)??d}catch{return d}};
+const uid=param('uid',null), docName=param('doc','Default');
+const clone=o=>JSON.parse(JSON.stringify(o??{}));
+const Store={
+  async load(name){ try{return JSON.parse(localStorage.getItem("cvdoc:"+name)||"null")}catch{return null} },
+  async save(name,data){ localStorage.setItem("cvdoc:"+name, JSON.stringify(data)); }
 };
 
-/* MIGRATION: assegna sempre i default mancanti */
+/* ALWAYS normalize */
 function migrate(raw){
-  const d = clone(raw);
-  d.header = d.header || { name:"JOHN DOE", role:"Data Scientist", email:"", phone:"", city:"", birth:"", avatar:"" };
-  d.summary = (typeof d.summary === "string") ? d.summary : "Short professional summary here.";
-  d.sectionNames = d.sectionNames || {
-    headerSummary:"Profile", experience:"Experience", education:"Education", volunteering:"Volunteering",
-    projects:"Projects", certifications:"Certifications", awards:"Awards", skills:"Skills",
-    languages:"Languages", strengths:"Strengths", hobbies:"Hobbies", online:"Online", laws:"Laws"
+  const d=clone(raw);
+  d.header=d.header||{name:"JOHN DOE",role:"Senior Software Architect",email:"",phone:"",city:"",birth:"",avatar:""};
+  d.summary=(typeof d.summary==="string")?d.summary:"Breve riepilogo professionale.";
+  d.sectionNames=d.sectionNames||{
+    headerSummary:"Profilo Professionale", experience:"Esperienza", education:"Formazione",
+    volunteering:"Volontariato", projects:"Progetti", certifications:"Certificazioni",
+    awards:"Premi", skills:"Competenze", languages:"Lingue", strengths:"Punti di forza",
+    hobbies:"Hobby", online:"Online", laws:"Laws"
   };
   const arrs=["experience","education","volunteering","projects","certifications","awards","skills","languages","strengths","hobbies"];
   arrs.forEach(k=>{ if(!Array.isArray(d[k])) d[k]=[]; });
-  d.online = d.online || {};
-  d.laws = Array.isArray(d.laws)? d.laws : (d.laws? [String(d.laws)] : ["I authorize the processing of personal data in accordance with GDPR 2016/679."]);
-  d._theme = d._theme || {accent:"#2563eb", fontSize:11, lineHeight:1.45};
-  d._theme.accent = d._theme.accent || "#2563eb";
-  d._theme.fontSize = d._theme.fontSize || 11;
-  d._theme.lineHeight = d._theme.lineHeight || 1.45;
-  if (!Array.isArray(d._layout) || d._layout.length===0){
+  d.online=d.online||{};
+  d.laws=Array.isArray(d.laws)?d.laws:[d.laws||"Autorizzo il trattamento dei dati personali ai sensi del GDPR 2016/679."];
+  d._theme=d._theme||{accent:"#2b8bd8",fontSize:11,lineHeight:1.45};
+  d._theme.accent=d._theme.accent||"#2b8bd8";
+  d._theme.fontSize=d._theme.fontSize||11;
+  d._theme.lineHeight=d._theme.lineHeight||1.45;
+  if(!Array.isArray(d._layout)||d._layout.length===0){
     d._layout=[{id:rid(),page:1,rows:[
       {id:rid(),type:"single",left:["headerSummary"],right:[]},
-      {id:rid(),type:"col-23-13",left:["experience"],right:["skills","languages","online","laws"]}
+      {id:rid(),type:"r-23-13",left:["experience"],right:["skills","languages","online","laws"]}
     ]}];
   }else{
-    d._layout = d._layout.map((pg,i)=>({
-      id: pg?.id || rid(),
-      page: typeof pg?.page==="number" ? pg.page : (i+1),
-      rows: Array.isArray(pg?.rows) ? pg.rows.map(r=>({
+    d._layout=d._layout.map((pg,i)=>({
+      id:pg?.id||rid(),
+      page:typeof pg?.page==="number"?pg.page:(i+1),
+      rows:Array.isArray(pg?.rows)?pg.rows.map(r=>({
         id:r?.id||rid(),
-        type:(["single","col-13-23","col-23-13","13-23","23-13"].includes(r?.type)
-              ? (r.type==="13-23"?"col-13-23": r.type==="23-13"?"col-23-13": r.type)
-              : "single"),
-        left: Array.isArray(r?.left)? r.left.filter(Boolean) : [],
-        right: Array.isArray(r?.right)? r.right.filter(Boolean) : []
-      })) : [{id:rid(),type:"single",left:[],right:[]}]
+        type:(["single","r-13-23","r-23-13","13-23","23-13"].includes(r?.type)
+              ? (r.type==="13-23"?"r-13-23":r.type==="23-13"?"r-23-13":r.type)
+              :"single"),
+        left:Array.isArray(r?.left)?r.left.filter(Boolean):[],
+        right:Array.isArray(r?.right)?r.right.filter(Boolean):[]
+      })):[{id:rid(),type:"single",left:[],right:[]}]
     }));
   }
   return d;
 }
 
-/* Safe seed (non-crash) */
-const SAFE_DOC = migrate({
-  experience:[{id:rid(), title:"Medical Advisor Intern", company:"Sanofi Oncology", period:"03/2025 — Present", location:"Milan, Italy", bullets:["Managed MAPs (compassionate use).","Supported local studies and data collection."]}],
-  skills:[{id:rid(),group:"Core",items:["Python","R","Pandas"]}],
-  languages:[{id:rid(),name:"Italian",score:5,level:"Native"}],
-  strengths:[{id:rid(),label:"Curiosity"}],
-  hobbies:[{id:rid(),label:"Photography"}],
-  online:{linkedin:{label:"/in/johndoe"}, github:{label:"github.com/johndoe"}, website:{label:"johndoe.dev"}}
+/* Safe initial seed so first paint never crashes */
+const SAFE_DOC=migrate({
+  experience:[
+    {id:rid(), title:"Senior Software Architect", company:"Google", period:"2018 – 2022", location:"San Diego, CA",
+     bullets:["Designed and deployed 2 cloud data architectures.","Communicated with CTO monthly on business initiatives."]}
+  ],
+  skills:[{id:rid(), group:"Technical", items:["Java","API","Cloud","Design Patterns","Critical Thinking"]}],
+  languages:[{id:rid(), name:"Italiano", level:"Madrelingua"}]
 });
 
-/* Editable primitive */
-const CE = ({value,onChange,placeholder="",style})=>(
+/* Small contentEditable primitive */
+const CE=({value,onChange,placeholder="",style})=>(
   <div className="editable"
-       contentEditable
-       suppressContentEditableWarning
-       onBlur={(e)=>onChange(e.currentTarget.textContent||"")}
-       onKeyDown={(e)=>{ if(e.key==="Enter"){ e.preventDefault(); e.currentTarget.blur(); } }}
-       style={style||{}}>
-    {value || placeholder}
-  </div>
+       contentEditable suppressContentEditableWarning
+       onBlur={e=>onChange(e.currentTarget.textContent||"")}
+       onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();e.currentTarget.blur();}}}
+       style={style||{}}>{value||placeholder}</div>
 );
 
 function App(){
-  const [doc,setDoc] = useState(SAFE_DOC);
+  const [doc,setDoc]=useState(SAFE_DOC);
+  const [reorder,setReorder]=useState(false); // reorder mode (like your screenshot)
 
   useEffect(()=>{(async()=>{
-    const saved = await Store.load(docName, uid);
-    setDoc(migrate(saved||{}));          // <— SEMPRE migrate
+    const saved=await Store.load(docName);
+    setDoc(migrate(saved||{}));
   })()},[]);
-  useEffect(()=>{ document.documentElement.style.setProperty('--accent', doc._theme?.accent || '#2563eb') },[doc._theme?.accent]);
 
-  const save = async()=>{ await Store.save(docName, doc, uid); alert("Saved"); };
-  const exportPDF = async()=>{ await Store.save(docName, doc, uid); requestAnimationFrame(()=>window.print()); };
+  useEffect(()=>{document.documentElement.style.setProperty('--accent',doc._theme?.accent||'#2b8bd8')},[doc._theme?.accent]);
+
+  const save=async()=>{await Store.save(docName,doc); alert("Salvato");};
+  const exportPDF=async()=>{await Store.save(docName,doc); requestAnimationFrame(()=>window.print());};
 
   /* Page ops */
-  const addPage = ()=> setDoc(prev=>{
-    const d=migrate(prev);
-    const last = (d._layout||[]).slice(-1)[0];
-    const nextPage = (last?.page||0)+1;
-    d._layout = (d._layout||[]).concat([{ id:rid(), page:nextPage, rows:[{id:rid(),type:"single",left:["headerSummary"],right:[]}] }]);
-    return d;
-  });
-  const delLastPage = ()=> setDoc(prev=>{ const d=migrate(prev); if((d._layout||[]).length>1) d._layout.pop(); return d; });
+  const addPage=()=>setDoc(p=>{const d=migrate(p); const last=d._layout[d._layout.length-1]; d._layout.push({id:rid(),page:(last?.page||0)+1,rows:[{id:rid(),type:"single",left:["headerSummary"],right:[]} ]});return d;});
+  const delLast=()=>setDoc(p=>{const d=migrate(p); if(d._layout.length>1) d._layout.pop(); return d;});
 
-  /* Row/Section ops */
-  const ROW_TYPES = [
-    {id:"single", label:"Single"},
-    {id:"col-13-23", label:"1/3 – 2/3"},
-    {id:"col-23-13", label:"2/3 – 1/3"},
-  ];
-  const ALL_SECTIONS = ["headerSummary","experience","education","volunteering","projects","certifications","awards","skills","languages","strengths","hobbies","online","laws"];
+  /* Row ops */
+  const changeRowType=(pi,ri,t)=>setDoc(p=>{const d=migrate(p); d._layout[pi].rows[ri].type=t; return d;});
+  const addRowBelow=(pi,ri)=>setDoc(p=>{const d=migrate(p);const r=d._layout[pi].rows[ri];d._layout[pi].rows.splice(ri+1,0,{id:rid(),type:r.type,left:[],right:[]});return d;});
+  const delRow=(pi,ri)=>setDoc(p=>{const d=migrate(p); if(d._layout[pi].rows.length>1) d._layout[pi].rows.splice(ri,1); return d;});
 
-  const changeRowType = (pgIdx,rowIdx,type)=> setDoc(p=>{const d=migrate(p); d._layout[pgIdx].rows[rowIdx].type=type; return d;});
-  const addRowBelow = (pgIdx,rowIdx)=> setDoc(p=>{const d=migrate(p); const r=d._layout[pgIdx].rows[rowIdx]; d._layout[pgIdx].rows.splice(rowIdx+1,0,{id:rid(),type:r.type,left:[],right:[]}); return d;});
-  const deleteRow = (pgIdx,rowIdx)=> setDoc(p=>{const d=migrate(p); if(d._layout[pgIdx].rows.length>1) d._layout[pgIdx].rows.splice(rowIdx,1); return d;});
+  /* Section ops on row/col */
+  const ALL_SECS=["headerSummary","experience","education","volunteering","projects","certifications","awards","skills","languages","strengths","hobbies","online","laws"];
+  const addSec=(pi,ri,side,k)=>setDoc(p=>{const d=migrate(p); (side==="left"?d._layout[pi].rows[ri].left:d._layout[pi].rows[ri].right).push(k); return d;});
+  const rmSec=(pi,ri,side,i)=>setDoc(p=>{const d=migrate(p); (side==="left"?d._layout[pi].rows[ri].left:d._layout[pi].rows[ri].right).splice(i,1); return d;});
+  const mvSec=(pi,ri,side,i,dir)=>setDoc(p=>{const d=migrate(p); const a=side==="left"?d._layout[pi].rows[ri].left:d._layout[pi].rows[ri].right; const j=dir==="up"?i-1:i+1; if(j<0||j>=a.length) return p; [a[i],a[j]]=[a[j],a[i]]; return d;});
+  const swapSec=(pi,ri,side,i)=>setDoc(p=>{const d=migrate(p); const row=d._layout[pi].rows[ri]; const from=side==="left"?row.left:row.right; const to=side==="left"?row.right:row.left; to.push(from.splice(i,1)[0]); return d;});
 
-  const addSection = (pgIdx,rowIdx,side,sec)=> setDoc(p=>{const d=migrate(p); (side==="left"?d._layout[pgIdx].rows[rowIdx].left:d._layout[pgIdx].rows[rowIdx].right).push(sec); return d;});
-  const removeSection = (pgIdx,rowIdx,side,i)=> setDoc(p=>{const d=migrate(p); (side==="left"?d._layout[pgIdx].rows[rowIdx].left:d._layout[pgIdx].rows[rowIdx].right).splice(i,1); return d;});
-  const moveSection = (pgIdx,rowIdx,side,i,dir)=> setDoc(p=>{
-    const d=migrate(p);
-    const arr = side==="left"?d._layout[pgIdx].rows[rowIdx].left:d._layout[pgIdx].rows[rowIdx].right;
-    const j = (dir==="up") ? i-1 : i+1;
-    if (j<0 || j>=arr.length) return p;
-    [arr[i],arr[j]]=[arr[j],arr[i]];
-    return d;
-  });
-  const swapSectionSide = (pgIdx,rowIdx,side,i)=> setDoc(p=>{
-    const d=migrate(p), row=d._layout[pgIdx].rows[rowIdx];
-    const from = side==="left"?row.left:row.right; const to = side==="left"?row.right:row.left;
-    to.push(from.splice(i,1)[0]); return d;
-  });
+  /* Logos/photos */
+  const pickImage=(cb)=>{const x=document.createElement('input'); x.type='file'; x.accept='image/*'; x.onchange=e=>{const f=e.target.files?.[0]; if(!f)return; const r=new FileReader(); r.onload=()=>cb(String(r.result)); r.readAsDataURL(f)}; x.click();};
+  const setLogo=(key,i,url)=>setDoc(p=>{const d=migrate(p); (d[key]||[])[i].logo=url; return d;});
 
-  const setLogo = (key, i, url)=> setDoc(p=>{const d=migrate(p); (d[key]||[])[i].logo=url; return d;});
-  const Title = ({nameKey})=> <div className="sect-title"><CE value={doc.sectionNames[nameKey]} onChange={v=>setDoc(p=>{const d=migrate(p); d.sectionNames[nameKey]=v; return d;})}/></div>;
-  const pickImage = (cb)=>{ const i=document.createElement('input'); i.type='file'; i.accept='image/*'; i.onchange=e=>{const f=e.target.files?.[0]; if(!f) return; const r=new FileReader(); r.onload=()=>cb(String(r.result)); r.readAsDataURL(f);}; i.click(); };
+  /* Section title inline (editable on sheet) */
+  const Title=({keyName})=><div className="title"><CE value={doc.sectionNames[keyName]} onChange={v=>setDoc(p=>{const d=migrate(p); d.sectionNames[keyName]=v; return d;})}/></div>;
 
-  const R = {
-    headerSummary:()=>(<div style={{borderBottom:"1px solid var(--rule)",paddingBottom:"8px"}}>
+  /* Renderers */
+  const R={
+    headerSummary:()=>(<section style={{borderBottom:"1px solid var(--rule)",paddingBottom:"8px"}}>
       <CE value={doc.header.name} onChange={v=>setDoc(p=>{const d=migrate(p); d.header.name=v; return d;})} style={{fontSize:"22pt",fontWeight:700,color:"var(--accent)"}}/>
       <CE value={doc.header.role} onChange={v=>setDoc(p=>{const d=migrate(p); d.header.role=v; return d;})} style={{fontSize:"12pt",fontWeight:500,color:"#374151"}}/>
       <div className="meta" style={{marginTop:"6px"}}>
@@ -223,14 +209,14 @@ function App(){
             onChange={v=>setDoc(p=>{const d=migrate(p); d.header.meta=v; return d;})}/>
       </div>
       <CE value={doc.summary} onChange={v=>setDoc(p=>{const d=migrate(p); d.summary=v; return d;})} style={{marginTop:"8px",fontSize:"10pt"}}/>
-      <div style={{marginTop:"6px",display:"flex",gap:"8px"}}>
-        <button className="chip" onClick={()=>pickImage(url=>setDoc(p=>{const d=migrate(p); d.header.avatar=url; return d;}))}>Upload photo</button>
-        {doc.header.avatar && <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.header.avatar=""; return d;})}>Remove photo</button>}
+      <div style={{display:"flex",gap:"6px",marginTop:"6px"}}>
+        <button className="chip" onClick={()=>pickImage(url=>setDoc(p=>{const d=migrate(p); d.header.avatar=url; return d;}))}>Foto</button>
+        {doc.header.avatar && <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.header.avatar=""; return d;})}>Rimuovi foto</button>}
       </div>
-    </div>),
+    </section>),
 
     experience:()=>(<section>
-      <Title nameKey="experience"/>
+      <Title keyName="experience"/>
       {(doc.experience||[]).map((ex,i)=>(
         <div key={ex.id||i} style={{marginBottom:"8px"}}>
           <div style={{display:"flex",justifyContent:"space-between",gap:"12px"}}>
@@ -243,63 +229,38 @@ function App(){
             <ul style={{margin:"6px 0 0 18px"}}>
               {ex.bullets.map((b,j)=><li key={j}><CE value={b} onChange={v=>setDoc(p=>{const d=migrate(p); d.experience[i].bullets[j]=v; return d;})}/></li>)}
             </ul>}
-          <div style={{marginTop:"6px",display:"flex",gap:"6px",flexWrap:"wrap"}}>
+          <div style={{display:"flex",gap:"6px",flexWrap:"wrap",marginTop:"6px"}}>
             <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.experience[i].bullets=[...(d.experience[i].bullets||[]),""]; return d;})}>+ Bullet</button>
-            <button className="chip" onClick={()=>pickImage(url=>setLogo('experience',i,url))}>Logo</button>
-            {ex.logo && <button className="chip" onClick={()=>setLogo('experience',i,"")}>Remove logo</button>}
-            <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=migrate(p); d.experience.splice(i,1); return d;})}>Delete</button>
+            <button className="chip" onClick={()=>pickImage(u=>setLogo('experience',i,u))}>Logo</button>
+            {ex.logo && <button className="chip" onClick={()=>setLogo('experience',i,"")}>Rimuovi logo</button>}
+            <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=migrate(p); d.experience.splice(i,1); return d;})}>Elimina</button>
           </div>
         </div>
       ))}
-      <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.experience.push({id:rid(),title:"",company:"",period:"",location:"",logo:"",bullets:[]}); return d;})}>+ Add experience</button>
+      <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.experience.push({id:rid(),title:"",company:"",period:"",location:"",logo:"",bullets:[]}); return d;})}>+ Esperienza</button>
     </section>),
 
     education:()=>(<section>
-      <Title nameKey="education"/>
+      <Title keyName="education"/>
       {(doc.education||[]).map((ed,i)=>(
         <div key={i} style={{marginBottom:"8px"}}>
           <div style={{display:"flex",justifyContent:"space-between",gap:"12px"}}>
             <CE value={ed.degree} onChange={v=>setDoc(p=>{const d=migrate(p); d.education[i].degree=v; return d;})} style={{fontWeight:600}}/>
             <div className="meta">
               <CE value={ed.period} onChange={v=>setDoc(p=>{const d=migrate(p); d.education[i].period=v; return d;})}/>
-              {"  |  GPA "}
-              <CE value={ed.gpa||""} onChange={v=>setDoc(p=>{const d=migrate(p); d.education[i].gpa=v; return d;})}/>
+              {"  |  GPA "}<CE value={ed.gpa||""} onChange={v=>setDoc(p=>{const d=migrate(p); d.education[i].gpa=v; return d;})}/>
             </div>
           </div>
           <div><span style={{color:"var(--accent)"}}><CE value={ed.school} onChange={v=>setDoc(p=>{const d=migrate(p); d.education[i].school=v; return d;})}/></span></div>
           <div className="meta"><CE value={ed.location} onChange={v=>setDoc(p=>{const d=migrate(p); d.education[i].location=v; return d;})}/></div>
-          <div style={{marginTop:"6px",display:"flex",gap:"6px"}}>
-            <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=migrate(p); d.education.splice(i,1); return d;})}>Delete</button>
-          </div>
+          <div style={{marginTop:"6px"}}><button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=migrate(p); d.education.splice(i,1); return d;})}>Elimina</button></div>
         </div>
       ))}
-      <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.education.push({degree:"",school:"",period:"",location:"",gpa:""}); return d;})}>+ Add education</button>
-    </section>),
-
-    volunteering:()=>(<section>
-      <Title nameKey="volunteering"/>
-      {(doc.volunteering||[]).map((v,i)=>(
-        <div key={i} style={{marginBottom:"8px"}}>
-          <div style={{display:"flex",justifyContent:"space-between",gap:"12px"}}>
-            <CE value={v.role} onChange={val=>setDoc(p=>{const d=migrate(p); d.volunteering[i].role=val; return d;})} style={{fontWeight:600}}/>
-            <div className="meta"><CE value={v.period} onChange={val=>setDoc(p=>{const d=migrate(p); d.volunteering[i].period=val; return d;})}/></div>
-          </div>
-          <div><span style={{color:"var(--accent)"}}><CE value={v.org} onChange={val=>setDoc(p=>{const d=migrate(p); d.volunteering[i].org=val; return d;})}/></span></div>
-          <div className="meta"><CE value={v.location} onChange={val=>setDoc(p=>{const d=migrate(p); d.volunteering[i].location=val; return d;})}/></div>
-          {(v.bullets||[]).length>0 && <ul style={{margin:"6px 0 0 18px"}}>{v.bullets.map((b,j)=><li key={j}><CE value={b} onChange={val=>setDoc(p=>{const d=migrate(p); d.volunteering[i].bullets[j]=val; return d;})}/></li>)}</ul>}
-          <div style={{marginTop:"6px",display:"flex",gap:"6px",flexWrap:"wrap"}}>
-            <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.volunteering[i].bullets=[...(d.volunteering[i].bullets||[]),""]; return d;})}>+ Bullet</button>
-            <button className="chip" onClick={()=>pickImage(url=>setLogo('volunteering',i,url))}>Logo</button>
-            {v.logo && <button className="chip" onClick={()=>setLogo('volunteering',i,"")}>Remove logo</button>}
-            <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=migrate(p); d.volunteering.splice(i,1); return d;})}>Delete</button>
-          </div>
-        </div>
-      ))}
-      <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.volunteering.push({role:"",org:"",period:"",location:"",logo:"",bullets:[]}); return d;})}>+ Add volunteering</button>
+      <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.education.push({degree:"",school:"",period:"",location:"",gpa:""}); return d;})}>+ Formazione</button>
     </section>),
 
     projects:()=>(<section>
-      <Title nameKey="projects"/>
+      <Title keyName="projects"/>
       {(doc.projects||[]).map((pr,i)=>(
         <div key={i} style={{marginBottom:"8px"}}>
           <div style={{display:"flex",justifyContent:"space-between",gap:"12px"}}>
@@ -309,55 +270,55 @@ function App(){
           <div className="meta"><CE value={pr.location} onChange={v=>setDoc(p=>{const d=migrate(p); d.projects[i].location=v; return d;})}/></div>
           <div style={{color:"var(--accent)",fontWeight:600}}><CE value={pr.domain||""} onChange={v=>setDoc(p=>{const d=migrate(p); d.projects[i].domain=v; return d;})}/></div>
           {(pr.bullets||[]).length>0 && <ul style={{margin:"6px 0 0 18px"}}>{pr.bullets.map((b,j)=><li key={j}><CE value={b} onChange={v=>setDoc(p=>{const d=migrate(p); d.projects[i].bullets[j]=v; return d;})}/></li>)}</ul>}
-          <div style={{marginTop:"6px",display:"flex",gap:"6px",flexWrap:"wrap"}}>
+          <div style={{marginTop:"6px",display:"flex",gap:"6px"}}>
             <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.projects[i].bullets=[...(d.projects[i].bullets||[]),""]; return d;})}>+ Bullet</button>
-            <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=migrate(p); d.projects.splice(i,1); return d;})}>Delete</button>
+            <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=migrate(p); d.projects.splice(i,1); return d;})}>Elimina</button>
           </div>
         </div>
       ))}
-      <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.projects.push({name:"",domain:"",period:"",location:"",bullets:[]}); return d;})}>+ Add project</button>
+      <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.projects.push({name:"",domain:"",period:"",location:"",bullets:[]}); return d;})}>+ Progetto</button>
     </section>),
 
     certifications:()=>(<section>
-      <Title nameKey="certifications"/>
+      <Title keyName="certifications"/>
       {(doc.certifications||[]).map((c,i)=>(
         <div key={i} style={{marginBottom:"8px",display:"flex",gap:"10px",alignItems:"flex-start"}}>
-          {c.logo && <img src={c.logo} alt="" style={{width:"28px",height:"28px",borderRadius:"6px",border:"1px solid var(--rule)",objectFit:"cover"}}/>}
+          {c.logo && <img src={c.logo} style={{width:"28px",height:"28px",borderRadius:"6px",border:"1px solid var(--rule)",objectFit:"cover"}}/>}
           <div style={{flex:"1 1 auto"}}>
             <div style={{color:"var(--accent)"}}><CE value={c.line1||""} onChange={v=>setDoc(p=>{const d=migrate(p); d.certifications[i].line1=v; return d;})}/></div>
             <div><CE value={c.line2||""} onChange={v=>setDoc(p=>{const d=migrate(p); d.certifications[i].line2=v; return d;})}/></div>
-            <div style={{marginTop:"6px",display:"flex",gap:"6px"}}>
-              <button className="chip" onClick={()=>{const input=document.createElement('input'); input.type='file'; input.accept='image/*'; input.onchange=e=>{const f=e.target.files?.[0]; if(!f)return; const r=new FileReader(); r.onload=()=>setLogo('certifications',i,String(r.result)); r.readAsDataURL(f)}; input.click();}}>Logo</button>
-              {c.logo && <button className="chip" onClick={()=>setLogo('certifications',i,"")}>Remove logo</button>}
-              <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=migrate(p); d.certifications.splice(i,1); return d;})}>Delete</button>
+            <div style={{display:"flex",gap:"6px",marginTop:"6px"}}>
+              <button className="chip" onClick={()=>pickImage(u=>setLogo('certifications',i,u))}>Logo</button>
+              {c.logo && <button className="chip" onClick={()=>setLogo('certifications',i,"")}>Rimuovi</button>}
+              <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=migrate(p); d.certifications.splice(i,1); return d;})}>Elimina</button>
             </div>
           </div>
         </div>
       ))}
-      <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.certifications.push({line1:"",line2:"",logo:""}); return d;})}>+ Add certification</button>
+      <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.certifications.push({line1:"",line2:"",logo:""}); return d;})}>+ Certificazione</button>
     </section>),
 
     awards:()=>(<section>
-      <Title nameKey="awards"/>
+      <Title keyName="awards"/>
       {(doc.awards||[]).map((a,i)=>(
         <div key={i} style={{marginBottom:"8px",display:"flex",gap:"10px",alignItems:"flex-start"}}>
-          {a.logo && <img src={a.logo} alt="" style={{width:"28px",height:"28px",borderRadius:"6px",border:"1px solid var(--rule)",objectFit:"cover"}}/>}
+          {a.logo && <img src={a.logo} style={{width:"28px",height:"28px",borderRadius:"6px",border:"1px solid var(--rule)",objectFit:"cover"}}/>}
           <div style={{flex:"1 1 auto"}}>
             <div style={{fontWeight:600}}><CE value={a.line1||""} onChange={v=>setDoc(p=>{const d=migrate(p); d.awards[i].line1=v; return d;})}/></div>
             <div><CE value={a.line2||""} onChange={v=>setDoc(p=>{const d=migrate(p); d.awards[i].line2=v; return d;})}/></div>
-            <div style={{marginTop:"6px",display:"flex",gap:"6px"}}>
-              <button className="chip" onClick={()=>{const input=document.createElement('input'); input.type='file'; input.accept='image/*'; input.onchange=e=>{const f=e.target.files?.[0]; if(!f)return; const r=new FileReader(); r.onload=()=>setLogo('awards',i,String(r.result)); r.readAsDataURL(f)}; input.click();}}>Logo</button>
-              {a.logo && <button className="chip" onClick={()=>setLogo('awards',i,"")}>Remove logo</button>}
-              <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=migrate(p); d.awards.splice(i,1); return d;})}>Delete</button>
+            <div style={{display:"flex",gap:"6px",marginTop:"6px"}}>
+              <button className="chip" onClick={()=>pickImage(u=>setLogo('awards',i,u))}>Logo</button>
+              {a.logo && <button className="chip" onClick={()=>setLogo('awards',i,"")}>Rimuovi</button>}
+              <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=migrate(p); d.awards.splice(i,1); return d;})}>Elimina</button>
             </div>
           </div>
         </div>
       ))}
-      <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.awards.push({line1:"",line2:"",logo:""}); return d;})}>+ Add award</button>
+      <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.awards.push({line1:"",line2:"",logo:""}); return d;})}>+ Premio</button>
     </section>),
 
     skills:()=>(<section>
-      <Title nameKey="skills"/>
+      <Title keyName="skills"/>
       {(doc.skills||[]).map((g,gi)=>(
         <div key={g.id||gi} style={{marginBottom:"8px"}}>
           <div style={{fontWeight:500}}><CE value={g.group||""} onChange={v=>setDoc(p=>{const d=migrate(p); d.skills[gi].group=v; return d;})}/></div>
@@ -368,160 +329,175 @@ function App(){
               </span>
             )}
           </div>
-          <div style={{marginTop:"6px",display:"flex",gap:"6px"}}>
+          <div style={{display:"flex",gap:"6px",marginTop:"6px"}}>
             <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.skills[gi].items=[...(d.skills[gi].items||[]),""]; return d;})}>+ Skill</button>
-            <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=migrate(p); d.skills.splice(gi,1); return d;})}>Delete group</button>
+            <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=migrate(p); d.skills.splice(gi,1); return d;})}>Elimina gruppo</button>
           </div>
         </div>
       ))}
-      <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.skills.push({id:rid(),group:"",items:[]}); return d;})}>+ Add group</button>
+      <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.skills.push({id:rid(),group:"",items:[]}); return d;})}>+ Gruppo</button>
     </section>),
 
     languages:()=>(<section>
-      <Title nameKey="languages"/>
+      <Title keyName="languages"/>
       {(doc.languages||[]).map((l,li)=>(
         <div key={l.id||li} style={{display:"flex",justifyContent:"space-between",marginBottom:"6px"}}>
-          <div><CE value={l.name||""} onChange={v=>setDoc(p=>{const d=migrate(p); d.languages[li].name=v; return d;})}/></div>
+          <CE value={l.name||""} onChange={v=>setDoc(p=>{const d=migrate(p); d.languages[li].name=v; return d;})}/>
           <div className="meta"><CE value={l.level||""} onChange={v=>setDoc(p=>{const d=migrate(p); d.languages[li].level=v; return d;})}/></div>
         </div>
       ))}
-      <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.languages.push({id:rid(),name:"",score:3,level:""}); return d;})}>+ Add language</button>
+      <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.languages.push({id:rid(),name:"",level:""}); return d;})}>+ Lingua</button>
     </section>),
 
     strengths:()=>(<section>
-      <Title nameKey="strengths"/>
+      <Title keyName="strengths"/>
       {(doc.strengths||[]).map((st,i)=>(
         <div key={st.id||i} style={{display:"flex",gap:"8px",alignItems:"center",marginBottom:"6px"}}>
-          {st.logo && <img src={st.logo} style={{width:"28px",height:"28px",borderRadius:"6px",border:"1px solid var(--rule)",objectFit:"cover"}} alt=""/>}
+          {st.logo && <img src={st.logo} style={{width:"28px",height:"28px",borderRadius:"6px",border:"1px solid var(--rule)",objectFit:"cover"}}/>}
           <CE value={st.label||""} onChange={v=>setDoc(p=>{const d=migrate(p); d.strengths[i].label=v; return d;})}/>
           <div style={{marginLeft:"auto",display:"flex",gap:"6px"}}>
-            <button className="chip" onClick={()=>{const input=document.createElement('input'); input.type='file'; input.accept='image/*'; input.onchange=e=>{const f=e.target.files?.[0]; if(!f)return; const r=new FileReader(); r.onload=()=>setLogo('strengths',i,String(r.result)); r.readAsDataURL(f)}; input.click();}}>Logo</button>
-            {st.logo && <button className="chip" onClick={()=>setLogo('strengths',i,"")}>Remove</button>}
-            <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=migrate(p); d.strengths.splice(i,1); return d;})}>Delete</button>
+            <button className="chip" onClick={()=>pickImage(u=>setLogo('strengths',i,u))}>Logo</button>
+            {st.logo && <button className="chip" onClick={()=>setLogo('strengths',i,"")}>Rimuovi</button>}
+            <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=migrate(p); d.strengths.splice(i,1); return d;})}>Elimina</button>
           </div>
         </div>
       ))}
-      <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.strengths.push({id:rid(),label:""}); return d;})}>+ Add strength</button>
+      <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.strengths.push({id:rid(),label:""}); return d;})}>+ Punto di forza</button>
     </section>),
 
     hobbies:()=>(<section>
-      <Title nameKey="hobbies"/>
+      <Title keyName="hobbies"/>
       {(doc.hobbies||[]).map((hb,i)=>(
         <div key={hb.id||i} style={{display:"flex",gap:"8px",alignItems:"center",marginBottom:"6px"}}>
-          {hb.logo && <img src={hb.logo} style={{width:"28px",height:"28px",borderRadius:"6px",border:"1px solid var(--rule)",objectFit:"cover"}} alt=""/>}
+          {hb.logo && <img src={hb.logo} style={{width:"28px",height:"28px",borderRadius:"6px",border:"1px solid var(--rule)",objectFit:"cover"}}/>}
           <CE value={hb.label||""} onChange={v=>setDoc(p=>{const d=migrate(p); d.hobbies[i].label=v; return d;})}/>
           <div style={{marginLeft:"auto",display:"flex",gap:"6px"}}>
-            <button className="chip" onClick={()=>{const input=document.createElement('input'); input.type='file'; input.accept='image/*'; input.onchange=e=>{const f=e.target.files?.[0]; if(!f)return; const r=new FileReader(); r.onload=()=>setLogo('hobbies',i,String(r.result)); r.readAsDataURL(f)}; input.click();}}>Logo</button>
-            {hb.logo && <button className="chip" onClick={()=>setLogo('hobbies',i,"")}>Remove</button>}
-            <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=migrate(p); d.hobbies.splice(i,1); return d;})}>Delete</button>
+            <button className="chip" onClick={()=>pickImage(u=>setLogo('hobbies',i,u))}>Logo</button>
+            {hb.logo && <button className="chip" onClick={()=>setLogo('hobbies',i,"")}>Rimuovi</button>}
+            <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=migrate(p); d.hobbies.splice(i,1); return d;})}>Elimina</button>
           </div>
         </div>
       ))}
-      <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.hobbies.push({id:rid(),label:""}); return d;})}>+ Add hobby</button>
+      <button className="chip" onClick={()=>setDoc(p=>{const d=migrate(p); d.hobbies.push({id:rid(),label:""}); return d;})}>+ Hobby</button>
     </section>),
 
     online:()=>(<section>
-      <Title nameKey="online"/>
+      <Title keyName="online"/>
       <div className="meta"><CE value={doc.online?.linkedin?.label||""} onChange={v=>setDoc(p=>{const d=migrate(p); d.online.linkedin=d.online.linkedin||{}; d.online.linkedin.label=v; return d;})}/></div>
       <div className="meta"><CE value={doc.online?.github?.label||""} onChange={v=>setDoc(p=>{const d=migrate(p); d.online.github=d.online.github||{}; d.online.github.label=v; return d;})}/></div>
       <div className="meta"><CE value={doc.online?.website?.label||""} onChange={v=>setDoc(p=>{const d=migrate(p); d.online.website=d.online.website||{}; d.online.website.label=v; return d;})}/></div>
     </section>),
 
     laws:()=>(<section>
-      <Title nameKey="laws"/>
+      <Title keyName="laws"/>
       <div className="meta"><CE value={(doc.laws||[]).join("\n")} onChange={v=>setDoc(p=>{const d=migrate(p); d.laws=[v]; return d;})}/></div>
     </section>)
   };
 
-  const ColumnTools = ({pgIdx,rowIdx,side,row})=>{
-    const items = side==="left" ? (row.left||[]) : (row.right||[]);
+  const Row=({pi,ri,row})=>{
+    const cls=row.type==="single"?"row single":row.type==="r-13-23"?"row r-13-23":"row r-23-13";
     return (
-      <div className="col-tools">
-        {items.map((sec,i)=>(
-          <span key={sec+i} className="sect-pill">
-            {doc.sectionNames[sec] || sec}
-            <button className="pill-btn" title="up" onClick={()=>moveSection(pgIdx,rowIdx,side,i,"up")}>↑</button>
-            <button className="pill-btn" title="down" onClick={()=>moveSection(pgIdx,rowIdx,side,i,"down")}>↓</button>
-            {row.type!=="single" && <button className="pill-btn" title="swap column" onClick={()=>swapSectionSide(pgIdx,rowIdx,side,i)}>⇆</button>}
-            <button className="pill-btn" title="remove" onClick={()=>removeSection(pgIdx,rowIdx,side,i)}>✕</button>
-          </span>
-        ))}
-        <select className="field" onChange={e=>{ if(!e.target.value) return; addSection(pgIdx,rowIdx,side,e.target.value); e.target.value=""; }}>
-          <option value="">+ Add section…</option>
-          {ALL_SECTIONS.map(k=> <option key={k} value={k}>{doc.sectionNames[k]||k}</option>)}
-        </select>
-      </div>
-    );
-  };
-
-  const Row = ({pgIdx,rowIdx,row})=>{
-    const cls = row.type==="col-23-13"?"row col-23-13" : row.type==="col-13-23"?"row col-13-23":"row single";
-    return (
-      <div className={cls}>
-        <div className="row-tools">
-          <select className="field" value={row.type} onChange={e=>changeRowType(pgIdx,rowIdx,e.target.value)}>
-            {ROW_TYPES.map(rt=><option key={rt.id} value={rt.id}>{rt.label}</option>)}
+      <div className={cls} style={{fontSize:(doc._theme||{}).fontSize+"pt",lineHeight:(doc._theme||{}).lineHeight}}>
+        {/* floating row tools */}
+        <div className="row-tools" style={{display:reorder?"flex":"none"}}>
+          <select className="field" value={row.type} onChange={e=>changeRowType(pi,ri,e.target.value)}>
+            <option value="single">Singola</option>
+            <option value="r-13-23">1/3 – 2/3</option>
+            <option value="r-23-13">2/3 – 1/3</option>
           </select>
-          <button className="btn" onClick={()=>addRowBelow(pgIdx,rowIdx)}>+ row</button>
-          <button className="btn-danger" onClick={()=>deleteRow(pgIdx,rowIdx)}>Delete row</button>
+          <button className="btn" onClick={()=>addRowBelow(pi,ri)}>+ riga</button>
+          <button className="btn-danger" onClick={()=>delRow(pi,ri)}>Elimina riga</button>
         </div>
 
+        {/* LEFT column */}
         <div>
-          <ColumnTools pgIdx={pgIdx} rowIdx={rowIdx} side="left" row={row}/>
-          {(row.left||[]).map((sec,i)=><div key={sec+i}>{R[sec]?R[sec]():<div className="meta">Unknown: {sec}</div>}</div>)}
+          {reorder && <ColTools pi={pi} ri={ri} side="left" row={row}/>}
+          {(row.left||[]).map((k,idx)=><div key={k+idx}>{R[k]?R[k]():<div className="meta">Unknown: {k}</div>}</div>)}
         </div>
-
+        {/* RIGHT column */}
         {row.type!=="single" && (
           <div>
-            <ColumnTools pgIdx={pgIdx} rowIdx={rowIdx} side="right" row={row}/>
-            {(row.right||[]).map((sec,i)=><div key={sec+i}>{R[sec]?R[sec]():<div className="meta">Unknown: {sec}</div>}</div>)}
+            {reorder && <ColTools pi={pi} ri={ri} side="right" row={row}/>}
+            {(row.right||[]).map((k,idx)=><div key={k+idx}>{R[k]?R[k]():<div className="meta">Unknown: {k}</div>}</div>)}
           </div>
         )}
       </div>
     );
   };
 
+  const ColTools=({pi,ri,side,row})=>{
+    const items = side==="left"? (row.left||[]) : (row.right||[]);
+    return (
+      <div className="col-tools">
+        {items.map((sec,i)=>(
+          <span key={sec+i} className="pill">
+            {doc.sectionNames[sec]||sec}
+            <button className="x" title="su" onClick={()=>mvSec(pi,ri,side,i,"up")}>↑</button>
+            <button className="x" title="giù" onClick={()=>mvSec(pi,ri,side,i,"down")}>↓</button>
+            {row.type!=="single" && <button className="x" title="scambia colonna" onClick={()=>swapSec(pi,ri,side,i)}>⇆</button>}
+            <button className="x" title="rimuovi" onClick={()=>rmSec(pi,ri,side,i)}>✕</button>
+          </span>
+        ))}
+        <select className="field" onChange={e=>{ if(!e.target.value) return; addSec(pi,ri,side,e.target.value); e.target.value=""; }}>
+          <option value="">+ sezione…</option>
+          {ALL_SECS.map(k=><option key={k} value={k}>{doc.sectionNames[k]||k}</option>)}
+        </select>
+      </div>
+    );
+  };
+
   return (
     <div style={{height:"100%",display:"flex",flexDirection:"column"}}>
-      <div className="toolbar">
+      <div className="topbar">
         <a className="btn" href="./home.html">← Home</a>
-        <button className="btn" onClick={addPage}>+ Page</button>
-        <button className="btn-danger" onClick={delLastPage}>− Last</button>
-        <button className="btn" onClick={save}>Save</button>
-        <button className="btn-primary" onClick={exportPDF}>Export PDF</button>
-        <span style={{marginLeft:"auto",fontWeight:600}}>CV Studio — Editor</span>
+        <button className="btn" onClick={()=>setReorder(v=>!v)}>{reorder?"Esci riordina":"Riordina"}</button>
+        <button className="btn" onClick={addPage}>+ Pagina</button>
+        <button className="btn-danger" onClick={delLast}>− Ultima</button>
+        <button className="btn" onClick={save}>Salva</button>
+        <button className="btn-primary" onClick={exportPDF}>Esporta PDF</button>
+        <span style={{marginLeft:"auto",fontWeight:700}}>CV Studio</span>
       </div>
 
-      <div className="wrap">
-        <aside>
-          <div style={{fontWeight:600,marginBottom:"8px"}}>Section labels (sincronizzate on-canvas)</div>
-          {Object.keys(doc.sectionNames||{}).map(k=>(
-            <div key={k} style={{display:"grid",gridTemplateColumns:"120px 1fr",gap:"8px",alignItems:"center",marginBottom:"6px"}}>
-              <div className="meta">{k}</div>
-              <input className="field" value={doc.sectionNames[k]} onChange={e=>setDoc(p=>{const d=migrate(p); d.sectionNames[k]=e.target.value; return d;})}/>
-            </div>
-          ))}
-          <div style={{height:"12px"}}></div>
-          <div style={{fontWeight:600,marginBottom:"8px"}}>Theme</div>
-          <div style={{display:"grid",gridTemplateColumns:"120px 1fr",gap:"8px",alignItems:"center",marginBottom:"6px"}}>
-            <div className="meta">Accent</div>
-            <input type="color" className="field" value={(doc._theme||{}).accent} onChange={e=>setDoc(p=>{const d=migrate(p); d._theme.accent=e.target.value; return d;})}/>
+      <div className="main">
+        <!-- Left rail like the screenshot -->
+        <div className="rail">
+          <div className="rail-group">
+            <div className="rail-title">Azioni</div>
+            <div className="rail-item" onclick="void(0)"><span class="k">+</span> Aggiungi sezione (usa menu in pagina)</div>
+            <div className="rail-item" onclick="void(0)"><span class="k">↕︎</span> Riordina (toggle sopra)</div>
+            <div className="rail-item" onclick="void(0)"><span class="k">⌘F</span> Modelli & Font (WIP)</div>
+            <div className="rail-item" onclick="void(0)"><span class="k">✓</span> Controlla (manuale)</div>
+            <div className="rail-item" onclick="void(0)"><span class="k">↓</span> Scarica (usa “Esporta PDF”)</div>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"120px 1fr",gap:"8px",alignItems:"center",marginBottom:"6px"}}>
-            <div className="meta">Font size</div>
-            <input type="range" min="9" max="14" step="1" value={(doc._theme||{}).fontSize} onChange={e=>setDoc(p=>{const d=migrate(p); d._theme.fontSize=Number(e.target.value); return d;})}/>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"120px 1fr",gap:"8px",alignItems:"center",marginBottom:"6px"}}>
-            <div className="meta">Line height</div>
-            <input type="range" min="1.2" max="1.8" step="0.05" value={(doc._theme||{}).lineHeight} onChange={e=>setDoc(p=>{const d=migrate(p); d._theme.lineHeight=Number(e.target.value); return d;})}/>
-          </div>
-        </aside>
 
-        <div className="preview">
-          <div className="sheets">
-            {(doc._layout||[]).sort((a,b)=>a.page-b.page).map((pg,pgIdx)=>(
-              <div key={pg.id||pgIdx} className="sheet" style={{fontSize:(doc._theme||{}).fontSize+"pt",lineHeight:(doc._theme||{}).lineHeight}}>
-                {(pg.rows||[]).map((row,rowIdx)=> <Row key={row.id||rowIdx} pgIdx={pgIdx} rowIdx={rowIdx} row={row}/>)}
+          <div className="rail-group">
+            <div className="rail-title">Tema</div>
+            <div style="display:grid;grid-template-columns:90px 1fr;gap:8px;align-items:center;margin:6px 0">
+              <div class="meta">Accent</div>
+              <input type="color" class="field" value="" id="accentPick"/>
+            </div>
+            <div style="display:grid;grid-template-columns:90px 1fr;gap:8px;align-items:center;margin:6px 0">
+              <div class="meta">T. base</div>
+              <input type="range" min="9" max="14" step="1" id="fsRange"/>
+            </div>
+            <div style="display:grid;grid-template-columns:90px 1fr;gap:8px;align-items:center;margin:6px 0">
+              <div class="meta">Interlinea</div>
+              <input type="range" min="1.2" max="1.8" step="0.05" id="lhRange"/>
+            </div>
+          </div>
+
+          <div className="rail-group">
+            <div className="rail-title">Etichette sezione</div>
+            <div id="labelsBox"></div>
+          </div>
+        </div>
+
+       
+        <div className="canvas">
+          <div className="stack">
+            {(doc._layout||[]).sort((a,b)=>a.page-b.page).map((pg,pi)=>(
+              <div key={pg.id||pi} className="sheet">
+                {(pg.rows||[]).map((row,ri)=><Row key={row.id||ri} pi={pi} ri={ri} row={row}/>)}
               </div>
             ))}
           </div>
@@ -529,9 +505,47 @@ function App(){
       </div>
     </div>
   );
-}
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+  /* wire simple inputs in the rail */
+}
+const root=ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App/>);
+
+/* Imperative wiring for theme sliders & labels (keeps React code readable) */
+(function wire(){
+  const accent=document.getElementById('accentPick');
+  const fs=document.getElementById('fsRange');
+  const lh=document.getElementById('lhRange');
+  const labelsBox=document.getElementById('labelsBox');
+
+  function getDoc(){ try{return JSON.parse(localStorage.getItem("cvdoc:"+ (new URL(location.href).searchParams.get('doc')||'Default'))||"null")}catch{return null} }
+  function putDoc(d){ localStorage.setItem("cvdoc:"+ (new URL(location.href).searchParams.get('doc')||'Default'), JSON.stringify(d)); }
+
+  function refreshControls(){
+    const d = (getDoc()||{}); const m = (d._theme||{});
+    accent && (accent.value = m.accent || '#2b8bd8');
+    fs && (fs.value = (m.fontSize||11));
+    lh && (lh.value = (m.lineHeight||1.45));
+    labelsBox.innerHTML = "";
+    const names = d.sectionNames || {};
+    Object.keys(names).forEach(k=>{
+      const wrap=document.createElement('div');
+      wrap.style.display='grid'; wrap.style.gridTemplateColumns='90px 1fr'; wrap.style.gap='8px'; wrap.style.alignItems='center'; wrap.style.margin='6px 0';
+      const left=document.createElement('div'); left.className='meta'; left.textContent=k;
+      const inp=document.createElement('input'); inp.className='field'; inp.value=names[k];
+      inp.oninput=()=>{ const doc=getDoc()||{}; doc.sectionNames=doc.sectionNames||{}; doc.sectionNames[k]=inp.value; putDoc(doc); location.reload(); };
+      wrap.appendChild(left); wrap.appendChild(inp); labelsBox.appendChild(wrap);
+    });
+  }
+  refreshControls();
+
+  function updateTheme(key, val){
+    const d=getDoc()||{}; d._theme=d._theme||{}; d._theme[key]=val; putDoc(d); location.reload();
+  }
+  accent && (accent.oninput = e=>updateTheme('accent', e.target.value));
+  fs && (fs.oninput = e=>updateTheme('fontSize', Number(e.target.value)));
+  lh && (lh.oninput = e=>updateTheme('lineHeight', Number(e.target.value)));
+})();
 </script>
 </body>
 </html>
