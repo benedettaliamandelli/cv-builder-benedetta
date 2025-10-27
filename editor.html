@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>CV Studio — Editor</title>
 
-<!-- (Optional) your fonts/css; safe if missing -->
 <link rel="stylesheet" href="./fonts/fonts.css"/>
 <link rel="stylesheet" href="./styles.css"/>
 
@@ -60,12 +59,23 @@
   .sheet{
     width:var(--sheet-w);min-height:var(--sheet-h);
     background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.08);
-    padding:18mm 16mm;display:flex;flex-direction:column;gap:12px
+    padding:18mm 16mm;display:flex;flex-direction:column;gap:14px
   }
-  .row{display:grid;gap:18px}
+  .row{display:grid;gap:18px;position:relative}
   .single{grid-template-columns:1fr}
   .col-13-23{grid-template-columns:1fr 2fr}
   .col-23-13{grid-template-columns:2fr 1fr}
+
+  .row-toolbar{
+    position:absolute;right:-8px;top:-10px;display:flex;gap:6px;z-index:2
+  }
+  .chip{border:1px solid var(--rule);background:#fff;border-radius:999px;padding:4px 8px;font-size:12px;cursor:pointer}
+  .chip:hover{background:#f3f4f6}
+
+  .col-toolbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+  .sect-pill{border:1px dashed var(--rule);border-radius:999px;padding:2px 8px;font-size:11px;background:#fafafa}
+  .pill-btn{border:none;background:none;color:#6b7280;cursor:pointer;margin-left:6px}
+  .pill-btn:hover{color:#111827}
 
   .sect-title{
     text-transform:uppercase;letter-spacing:.08em;
@@ -86,30 +96,29 @@
   }
 </style>
 
-<!-- React + Babel -->
 <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-<!-- Storage fallbacks -->
+<!-- optional, used if present -->
 <script src="./storage.local.js"></script>
+<script src="./storage.firebase.js"></script>
 </head>
 <body>
 <div id="root"></div>
 
 <script type="text/babel">
-const {useState,useEffect,useMemo,useRef} = React;
+const {useState,useEffect} = React;
 const rid = () => Math.random().toString(36).slice(2)+Date.now().toString(36);
 const param = (k,d=null)=>{try{return new URL(location.href).searchParams.get(k)??d}catch{return d}};
 const uid = param('uid',null);
 const docName = param('doc','Default');
 
-/* Storage facade (uses your StorageAPI if present, else localStorage) */
+/* Storage facade */
 const Store = {
   async load(name, uid){
     if (window.StorageAPI?.load) return window.StorageAPI.load(name, uid);
-    const raw = localStorage.getItem("cvdoc:"+name);
-    try{return raw?JSON.parse(raw):null}catch{return null}
+    try{ return JSON.parse(localStorage.getItem("cvdoc:"+name) || "null"); }catch{return null}
   },
   async save(name, data, uid){
     if (window.StorageAPI?.save) return window.StorageAPI.save(name, data, uid);
@@ -117,7 +126,7 @@ const Store = {
   }
 };
 
-/* Safe seed */
+/* Seed */
 const SAFE_DOC = {
   header:{ name:"JOHN DOE", role:"Data Scientist", email:"john.doe@example.com", phone:"+39 333 0000000", city:"Milan, Italy", birth:"01/01/1995", avatar:"" },
   summary:"Biomedical Engineer and Data Scientist passionate about AI-powered healthcare innovation.",
@@ -130,7 +139,7 @@ const SAFE_DOC = {
   hobbies:[{id:rid(),icon:"",label:"Photography"}],
   online:{linkedin:{label:"/in/johndoe"}, github:{label:"github.com/johndoe"}, website:{label:"johndoe.dev"}},
   laws:["I authorize the processing of personal data in accordance with GDPR 2016/679."],
-  _theme:{ accent:"#2563eb", fontSize:11, lineHeight:1.45, h:700, sh:500 },
+  _theme:{ accent:"#2563eb", fontSize:11, lineHeight:1.45 },
   _layout:[{
     id:rid(), page:1,
     rows:[
@@ -140,38 +149,104 @@ const SAFE_DOC = {
   }]
 };
 
-/* small clone */
 const clone = o => JSON.parse(JSON.stringify(o));
+
+/* Image picker -> DataURL */
+const pickImage = (cb)=>{
+  const i=document.createElement('input'); i.type='file'; i.accept='image/*';
+  i.onchange=e=>{
+    const f=e.target.files?.[0]; if(!f) return;
+    const r=new FileReader(); r.onload=()=> cb(String(r.result)); r.readAsDataURL(f);
+  };
+  i.click();
+};
+
+/* Inline editable primitive */
+const CE = ({value,onChange,placeholder="",style={}})=>(
+  <div className="editable" contentEditable suppressContentEditableWarning
+       onBlur={(e)=>onChange(e.currentTarget.textContent||"")}
+       onKeyDown={(e)=>{ if(e.key==="Enter"){ e.preventDefault(); e.currentTarget.blur(); } }}
+       style={style}>{value || placeholder}</div>
+);
 
 function App(){
   const [doc,setDoc] = useState(SAFE_DOC);
 
-  /* load once */
+  /* load & theme */
   useEffect(()=>{(async()=>{
     const saved = await Store.load(docName, uid);
     if (saved) setDoc(clone(saved));
   })()},[]);
-
-  /* theme -> CSS */
   useEffect(()=>{document.documentElement.style.setProperty('--accent', doc._theme?.accent || '#2563eb')},[doc]);
 
-  /* helpers */
-  const CE = ({value,onChange,className="",style={}})=>(
-    <div className={`editable ${className}`} contentEditable
-         suppressContentEditableWarning
-         onBlur={(e)=>onChange(e.currentTarget.textContent||"")}
-         style={style}>{value}</div>
-  );
+  /* toolbar handlers */
   const save = async()=>{ await Store.save(docName, doc, uid); alert("Saved"); };
+  const exportPDF = async()=>{
+    await Store.save(docName, doc, uid);
+    // Ensure layout recalculated before print
+    requestAnimationFrame(()=> window.print());
+  };
+
   const addPage = ()=> setDoc(prev=>{
     const d=clone(prev);
-    d._layout.push({id:rid(),page:(d._layout[d._layout.length-1]?.page||0)+1,rows:[{id:rid(),type:"single",left:["headerSummary"],right:[]}]});
+    d._layout.push({
+      id:rid(), page:(d._layout[d._layout.length-1]?.page||0)+1,
+      rows:[{id:rid(),type:"single",left:["headerSummary"],right:[]}]
+    });
     return d;
   });
   const delLastPage = ()=> setDoc(prev=>{
     const d=clone(prev); if(d._layout.length>1) d._layout.pop(); return d;
   });
-  const printPDF = ()=> window.print();
+
+  /* row/section ops */
+  const ROW_TYPES = [
+    {id:"single", label:"Single"},
+    {id:"col-13-23", label:"1/3 – 2/3"},
+    {id:"col-23-13", label:"2/3 – 1/3"},
+  ];
+  const ALL_SECTIONS = [
+    "headerSummary","experience","education","volunteering","projects",
+    "certifications","awards","skills","languages","strengths","hobbies","online","laws"
+  ];
+
+  const changeRowType = (pgIdx,rowIdx,type)=> setDoc(p=>{
+    const d=clone(p); d._layout[pgIdx].rows[rowIdx].type=type; return d;
+  });
+  const addRowBelow = (pgIdx,rowIdx)=> setDoc(p=>{
+    const d=clone(p);
+    d._layout[pgIdx].rows.splice(rowIdx+1,0,{id:rid(),type:d._layout[pgIdx].rows[rowIdx].type,left:[],right:[]});
+    return d;
+  });
+  const deleteRow = (pgIdx,rowIdx)=> setDoc(p=>{
+    const d=clone(p);
+    if(d._layout[pgIdx].rows.length>1) d._layout[pgIdx].rows.splice(rowIdx,1);
+    return d;
+  });
+
+  const addSection = (pgIdx,rowIdx,side,sec)=> setDoc(p=>{
+    const d=clone(p); (side==="left"?d._layout[pgIdx].rows[rowIdx].left:d._layout[pgIdx].rows[rowIdx].right).push(sec); return d;
+  });
+  const removeSection = (pgIdx,rowIdx,side,i)=> setDoc(p=>{
+    const d=clone(p); (side==="left"?d._layout[pgIdx].rows[rowIdx].left:d._layout[pgIdx].rows[rowIdx].right).splice(i,1); return d;
+  });
+  const moveSection = (pgIdx,rowIdx,side,i,dir)=> setDoc(p=>{
+    const d=clone(p);
+    const arr = side==="left"?d._layout[pgIdx].rows[rowIdx].left:d._layout[pgIdx].rows[rowIdx].right;
+    const j = dir==="left"||dir==="up" ? i-1 : i+1;
+    if (j<0 || j>=arr.length) return p;
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+    return d;
+  });
+  const swapSectionSide = (pgIdx,rowIdx,side,i)=> setDoc(p=>{
+    const d=clone(p);
+    const row = d._layout[pgIdx].rows[rowIdx];
+    const from = side==="left"?row.left:row.right;
+    const to   = side==="left"?row.right:row.left;
+    const item = from.splice(i,1)[0];
+    to.push(item);
+    return d;
+  });
 
   /* section title inline editable */
   const Title = ({keyName})=>(
@@ -179,6 +254,9 @@ function App(){
       <CE value={doc.sectionNames[keyName]} onChange={v=>setDoc(p=>{const d=clone(p); d.sectionNames[keyName]=v; return d;})}/>
     </div>
   );
+
+  /* Image helpers in sections */
+  const setLogo = (key, i, url)=> setDoc(p=>{const d=clone(p); (d[key]||[])[i].logo=url; return d;});
 
   /* renderers */
   const R = {
@@ -194,6 +272,10 @@ function App(){
         </div>
         <CE value={doc.summary} onChange={v=>setDoc(p=>{const d=clone(p); d.summary=v; return d;})}
             style={{marginTop:"8px",fontSize:"10pt"}}/>
+        <div style="margin-top:6px;display:flex;gap:8px">
+          <button class="chip" onclick={()=>pickImage(url=>setDoc(p=>{const d=clone(p); d.header.avatar=url; return d;}))}>Upload photo</button>
+          {doc.header.avatar && <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.header.avatar=""; return d;})}>Remove photo</button>}
+        </div>
       </div>
     ),
     experience:()=>(
@@ -212,69 +294,267 @@ function App(){
             <div className="meta"><CE value={ex.location} onChange={v=>setDoc(p=>{const d=clone(p); d.experience[i].location=v; return d;})}/></div>
             {(ex.bullets||[]).length>0 &&
               <ul style={{margin:"6px 0 0 18px"}}>
-                {ex.bullets.map((b,j)=>(
+                {ex.bullets.map((b,j)=>
                   <li key={j}><CE value={b} onChange={v=>setDoc(p=>{const d=clone(p); d.experience[i].bullets[j]=v; return d;})}/></li>
-                ))}
+                )}
               </ul>}
+            <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+              <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.experience[i].bullets=[...(d.experience[i].bullets||[]), ""]; return d;})}>+ Bullet</button>
+              <button class="chip" onclick={()=>pickImage(url=>setLogo('experience',i,url))}>Logo</button>
+              {ex.logo && <button class="chip" onclick={()=>setLogo('experience',i,"")}>Remove logo</button>}
+              <button class="chip btn-danger" onclick={()=>setDoc(p=>{const d=clone(p); d.experience.splice(i,1); return d;})}>Delete</button>
+            </div>
           </div>
         ))}
+        <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.experience.push({id:rid(),title:"",company:"",period:"",location:"",logo:"",bullets:[]}); return d;})}>+ Add experience</button>
+      </section>
+    ),
+    education:()=>(
+      <section>
+        <Title keyName="education"/>
+        {(doc.education||[]).map((ed,i)=>(
+          <div key={i} style="margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;gap:12px">
+              <CE value={ed.degree} onChange={v=>setDoc(p=>{const d=clone(p); d.education[i].degree=v; return d;})} style="font-weight:600"/>
+              <div class="meta">
+                <CE value={ed.period} onChange={v=>setDoc(p=>{const d=clone(p); d.education[i].period=v; return d;})}/>
+                {"  |  GPA "}
+                <CE value={ed.gpa||""} onChange={v=>setDoc(p=>{const d=clone(p); d.education[i].gpa=v; return d;})}/>
+              </div>
+            </div>
+            <div><span style="color:var(--accent)">
+              <CE value={ed.school} onChange={v=>setDoc(p=>{const d=clone(p); d.education[i].school=v; return d;})}/>
+            </span></div>
+            <div class="meta"><CE value={ed.location} onChange={v=>setDoc(p=>{const d=clone(p); d.education[i].location=v; return d;})}/></div>
+            <div style="margin-top:6px;display:flex;gap:6px">
+              <button class="chip btn-danger" onclick={()=>setDoc(p=>{const d=clone(p); d.education.splice(i,1); return d;})}>Delete</button>
+            </div>
+          </div>
+        ))}
+        <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.education.push({degree:"",school:"",period:"",location:"",gpa:""}); return d;})}>+ Add education</button>
+      </section>
+    ),
+    volunteering:()=>(
+      <section>
+        <Title keyName="volunteering"/>
+        {(doc.volunteering||[]).map((v,i)=>(
+          <div key={i} style="margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;gap:12px">
+              <CE value={v.role} onChange={val=>setDoc(p=>{const d=clone(p); d.volunteering[i].role=val; return d;})} style="font-weight:600"/>
+              <div class="meta"><CE value={v.period} onChange={val=>setDoc(p=>{const d=clone(p); d.volunteering[i].period=val; return d;})}/></div>
+            </div>
+            <div><span style="color:var(--accent)">
+              <CE value={v.org} onChange={val=>setDoc(p=>{const d=clone(p); d.volunteering[i].org=val; return d;})}/>
+            </span></div>
+            <div class="meta"><CE value={v.location} onChange={val=>setDoc(p=>{const d=clone(p); d.volunteering[i].location=val; return d;})}/></div>
+            {(v.bullets||[]).length>0 &&
+              <ul style="margin:6px 0 0 18px">
+                {v.bullets.map((b,j)=><li key={j}><CE value={b} onChange={val=>setDoc(p=>{const d=clone(p); d.volunteering[i].bullets[j]=val; return d;})}/></li>)}
+              </ul>}
+            <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+              <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.volunteering[i].bullets=[...(d.volunteering[i].bullets||[]), ""]; return d;})}>+ Bullet</button>
+              <button class="chip" onclick={()=>pickImage(url=>setLogo('volunteering',i,url))}>Logo</button>
+              {v.logo && <button class="chip" onclick={()=>setLogo('volunteering',i,"")}>Remove logo</button>}
+              <button class="chip btn-danger" onclick={()=>setDoc(p=>{const d=clone(p); d.volunteering.splice(i,1); return d;})}>Delete</button>
+            </div>
+          </div>
+        ))}
+        <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.volunteering.push({role:"",org:"",period:"",location:"",logo:"",bullets:[]}); return d;})}>+ Add volunteering</button>
+      </section>
+    ),
+    projects:()=>(
+      <section>
+        <Title keyName="projects"/>
+        {(doc.projects||[]).map((pr,i)=>(
+          <div key={i} style="margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;gap:12px">
+              <CE value={pr.name} onChange={v=>setDoc(p=>{const d=clone(p); d.projects[i].name=v; return d;})} style="font-weight:600"/>
+              <div class="meta"><CE value={pr.period} onChange={v=>setDoc(p=>{const d=clone(p); d.projects[i].period=v; return d;})}/></div>
+            </div>
+            <div class="meta"><CE value={pr.location} onChange={v=>setDoc(p=>{const d=clone(p); d.projects[i].location=v; return d;})}/></div>
+            <div style="color:var(--accent);font-weight:600"><CE value={pr.domain||""} onChange={v=>setDoc(p=>{const d=clone(p); d.projects[i].domain=v; return d;})}/></div>
+            {(pr.bullets||[]).length>0 && <ul style="margin:6px 0 0 18px">{pr.bullets.map((b,j)=><li key={j}><CE value={b} onChange={v=>setDoc(p=>{const d=clone(p); d.projects[i].bullets[j]=v; return d;})}/></li>)}</ul>}
+            <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+              <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.projects[i].bullets=[...(d.projects[i].bullets||[]), ""]; return d;})}>+ Bullet</button>
+              <button class="chip btn-danger" onclick={()=>setDoc(p=>{const d=clone(p); d.projects.splice(i,1); return d;})}>Delete</button>
+            </div>
+          </div>
+        ))}
+        <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.projects.push({name:"",domain:"",period:"",location:"",bullets:[]}); return d;})}>+ Add project</button>
+      </section>
+    ),
+    certifications:()=>(
+      <section>
+        <Title keyName="certifications"/>
+        {(doc.certifications||[]).map((c,i)=>(
+          <div key={i} style="margin-bottom:8px;display:flex;gap:10px;align-items:flex-start">
+            {c.logo && <img src={c.logo} alt="" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--rule);object-fit:cover"/>}
+            <div style="flex:1 1 auto">
+              <div style="color:var(--accent)"><CE value={c.line1||""} onChange={v=>setDoc(p=>{const d=clone(p); d.certifications[i].line1=v; return d;})}/></div>
+              <div><CE value={c.line2||""} onChange={v=>setDoc(p=>{const d=clone(p); d.certifications[i].line2=v; return d;})}/></div>
+              <div style="margin-top:6px;display:flex;gap:6px">
+                <button class="chip" onclick={()=>pickImage(url=>setLogo('certifications',i,url))}>Logo</button>
+                {c.logo && <button class="chip" onclick={()=>setLogo('certifications',i,"")}>Remove logo</button>}
+                <button class="chip btn-danger" onclick={()=>setDoc(p=>{const d=clone(p); d.certifications.splice(i,1); return d;})}>Delete</button>
+              </div>
+            </div>
+          </div>
+        ))}
+        <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.certifications.push({line1:"",line2:"",logo:""}); return d;})}>+ Add certification</button>
+      </section>
+    ),
+    awards:()=>(
+      <section>
+        <Title keyName="awards"/>
+        {(doc.awards||[]).map((a,i)=>(
+          <div key={i} style="margin-bottom:8px;display:flex;gap:10px;align-items:flex-start">
+            {a.logo && <img src={a.logo} alt="" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--rule);object-fit:cover"/>}
+            <div style="flex:1 1 auto">
+              <div style="font-weight:600"><CE value={a.line1||""} onChange={v=>setDoc(p=>{const d=clone(p); d.awards[i].line1=v; return d;})}/></div>
+              <div><CE value={a.line2||""} onChange={v=>setDoc(p=>{const d=clone(p); d.awards[i].line2=v; return d;})}/></div>
+              <div style="margin-top:6px;display:flex;gap:6px">
+                <button class="chip" onclick={()=>pickImage(url=>setLogo('awards',i,url))}>Logo</button>
+                {a.logo && <button class="chip" onclick={()=>setLogo('awards',i,"")}>Remove logo</button>}
+                <button class="chip btn-danger" onclick={()=>setDoc(p=>{const d=clone(p); d.awards.splice(i,1); return d;})}>Delete</button>
+              </div>
+            </div>
+          </div>
+        ))}
+        <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.awards.push({line1:"",line2:"",logo:""}); return d;})}>+ Add award</button>
       </section>
     ),
     skills:()=>(
       <section>
         <Title keyName="skills"/>
         {(doc.skills||[]).map((g,gi)=>(
-          <div key={g.id} style={{marginBottom:"8px"}}>
-            <div style={{fontWeight:500}}>
-              <CE value={g.group} onChange={v=>setDoc(p=>{const d=clone(p); d.skills[gi].group=v; return d;})}/>
-            </div>
-            <div style={{display:"flex",flexWrap:"wrap",gap:"6px",marginTop:"4px"}}>
+          <div key={g.id} style="margin-bottom:8px">
+            <div style="font-weight:500"><CE value={g.group} onChange={v=>setDoc(p=>{const d=clone(p); d.skills[gi].group=v; return d;})}/></div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
               {(g.items||[]).map((t,ti)=>
                 <span key={ti} style="border:1px solid var(--rule);border-radius:999px;padding:2px 8px;font-size:11px">
                   <CE value={t} onChange={v=>setDoc(p=>{const d=clone(p); d.skills[gi].items[ti]=v; return d;})}/>
                 </span>
               )}
             </div>
+            <div style="margin-top:6px;display:flex;gap:6px">
+              <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.skills[gi].items=[...(d.skills[gi].items||[]), ""]; return d;})}>+ Skill</button>
+              <button class="chip btn-danger" onclick={()=>setDoc(p=>{const d=clone(p); d.skills.splice(gi,1); return d;})}>Delete group</button>
+            </div>
           </div>
         ))}
+        <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.skills.push({id:rid(),group:"",items:[]}); return d;})}>+ Add group</button>
       </section>
     ),
     languages:()=>(
       <section>
         <Title keyName="languages"/>
         {(doc.languages||[]).map((l,li)=>(
-          <div key={l.id} style={{display:"flex",justifyContent:"space-between",marginBottom:"6px"}}>
+          <div key={l.id} style="display:flex;justify-content:space-between;margin-bottom:6px">
             <div><CE value={l.name} onChange={v=>setDoc(p=>{const d=clone(p); d.languages[li].name=v; return d;})}/></div>
-            <div className="meta"><CE value={l.level} onChange={v=>setDoc(p=>{const d=clone(p); d.languages[li].level=v; return d;})}/></div>
+            <div class="meta"><CE value={l.level} onChange={v=>setDoc(p=>{const d=clone(p); d.languages[li].level=v; return d;})}/></div>
           </div>
         ))}
+        <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.languages.push({id:rid(),name:"",score:3,level:""}); return d;})}>+ Add language</button>
+      </section>
+    ),
+    strengths:()=>(
+      <section>
+        <Title keyName="strengths"/>
+        {(doc.strengths||[]).map((st,i)=>(
+          <div key={st.id} style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+            {st.logo && <img src={st.logo} style="width:28px;height:28px;border-radius:6px;border:1px solid var(--rule);object-fit:cover" alt=""/>}
+            <CE value={st.label||""} onChange={v=>setDoc(p=>{const d=clone(p); d.strengths[i].label=v; return d;})}/>
+            <div style="margin-left:auto;display:flex;gap:6px">
+              <button class="chip" onclick={()=>pickImage(url=>setLogo('strengths',i,url))}>Logo</button>
+              {st.logo && <button class="chip" onclick={()=>setLogo('strengths',i,"")}>Remove</button>}
+              <button class="chip btn-danger" onclick={()=>setDoc(p=>{const d=clone(p); d.strengths.splice(i,1); return d;})}>Delete</button>
+            </div>
+          </div>
+        ))}
+        <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.strengths.push({id:rid(),label:""}); return d;})}>+ Add strength</button>
+      </section>
+    ),
+    hobbies:()=>(
+      <section>
+        <Title keyName="hobbies"/>
+        {(doc.hobbies||[]).map((hb,i)=>(
+          <div key={hb.id} style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+            {hb.logo && <img src={hb.logo} style="width:28px;height:28px;border-radius:6px;border:1px solid var(--rule);object-fit:cover" alt=""/>}
+            <CE value={hb.label||""} onChange={v=>setDoc(p=>{const d=clone(p); d.hobbies[i].label=v; return d;})}/>
+            <div style="margin-left:auto;display:flex;gap:6px">
+              <button class="chip" onclick={()=>pickImage(url=>setLogo('hobbies',i,url))}>Logo</button>
+              {hb.logo && <button class="chip" onclick={()=>setLogo('hobbies',i,"")}>Remove</button>}
+              <button class="chip btn-danger" onclick={()=>setDoc(p=>{const d=clone(p); d.hobbies.splice(i,1); return d;})}>Delete</button>
+            </div>
+          </div>
+        ))}
+        <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.hobbies.push({id:rid(),label:""}); return d;})}>+ Add hobby</button>
       </section>
     ),
     online:()=>(
       <section>
         <Title keyName="online"/>
-        <div className="meta"><CE value={doc.online?.linkedin?.label||""} onChange={v=>setDoc(p=>{const d=clone(p); d.online.linkedin=d.online.linkedin||{}; d.online.linkedin.label=v; return d;})}/></div>
-        <div className="meta"><CE value={doc.online?.github?.label||""} onChange={v=>setDoc(p=>{const d=clone(p); d.online.github=d.online.github||{}; d.online.github.label=v; return d;})}/></div>
-        <div className="meta"><CE value={doc.online?.website?.label||""} onChange={v=>setDoc(p=>{const d=clone(p); d.online.website=d.online.website||{}; d.online.website.label=v; return d;})}/></div>
+        <div class="meta"><CE value={doc.online?.linkedin?.label||""} onChange={v=>setDoc(p=>{const d=clone(p); d.online.linkedin=d.online.linkedin||{}; d.online.linkedin.label=v; return d;})}/></div>
+        <div class="meta"><CE value={doc.online?.github?.label||""} onChange={v=>setDoc(p=>{const d=clone(p); d.online.github=d.online.github||{}; d.online.github.label=v; return d;})}/></div>
+        <div class="meta"><CE value={doc.online?.website?.label||""} onChange={v=>setDoc(p=>{const d=clone(p); d.online.website=d.online.website||{}; d.online.website.label=v; return d;})}/></div>
       </section>
     ),
     laws:()=>(
       <section>
         <Title keyName="laws"/>
-        <div className="meta">
-          <CE value={(doc.laws||[]).join("\n")} onChange={v=>setDoc(p=>{const d=clone(p); d.laws=[v]; return d;})}/>
-        </div>
+        <div class="meta"><CE value={(doc.laws||[]).join("\n")} onChange={v=>setDoc(p=>{const d=clone(p); d.laws=[v]; return d;})}/></div>
       </section>
     )
   };
 
-  const Row = ({row})=>{
-    const renderStack = stack => stack.map((sec,i)=><div key={sec+i}>{R[sec]?R[sec]():<div className="meta">Unknown: {sec}</div>}</div>);
+  /* Column toolbar with chips + add-selector */
+  const ColumnToolbar = ({pgIdx,rowIdx,side,row})=>{
+    const current = side==="left"?row.left:row.right;
+    return (
+      <div className="col-toolbar">
+        {current.map((sec,i)=>(
+          <span key={sec+i} className="sect-pill">
+            {doc.sectionNames[sec] || sec}
+            <button className="pill-btn" title="up" onClick={()=>moveSection(pgIdx,rowIdx,side,i,"up")}>↑</button>
+            <button className="pill-btn" title="down" onClick={()=>moveSection(pgIdx,rowIdx,side,i,"down")}>↓</button>
+            {row.type!=="single" && <button className="pill-btn" title="swap column" onClick={()=>swapSectionSide(pgIdx,rowIdx,side,i)}>⇆</button>}
+            <button className="pill-btn" title="remove" onClick={()=>removeSection(pgIdx,rowIdx,side,i)}>✕</button>
+          </span>
+        ))}
+        <select className="field" onChange={e=>{ if(!e.target.value) return; addSection(pgIdx,rowIdx,side,e.target.value); e.target.value=""; }}>
+          <option value="">+ Add section…</option>
+          {ALL_SECTIONS.map(k=> <option key={k} value={k}>{doc.sectionNames[k]||k}</option>)}
+        </select>
+      </div>
+    );
+  };
+
+  const Row = ({pgIdx,rowIdx,row})=>{
     const cls = row.type==="col-23-13"?"row col-23-13" : row.type==="col-13-23"?"row col-13-23":"row single";
     return (
       <div className={cls}>
-        <div>{renderStack(row.left||[])}</div>
-        {row.type!=="single" && <div>{renderStack(row.right||[])}</div>}
+        {/* floating row toolbar */}
+        <div className="row-toolbar">
+          <select className="field" value={row.type} onChange={e=>changeRowType(pgIdx,rowIdx,e.target.value)}>
+            {ROW_TYPES.map(rt=><option key={rt.id} value={rt.id}>{rt.label}</option>)}
+          </select>
+          <button className="btn" onClick={()=>addRowBelow(pgIdx,rowIdx)}>+ row</button>
+          {true && <button className="btn-danger" onClick={()=>deleteRow(pgIdx,rowIdx)}>Delete row</button>}
+        </div>
+
+        {/* LEFT column */}
+        <div>
+          <ColumnToolbar pgIdx={pgIdx} rowIdx={rowIdx} side="left" row={row}/>
+          {(row.left||[]).map((sec,i)=><div key={sec+i}>{R[sec]?R[sec]():<div className="meta">Unknown: {sec}</div>}</div>)}
+        </div>
+
+        {/* RIGHT column when present */}
+        {row.type!=="single" && (
+          <div>
+            <ColumnToolbar pgIdx={pgIdx} rowIdx={rowIdx} side="right" row={row}/>
+            {(row.right||[]).map((sec,i)=><div key={sec+i}>{R[sec]?R[sec]():<div className="meta">Unknown: {sec}</div>}</div>)}
+          </div>
+        )}
       </div>
     );
   };
@@ -285,16 +565,16 @@ function App(){
       <div className="toolbar">
         <a className="btn" href="./home.html">← Home</a>
         <button className="btn" onClick={addPage}>+ Page</button>
-        <button className="btn-danger" onClick={delLastPage}>− Last page</button>
+        <button className="btn-danger" onClick={delLastPage}>− Last</button>
         <button className="btn" onClick={save}>Save</button>
-        <button className="btn-primary" onClick={printPDF}>Export PDF</button>
+        <button className="btn-primary" onClick={exportPDF}>Export PDF</button>
         <span style={{marginLeft:"auto",fontWeight:600}}>CV Studio — Editor</span>
       </div>
 
       {/* Main */}
       <div className="wrap">
         <aside>
-          <div style="font-weight:600;margin-bottom:8px">Section labels</div>
+          <div style="font-weight:600;margin-bottom:8px">Section labels (mirror of inline)</div>
           {Object.keys(doc.sectionNames).map(k=>(
             <div key={k} style="display:grid;grid-template-columns:120px 1fr;gap:8px;align-items:center;margin-bottom:6px">
               <div className="meta">{k}</div>
@@ -303,15 +583,29 @@ function App(){
             </div>
           ))}
           <div style="height:12px"></div>
-          <div style="font-weight:600;margin-bottom:8px">Rows / Layout (Page 1)</div>
-          <div className="meta">Layout editing UI kept minimal here; sections can still be edited inline on the sheet.</div>
+          <div style="font-weight:600;margin-bottom:8px">Theme</div>
+          <div style="display:grid;grid-template-columns:120px 1fr;gap:8px;align-items:center;margin-bottom:6px">
+            <div class="meta">Accent</div>
+            <input type="color" class="field" value={doc._theme.accent}
+                   onChange={e=>setDoc(p=>{const d=clone(p); d._theme.accent=e.target.value; return d;})}/>
+          </div>
+          <div style="display:grid;grid-template-columns:120px 1fr;gap:8px;align-items:center;margin-bottom:6px">
+            <div class="meta">Font size</div>
+            <input type="range" min="9" max="14" step="1" value={doc._theme.fontSize}
+                   onChange={e=>setDoc(p=>{const d=clone(p); d._theme.fontSize=Number(e.target.value); return d;})}/>
+          </div>
+          <div style="display:grid;grid-template-columns:120px 1fr;gap:8px;align-items:center;margin-bottom:6px">
+            <div class="meta">Line height</div>
+            <input type="range" min="1.2" max="1.8" step="0.05" value={doc._theme.lineHeight}
+                   onChange={e=>setDoc(p=>{const d=clone(p); d._theme.lineHeight=Number(e.target.value); return d;})}/>
+          </div>
         </aside>
 
         <div className="preview">
           <div className="sheets">
-            {doc._layout.sort((a,b)=>a.page-b.page).map(pg=>(
+            {doc._layout.sort((a,b)=>a.page-b.page).map((pg,pgIdx)=>(
               <div key={pg.id} className="sheet" style={{fontSize:`${doc._theme.fontSize}pt`,lineHeight:doc._theme.lineHeight}}>
-                {pg.rows.map(r=> <Row key={r.id} row={r}/>)}
+                {pg.rows.map((row,rowIdx)=> <Row key={row.id} pgIdx={pgIdx} rowIdx={rowIdx} row={row}/>)}
               </div>
             ))}
           </div>
