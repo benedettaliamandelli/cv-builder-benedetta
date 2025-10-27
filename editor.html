@@ -5,192 +5,323 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>CV Studio — Editor</title>
 
-<link rel="stylesheet" href="./styles.css"/>
+<!-- (Optional) your fonts/css; safe if missing -->
 <link rel="stylesheet" href="./fonts/fonts.css"/>
+<link rel="stylesheet" href="./styles.css"/>
 
 <style>
-  :root {
+  :root{
     --accent:#2563eb;
     --rule:#e5e7eb;
     --sheet-w:210mm;
     --sheet-h:297mm;
     --toolbar-h:56px;
     --sidebar-w:360px;
-    --bg:#f7f7fb;
+    --bg:#f6f7fb;
   }
-  *{box-sizing:border-box;}
-  body {
-    margin:0;
-    background:var(--bg);
-    color:#111827;
-    font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial;
-  }
-  #toolbar {
-    position:fixed;top:0;left:0;right:0;z-index:50;
-    display:flex;align-items:center;gap:8px;
-    padding:10px 14px;background:#fffffff2;
-    backdrop-filter:saturate(120%) blur(6px);
-    border-bottom:1px solid var(--rule);
-  }
-  .btn{border:1px solid var(--rule);background:white;border-radius:8px;padding:6px 10px;font-size:14px;cursor:pointer;}
-  .btn:hover{background:#f3f4f6;}
-  .btn-primary{background:var(--accent);border-color:var(--accent);color:white;}
-  .btn-primary:hover{filter:brightness(.95);}
-  .btn-danger{background:#fee2e2;border-color:#fecaca;color:#991b1b;}
-  .field{border:1px solid var(--rule);border-radius:8px;padding:6px 8px;font-size:14px;}
+  *{box-sizing:border-box}
+  html,body,#root{height:100%}
+  body{margin:0;background:var(--bg);color:#111827;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial}
 
-  .wrap {
+  /* Toolbar */
+  .toolbar{
+    height:var(--toolbar-h);
+    display:flex;gap:8px;align-items:center;
+    padding:10px 14px;background:#fffffff2;
+    border-bottom:1px solid var(--rule);
+    position:sticky;top:0;z-index:50;
+    backdrop-filter:saturate(120%) blur(6px);
+  }
+  .btn{border:1px solid var(--rule);background:#fff;border-radius:8px;padding:6px 10px;font-size:14px;cursor:pointer}
+  .btn:hover{background:#f3f4f6}
+  .btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn-primary:hover{filter:brightness(.96)}
+  .btn-danger{background:#fee2e2;border-color:#fecaca;color:#991b1b}
+  .field{border:1px solid var(--rule);border-radius:8px;padding:6px 8px;font-size:14px;background:#fff;min-width:120px}
+
+  /* Layout */
+  .wrap{
     display:grid;
     grid-template-columns: var(--sidebar-w) 1fr;
-    height:calc(100vh - var(--toolbar-h));
-    margin-top:var(--toolbar-h);
+    gap:0;
+    height:calc(100% - var(--toolbar-h));
   }
-  aside {
+  aside{
     border-right:1px solid var(--rule);
-    background:#fff;
-    overflow:auto;
-    padding:14px;
+    background:#fff;overflow:auto;padding:14px;
   }
-  .preview {
-    overflow:auto;
-    padding:24px;
-    display:flex;
-    justify-content:center;
-    align-items:flex-start;
+  .preview{
+    overflow:auto;padding:24px;
+    display:flex;justify-content:center;align-items:flex-start;
   }
+  .sheets{display:flex;flex-direction:column;gap:24px;align-items:center;width:100%}
 
-  .sheets {
-    display:flex;
-    flex-direction:column;
-    gap:24px;
-    align-items:center;
-    width:100%;
+  /* A4 sheet */
+  .sheet{
+    width:var(--sheet-w);min-height:var(--sheet-h);
+    background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.08);
+    padding:18mm 16mm;display:flex;flex-direction:column;gap:12px
   }
-  .sheet {
-    width:var(--sheet-w);
-    min-height:var(--sheet-h);
-    background:white;
-    box-shadow:0 10px 30px rgba(0,0,0,.08);
-    padding:18mm 16mm;
-    display:flex;
-    flex-direction:column;
-    gap:14px;
-  }
-  .sect-title {
-    text-transform:uppercase;
-    letter-spacing:.08em;
-    font-size:11px;
-    font-weight:600;
-    color:var(--accent);
-    border-bottom:1px solid var(--rule);
-    padding-bottom:3px;
-    margin-bottom:6px;
-  }
-  .editable[contenteditable="true"]{outline:0;}
-  .editable[contenteditable="true"]:focus{box-shadow:inset 0 0 0 2px rgba(37,99,235,.25);border-radius:4px;}
+  .row{display:grid;gap:18px}
+  .single{grid-template-columns:1fr}
+  .col-13-23{grid-template-columns:1fr 2fr}
+  .col-23-13{grid-template-columns:2fr 1fr}
 
+  .sect-title{
+    text-transform:uppercase;letter-spacing:.08em;
+    font-size:11px;font-weight:600;color:var(--accent);
+    border-bottom:1px solid var(--rule);padding-bottom:3px;margin-bottom:6px
+  }
+  .meta{color:#6b7280}
+  .editable[contenteditable="true"]{outline:0}
+  .editable[contenteditable="true"]:focus{box-shadow:inset 0 0 0 2px rgba(37,99,235,.25);border-radius:4px}
+
+  /* Print */
   @media print{
-    #toolbar,aside{display:none!important;}
-    body{background:white!important;}
-    .preview{padding:0!important;}
-    .sheet{box-shadow:none!important;break-after:page;}
-    @page{size:A4;margin:14mm;}
+    .toolbar, aside{display:none!important}
+    body{background:#fff!important}
+    .preview{padding:0!important}
+    .sheet{box-shadow:none!important;break-after:page}
+    @page{size:A4;margin:14mm}
   }
 </style>
 
-<!-- React -->
+<!-- React + Babel -->
 <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-<!-- Storage fallback -->
+<!-- Storage fallbacks -->
 <script src="./storage.local.js"></script>
 </head>
 <body>
-  <div id="toolbar">
-    <a class="btn" href="./home.html">← Home</a>
-    <button class="btn" id="addPageBtn">+ Page</button>
-    <button class="btn" id="saveBtn">💾 Save</button>
-    <button class="btn-primary" id="printBtn">⬇️ Export PDF</button>
-    <span style="margin-left:auto;font-weight:600">CV Studio Editor</span>
-  </div>
-
-  <div class="wrap">
-    <aside>
-      <div style="font-weight:600;margin-bottom:8px">Layout & Sections</div>
-      <div id="sidebar"></div>
-    </aside>
-    <div class="preview">
-      <div class="sheets" id="sheets"></div>
-    </div>
-  </div>
+<div id="root"></div>
 
 <script type="text/babel">
-const { useState, useEffect } = React;
-const rid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+const {useState,useEffect,useMemo,useRef} = React;
+const rid = () => Math.random().toString(36).slice(2)+Date.now().toString(36);
+const param = (k,d=null)=>{try{return new URL(location.href).searchParams.get(k)??d}catch{return d}};
+const uid = param('uid',null);
+const docName = param('doc','Default');
 
-const SAFE_DOC = {
-  header:{name:"JOHN DOE",role:"Data Scientist",summary:"AI-focused engineer."},
-  _layout:[{id:rid(),page:1,rows:[{id:rid(),type:"single",left:["headerSummary"],right:[]}]}],
+/* Storage facade (uses your StorageAPI if present, else localStorage) */
+const Store = {
+  async load(name, uid){
+    if (window.StorageAPI?.load) return window.StorageAPI.load(name, uid);
+    const raw = localStorage.getItem("cvdoc:"+name);
+    try{return raw?JSON.parse(raw):null}catch{return null}
+  },
+  async save(name, data, uid){
+    if (window.StorageAPI?.save) return window.StorageAPI.save(name, data, uid);
+    localStorage.setItem("cvdoc:"+name, JSON.stringify(data));
+  }
 };
 
+/* Safe seed */
+const SAFE_DOC = {
+  header:{ name:"JOHN DOE", role:"Data Scientist", email:"john.doe@example.com", phone:"+39 333 0000000", city:"Milan, Italy", birth:"01/01/1995", avatar:"" },
+  summary:"Biomedical Engineer and Data Scientist passionate about AI-powered healthcare innovation.",
+  sectionNames:{ experience:"Experience", education:"Education", volunteering:"Volunteering", projects:"Projects", certifications:"Certifications", awards:"Awards", skills:"Skills", languages:"Languages", strengths:"Strengths", hobbies:"Hobbies", online:"Online", laws:"Laws" },
+  experience:[{id:rid(), title:"Medical Advisor Intern", company:"Sanofi Oncology", period:"03/2025 — Present", location:"Milan, Italy", logo:"", bullets:["Managed MAPs (compassionate use).","Supported local studies and data collection."]}],
+  education:[], volunteering:[], projects:[], certifications:[], awards:[],
+  skills:[{id:rid(),group:"Core",items:["Python","R","Pandas"]}],
+  languages:[{id:rid(),name:"Italian",score:5,level:"Native"}],
+  strengths:[{id:rid(),icon:"",label:"Curiosity"}],
+  hobbies:[{id:rid(),icon:"",label:"Photography"}],
+  online:{linkedin:{label:"/in/johndoe"}, github:{label:"github.com/johndoe"}, website:{label:"johndoe.dev"}},
+  laws:["I authorize the processing of personal data in accordance with GDPR 2016/679."],
+  _theme:{ accent:"#2563eb", fontSize:11, lineHeight:1.45, h:700, sh:500 },
+  _layout:[{
+    id:rid(), page:1,
+    rows:[
+      {id:rid(), type:"single", left:["headerSummary"], right:[]},
+      {id:rid(), type:"col-23-13", left:["experience"], right:["skills","languages","online","laws"]}
+    ]
+  }]
+};
+
+/* small clone */
+const clone = o => JSON.parse(JSON.stringify(o));
+
 function App(){
-  const [doc,setDoc]=useState(SAFE_DOC);
+  const [doc,setDoc] = useState(SAFE_DOC);
 
+  /* load once */
+  useEffect(()=>{(async()=>{
+    const saved = await Store.load(docName, uid);
+    if (saved) setDoc(clone(saved));
+  })()},[]);
+
+  /* theme -> CSS */
+  useEffect(()=>{document.documentElement.style.setProperty('--accent', doc._theme?.accent || '#2563eb')},[doc]);
+
+  /* helpers */
   const CE = ({value,onChange,className="",style={}})=>(
-    <div
-      className={`editable ${className}`}
-      style={style}
-      contentEditable
-      suppressContentEditableWarning
-      onBlur={(e)=>onChange(e.currentTarget.textContent)}>
-      {value}
+    <div className={`editable ${className}`} contentEditable
+         suppressContentEditableWarning
+         onBlur={(e)=>onChange(e.currentTarget.textContent||"")}
+         style={style}>{value}</div>
+  );
+  const save = async()=>{ await Store.save(docName, doc, uid); alert("Saved"); };
+  const addPage = ()=> setDoc(prev=>{
+    const d=clone(prev);
+    d._layout.push({id:rid(),page:(d._layout[d._layout.length-1]?.page||0)+1,rows:[{id:rid(),type:"single",left:["headerSummary"],right:[]}]});
+    return d;
+  });
+  const delLastPage = ()=> setDoc(prev=>{
+    const d=clone(prev); if(d._layout.length>1) d._layout.pop(); return d;
+  });
+  const printPDF = ()=> window.print();
+
+  /* section title inline editable */
+  const Title = ({keyName})=>(
+    <div className="sect-title">
+      <CE value={doc.sectionNames[keyName]} onChange={v=>setDoc(p=>{const d=clone(p); d.sectionNames[keyName]=v; return d;})}/>
     </div>
   );
 
-  function save(){localStorage.setItem("cvdoc:Default",JSON.stringify(doc));alert("Saved!");}
-  function print(){window.print();}
-  function addPage(){
-    setDoc(prev=>{
-      const d=JSON.parse(JSON.stringify(prev));
-      d._layout.push({id:rid(),page:d._layout.length+1,rows:[{id:rid(),type:"single",left:["headerSummary"],right:[]} ]});
-      return d;
-    });
-  }
-
-  useEffect(()=>{
-    document.getElementById("saveBtn").onclick=save;
-    document.getElementById("printBtn").onclick=print;
-    document.getElementById("addPageBtn").onclick=addPage;
-  },[doc]);
-
-  const Header = () => (
-    <div style={{borderBottom:"1px solid var(--rule)",paddingBottom:"8px"}}>
-      <CE value={doc.header.name} onChange={(v)=>setDoc(p=>({...p,header:{...p.header,name:v}}))}
-          style={{fontSize:"22pt",fontWeight:700,color:"var(--accent)"}}/>
-      <CE value={doc.header.role} onChange={(v)=>setDoc(p=>({...p,header:{...p.header,role:v}}))}
-          style={{fontSize:"12pt",fontWeight:500,color:"#374151"}}/>
-      <CE value={doc.header.summary} onChange={(v)=>setDoc(p=>({...p,header:{...p.header,summary:v}}))}
-          style={{marginTop:"6px",fontSize:"10pt",color:"#111"}}/>
-    </div>
-  );
-
-  return (
-    <>
-      <div className="sheets">
-        {doc._layout.map(pg=>(
-          <div className="sheet" key={pg.id}>
-            <Header/>
-            <div className="sect-title" contentEditable suppressContentEditableWarning>Experience</div>
-            <p contentEditable suppressContentEditableWarning style={{fontSize:"10pt",lineHeight:1.45}}>Add your experience here...</p>
+  /* renderers */
+  const R = {
+    headerSummary:()=>(
+      <div style={{borderBottom:"1px solid var(--rule)",paddingBottom:"8px"}}>
+        <CE value={doc.header.name} onChange={v=>setDoc(p=>{const d=clone(p); d.header.name=v; return d;})}
+            style={{fontSize:"22pt",fontWeight:700,color:"var(--accent)"}}/>
+        <CE value={doc.header.role} onChange={v=>setDoc(p=>{const d=clone(p); d.header.role=v; return d;})}
+            style={{fontSize:"12pt",fontWeight:500,color:"#374151"}}/>
+        <div className="meta" style={{marginTop:"6px"}}>
+          <CE value={[doc.header.email,doc.header.phone,doc.header.city,doc.header.birth].filter(Boolean).join(" • ")}
+              onChange={v=>setDoc(p=>{const d=clone(p); d.header.meta=v; return d;})}/>
+        </div>
+        <CE value={doc.summary} onChange={v=>setDoc(p=>{const d=clone(p); d.summary=v; return d;})}
+            style={{marginTop:"8px",fontSize:"10pt"}}/>
+      </div>
+    ),
+    experience:()=>(
+      <section>
+        <Title keyName="experience"/>
+        {(doc.experience||[]).map((ex,i)=>(
+          <div key={ex.id} style={{marginBottom:"8px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",gap:"12px"}}>
+              <CE value={ex.title} onChange={v=>setDoc(p=>{const d=clone(p); d.experience[i].title=v; return d;})}
+                  style={{fontWeight:600}}/>
+              <div className="meta"><CE value={ex.period} onChange={v=>setDoc(p=>{const d=clone(p); d.experience[i].period=v; return d;})}/></div>
+            </div>
+            <div><span style={{color:"var(--accent)"}}>
+              <CE value={ex.company} onChange={v=>setDoc(p=>{const d=clone(p); d.experience[i].company=v; return d;})}/>
+            </span></div>
+            <div className="meta"><CE value={ex.location} onChange={v=>setDoc(p=>{const d=clone(p); d.experience[i].location=v; return d;})}/></div>
+            {(ex.bullets||[]).length>0 &&
+              <ul style={{margin:"6px 0 0 18px"}}>
+                {ex.bullets.map((b,j)=>(
+                  <li key={j}><CE value={b} onChange={v=>setDoc(p=>{const d=clone(p); d.experience[i].bullets[j]=v; return d;})}/></li>
+                ))}
+              </ul>}
           </div>
         ))}
+      </section>
+    ),
+    skills:()=>(
+      <section>
+        <Title keyName="skills"/>
+        {(doc.skills||[]).map((g,gi)=>(
+          <div key={g.id} style={{marginBottom:"8px"}}>
+            <div style={{fontWeight:500}}>
+              <CE value={g.group} onChange={v=>setDoc(p=>{const d=clone(p); d.skills[gi].group=v; return d;})}/>
+            </div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:"6px",marginTop:"4px"}}>
+              {(g.items||[]).map((t,ti)=>
+                <span key={ti} style="border:1px solid var(--rule);border-radius:999px;padding:2px 8px;font-size:11px">
+                  <CE value={t} onChange={v=>setDoc(p=>{const d=clone(p); d.skills[gi].items[ti]=v; return d;})}/>
+                </span>
+              )}
+            </div>
+          </div>
+        ))}
+      </section>
+    ),
+    languages:()=>(
+      <section>
+        <Title keyName="languages"/>
+        {(doc.languages||[]).map((l,li)=>(
+          <div key={l.id} style={{display:"flex",justifyContent:"space-between",marginBottom:"6px"}}>
+            <div><CE value={l.name} onChange={v=>setDoc(p=>{const d=clone(p); d.languages[li].name=v; return d;})}/></div>
+            <div className="meta"><CE value={l.level} onChange={v=>setDoc(p=>{const d=clone(p); d.languages[li].level=v; return d;})}/></div>
+          </div>
+        ))}
+      </section>
+    ),
+    online:()=>(
+      <section>
+        <Title keyName="online"/>
+        <div className="meta"><CE value={doc.online?.linkedin?.label||""} onChange={v=>setDoc(p=>{const d=clone(p); d.online.linkedin=d.online.linkedin||{}; d.online.linkedin.label=v; return d;})}/></div>
+        <div className="meta"><CE value={doc.online?.github?.label||""} onChange={v=>setDoc(p=>{const d=clone(p); d.online.github=d.online.github||{}; d.online.github.label=v; return d;})}/></div>
+        <div className="meta"><CE value={doc.online?.website?.label||""} onChange={v=>setDoc(p=>{const d=clone(p); d.online.website=d.online.website||{}; d.online.website.label=v; return d;})}/></div>
+      </section>
+    ),
+    laws:()=>(
+      <section>
+        <Title keyName="laws"/>
+        <div className="meta">
+          <CE value={(doc.laws||[]).join("\n")} onChange={v=>setDoc(p=>{const d=clone(p); d.laws=[v]; return d;})}/>
+        </div>
+      </section>
+    )
+  };
+
+  const Row = ({row})=>{
+    const renderStack = stack => stack.map((sec,i)=><div key={sec+i}>{R[sec]?R[sec]():<div className="meta">Unknown: {sec}</div>}</div>);
+    const cls = row.type==="col-23-13"?"row col-23-13" : row.type==="col-13-23"?"row col-13-23":"row single";
+    return (
+      <div className={cls}>
+        <div>{renderStack(row.left||[])}</div>
+        {row.type!=="single" && <div>{renderStack(row.right||[])}</div>}
       </div>
-    </>
+    );
+  };
+
+  return (
+    <div style={{height:"100%",display:"flex",flexDirection:"column"}}>
+      {/* Toolbar */}
+      <div className="toolbar">
+        <a className="btn" href="./home.html">← Home</a>
+        <button className="btn" onClick={addPage}>+ Page</button>
+        <button className="btn-danger" onClick={delLastPage}>− Last page</button>
+        <button className="btn" onClick={save}>Save</button>
+        <button className="btn-primary" onClick={printPDF}>Export PDF</button>
+        <span style={{marginLeft:"auto",fontWeight:600}}>CV Studio — Editor</span>
+      </div>
+
+      {/* Main */}
+      <div className="wrap">
+        <aside>
+          <div style="font-weight:600;margin-bottom:8px">Section labels</div>
+          {Object.keys(doc.sectionNames).map(k=>(
+            <div key={k} style="display:grid;grid-template-columns:120px 1fr;gap:8px;align-items:center;margin-bottom:6px">
+              <div className="meta">{k}</div>
+              <input className="field" value={doc.sectionNames[k]}
+                     onChange={e=>setDoc(p=>{const d=clone(p); d.sectionNames[k]=e.target.value; return d;})}/>
+            </div>
+          ))}
+          <div style="height:12px"></div>
+          <div style="font-weight:600;margin-bottom:8px">Rows / Layout (Page 1)</div>
+          <div className="meta">Layout editing UI kept minimal here; sections can still be edited inline on the sheet.</div>
+        </aside>
+
+        <div className="preview">
+          <div className="sheets">
+            {doc._layout.sort((a,b)=>a.page-b.page).map(pg=>(
+              <div key={pg.id} className="sheet" style={{fontSize:`${doc._theme.fontSize}pt`,lineHeight:doc._theme.lineHeight}}>
+                {pg.rows.map(r=> <Row key={r.id} row={r}/>)}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
-ReactDOM.createRoot(document.getElementById("sheets")).render(<App/>);
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
 </body>
 </html>
