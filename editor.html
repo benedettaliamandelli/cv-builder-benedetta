@@ -183,7 +183,6 @@ function App(){
   const save = async()=>{ await Store.save(docName, doc, uid); alert("Saved"); };
   const exportPDF = async()=>{
     await Store.save(docName, doc, uid);
-    // Ensure layout recalculated before print
     requestAnimationFrame(()=> window.print());
   };
 
@@ -233,7 +232,7 @@ function App(){
   const moveSection = (pgIdx,rowIdx,side,i,dir)=> setDoc(p=>{
     const d=clone(p);
     const arr = side==="left"?d._layout[pgIdx].rows[rowIdx].left:d._layout[pgIdx].rows[rowIdx].right;
-    const j = dir==="left"||dir==="up" ? i-1 : i+1;
+    const j = (dir==="left"||dir==="up") ? i-1 : i+1;
     if (j<0 || j>=arr.length) return p;
     [arr[i],arr[j]]=[arr[j],arr[i]];
     return d;
@@ -272,9 +271,9 @@ function App(){
         </div>
         <CE value={doc.summary} onChange={v=>setDoc(p=>{const d=clone(p); d.summary=v; return d;})}
             style={{marginTop:"8px",fontSize:"10pt"}}/>
-        <div style="margin-top:6px;display:flex;gap:8px">
-          <button class="chip" onclick={()=>pickImage(url=>setDoc(p=>{const d=clone(p); d.header.avatar=url; return d;}))}>Upload photo</button>
-          {doc.header.avatar && <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.header.avatar=""; return d;})}>Remove photo</button>}
+        <div style={{marginTop:"6px",display:"flex",gap:"8px"}}>
+          <button className="chip" onClick={()=>pickImage(url=>setDoc(p=>{const d=clone(p); d.header.avatar=url; return d;}))}>Upload photo</button>
+          {doc.header.avatar && <button className="chip" onClick={()=>setDoc(p=>{const d=clone(p); d.header.avatar=""; return d;})}>Remove photo</button>}
         </div>
       </div>
     ),
@@ -298,211 +297,211 @@ function App(){
                   <li key={j}><CE value={b} onChange={v=>setDoc(p=>{const d=clone(p); d.experience[i].bullets[j]=v; return d;})}/></li>
                 )}
               </ul>}
-            <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
-              <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.experience[i].bullets=[...(d.experience[i].bullets||[]), ""]; return d;})}>+ Bullet</button>
-              <button class="chip" onclick={()=>pickImage(url=>setLogo('experience',i,url))}>Logo</button>
-              {ex.logo && <button class="chip" onclick={()=>setLogo('experience',i,"")}>Remove logo</button>}
-              <button class="chip btn-danger" onclick={()=>setDoc(p=>{const d=clone(p); d.experience.splice(i,1); return d;})}>Delete</button>
+            <div style={{marginTop:"6px",display:"flex",gap:"6px",flexWrap:"wrap"}}>
+              <button className="chip" onClick={()=>setDoc(p=>{const d=clone(p); d.experience[i].bullets=[...(d.experience[i].bullets||[]), ""]; return d;})}>+ Bullet</button>
+              <button className="chip" onClick={()=>pickImage(url=>setLogo('experience',i,url))}>Logo</button>
+              {ex.logo && <button className="chip" onClick={()=>setLogo('experience',i,"")}>Remove logo</button>}
+              <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=clone(p); d.experience.splice(i,1); return d;})}>Delete</button>
             </div>
           </div>
         ))}
-        <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.experience.push({id:rid(),title:"",company:"",period:"",location:"",logo:"",bullets:[]}); return d;})}>+ Add experience</button>
+        <button className="chip" onClick={()=>setDoc(p=>{const d=clone(p); d.experience.push({id:rid(),title:"",company:"",period:"",location:"",logo:"",bullets:[]}); return d;})}>+ Add experience</button>
       </section>
     ),
     education:()=>(
       <section>
         <Title keyName="education"/>
         {(doc.education||[]).map((ed,i)=>(
-          <div key={i} style="margin-bottom:8px">
-            <div style="display:flex;justify-content:space-between;gap:12px">
-              <CE value={ed.degree} onChange={v=>setDoc(p=>{const d=clone(p); d.education[i].degree=v; return d;})} style="font-weight:600"/>
-              <div class="meta">
+          <div key={i} style={{marginBottom:"8px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",gap:"12px"}}>
+              <CE value={ed.degree} onChange={v=>setDoc(p=>{const d=clone(p); d.education[i].degree=v; return d;})} style={{fontWeight:600}}/>
+              <div className="meta">
                 <CE value={ed.period} onChange={v=>setDoc(p=>{const d=clone(p); d.education[i].period=v; return d;})}/>
                 {"  |  GPA "}
                 <CE value={ed.gpa||""} onChange={v=>setDoc(p=>{const d=clone(p); d.education[i].gpa=v; return d;})}/>
               </div>
             </div>
-            <div><span style="color:var(--accent)">
+            <div><span style={{color:"var(--accent)"}}>
               <CE value={ed.school} onChange={v=>setDoc(p=>{const d=clone(p); d.education[i].school=v; return d;})}/>
             </span></div>
-            <div class="meta"><CE value={ed.location} onChange={v=>setDoc(p=>{const d=clone(p); d.education[i].location=v; return d;})}/></div>
-            <div style="margin-top:6px;display:flex;gap:6px">
-              <button class="chip btn-danger" onclick={()=>setDoc(p=>{const d=clone(p); d.education.splice(i,1); return d;})}>Delete</button>
+            <div className="meta"><CE value={ed.location} onChange={v=>setDoc(p=>{const d=clone(p); d.education[i].location=v; return d;})}/></div>
+            <div style={{marginTop:"6px",display:"flex",gap:"6px"}}>
+              <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=clone(p); d.education.splice(i,1); return d;})}>Delete</button>
             </div>
           </div>
         ))}
-        <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.education.push({degree:"",school:"",period:"",location:"",gpa:""}); return d;})}>+ Add education</button>
+        <button className="chip" onClick={()=>setDoc(p=>{const d=clone(p); d.education.push({degree:"",school:"",period:"",location:"",gpa:""}); return d;})}>+ Add education</button>
       </section>
     ),
     volunteering:()=>(
       <section>
         <Title keyName="volunteering"/>
         {(doc.volunteering||[]).map((v,i)=>(
-          <div key={i} style="margin-bottom:8px">
-            <div style="display:flex;justify-content:space-between;gap:12px">
-              <CE value={v.role} onChange={val=>setDoc(p=>{const d=clone(p); d.volunteering[i].role=val; return d;})} style="font-weight:600"/>
-              <div class="meta"><CE value={v.period} onChange={val=>setDoc(p=>{const d=clone(p); d.volunteering[i].period=val; return d;})}/></div>
+          <div key={i} style={{marginBottom:"8px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",gap:"12px"}}>
+              <CE value={v.role} onChange={val=>setDoc(p=>{const d=clone(p); d.volunteering[i].role=val; return d;})} style={{fontWeight:600}}/>
+              <div className="meta"><CE value={v.period} onChange={val=>setDoc(p=>{const d=clone(p); d.volunteering[i].period=val; return d;})}/></div>
             </div>
-            <div><span style="color:var(--accent)">
+            <div><span style={{color:"var(--accent)"}}>
               <CE value={v.org} onChange={val=>setDoc(p=>{const d=clone(p); d.volunteering[i].org=val; return d;})}/>
             </span></div>
-            <div class="meta"><CE value={v.location} onChange={val=>setDoc(p=>{const d=clone(p); d.volunteering[i].location=val; return d;})}/></div>
+            <div className="meta"><CE value={v.location} onChange={val=>setDoc(p=>{const d=clone(p); d.volunteering[i].location=val; return d;})}/></div>
             {(v.bullets||[]).length>0 &&
-              <ul style="margin:6px 0 0 18px">
+              <ul style={{margin:"6px 0 0 18px"}}>
                 {v.bullets.map((b,j)=><li key={j}><CE value={b} onChange={val=>setDoc(p=>{const d=clone(p); d.volunteering[i].bullets[j]=val; return d;})}/></li>)}
               </ul>}
-            <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
-              <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.volunteering[i].bullets=[...(d.volunteering[i].bullets||[]), ""]; return d;})}>+ Bullet</button>
-              <button class="chip" onclick={()=>pickImage(url=>setLogo('volunteering',i,url))}>Logo</button>
-              {v.logo && <button class="chip" onclick={()=>setLogo('volunteering',i,"")}>Remove logo</button>}
-              <button class="chip btn-danger" onclick={()=>setDoc(p=>{const d=clone(p); d.volunteering.splice(i,1); return d;})}>Delete</button>
+            <div style={{marginTop:"6px",display:"flex",gap:"6px",flexWrap:"wrap"}}>
+              <button className="chip" onClick={()=>setDoc(p=>{const d=clone(p); d.volunteering[i].bullets=[...(d.volunteering[i].bullets||[]), ""]; return d;})}>+ Bullet</button>
+              <button className="chip" onClick={()=>pickImage(url=>setLogo('volunteering',i,url))}>Logo</button>
+              {v.logo && <button className="chip" onClick={()=>setLogo('volunteering',i,"")}>Remove logo</button>}
+              <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=clone(p); d.volunteering.splice(i,1); return d;})}>Delete</button>
             </div>
           </div>
         ))}
-        <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.volunteering.push({role:"",org:"",period:"",location:"",logo:"",bullets:[]}); return d;})}>+ Add volunteering</button>
+        <button className="chip" onClick={()=>setDoc(p=>{const d=clone(p); d.volunteering.push({role:"",org:"",period:"",location:"",logo:"",bullets:[]}); return d;})}>+ Add volunteering</button>
       </section>
     ),
     projects:()=>(
       <section>
         <Title keyName="projects"/>
         {(doc.projects||[]).map((pr,i)=>(
-          <div key={i} style="margin-bottom:8px">
-            <div style="display:flex;justify-content:space-between;gap:12px">
-              <CE value={pr.name} onChange={v=>setDoc(p=>{const d=clone(p); d.projects[i].name=v; return d;})} style="font-weight:600"/>
-              <div class="meta"><CE value={pr.period} onChange={v=>setDoc(p=>{const d=clone(p); d.projects[i].period=v; return d;})}/></div>
+          <div key={i} style={{marginBottom:"8px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",gap:"12px"}}>
+              <CE value={pr.name} onChange={v=>setDoc(p=>{const d=clone(p); d.projects[i].name=v; return d;})} style={{fontWeight:600}}/>
+              <div className="meta"><CE value={pr.period} onChange={v=>setDoc(p=>{const d=clone(p); d.projects[i].period=v; return d;})}/></div>
             </div>
-            <div class="meta"><CE value={pr.location} onChange={v=>setDoc(p=>{const d=clone(p); d.projects[i].location=v; return d;})}/></div>
-            <div style="color:var(--accent);font-weight:600"><CE value={pr.domain||""} onChange={v=>setDoc(p=>{const d=clone(p); d.projects[i].domain=v; return d;})}/></div>
-            {(pr.bullets||[]).length>0 && <ul style="margin:6px 0 0 18px">{pr.bullets.map((b,j)=><li key={j}><CE value={b} onChange={v=>setDoc(p=>{const d=clone(p); d.projects[i].bullets[j]=v; return d;})}/></li>)}</ul>}
-            <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
-              <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.projects[i].bullets=[...(d.projects[i].bullets||[]), ""]; return d;})}>+ Bullet</button>
-              <button class="chip btn-danger" onclick={()=>setDoc(p=>{const d=clone(p); d.projects.splice(i,1); return d;})}>Delete</button>
+            <div className="meta"><CE value={pr.location} onChange={v=>setDoc(p=>{const d=clone(p); d.projects[i].location=v; return d;})}/></div>
+            <div style={{color:"var(--accent)",fontWeight:600}}><CE value={pr.domain||""} onChange={v=>setDoc(p=>{const d=clone(p); d.projects[i].domain=v; return d;})}/></div>
+            {(pr.bullets||[]).length>0 && <ul style={{margin:"6px 0 0 18px"}}>{pr.bullets.map((b,j)=><li key={j}><CE value={b} onChange={v=>setDoc(p=>{const d=clone(p); d.projects[i].bullets[j]=v; return d;})}/></li>)}</ul>}
+            <div style={{marginTop:"6px",display:"flex",gap:"6px",flexWrap:"wrap"}}>
+              <button className="chip" onClick={()=>setDoc(p=>{const d=clone(p); d.projects[i].bullets=[...(d.projects[i].bullets||[]), ""]; return d;})}>+ Bullet</button>
+              <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=clone(p); d.projects.splice(i,1); return d;})}>Delete</button>
             </div>
           </div>
         ))}
-        <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.projects.push({name:"",domain:"",period:"",location:"",bullets:[]}); return d;})}>+ Add project</button>
+        <button className="chip" onClick={()=>setDoc(p=>{const d=clone(p); d.projects.push({name:"",domain:"",period:"",location:"",bullets:[]}); return d;})}>+ Add project</button>
       </section>
     ),
     certifications:()=>(
       <section>
         <Title keyName="certifications"/>
         {(doc.certifications||[]).map((c,i)=>(
-          <div key={i} style="margin-bottom:8px;display:flex;gap:10px;align-items:flex-start">
-            {c.logo && <img src={c.logo} alt="" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--rule);object-fit:cover"/>}
-            <div style="flex:1 1 auto">
-              <div style="color:var(--accent)"><CE value={c.line1||""} onChange={v=>setDoc(p=>{const d=clone(p); d.certifications[i].line1=v; return d;})}/></div>
+          <div key={i} style={{marginBottom:"8px",display:"flex",gap:"10px",alignItems:"flex-start"}}>
+            {c.logo && <img src={c.logo} alt="" style={{width:"28px",height:"28px",borderRadius:"6px",border:"1px solid var(--rule)",objectFit:"cover"}}/>}
+            <div style={{flex:"1 1 auto"}}>
+              <div style={{color:"var(--accent)"}}><CE value={c.line1||""} onChange={v=>setDoc(p=>{const d=clone(p); d.certifications[i].line1=v; return d;})}/></div>
               <div><CE value={c.line2||""} onChange={v=>setDoc(p=>{const d=clone(p); d.certifications[i].line2=v; return d;})}/></div>
-              <div style="margin-top:6px;display:flex;gap:6px">
-                <button class="chip" onclick={()=>pickImage(url=>setLogo('certifications',i,url))}>Logo</button>
-                {c.logo && <button class="chip" onclick={()=>setLogo('certifications',i,"")}>Remove logo</button>}
-                <button class="chip btn-danger" onclick={()=>setDoc(p=>{const d=clone(p); d.certifications.splice(i,1); return d;})}>Delete</button>
+              <div style={{marginTop:"6px",display:"flex",gap:"6px"}}>
+                <button className="chip" onClick={()=>pickImage(url=>setLogo('certifications',i,url))}>Logo</button>
+                {c.logo && <button className="chip" onClick={()=>setLogo('certifications',i,"")}>Remove logo</button>}
+                <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=clone(p); d.certifications.splice(i,1); return d;})}>Delete</button>
               </div>
             </div>
           </div>
         ))}
-        <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.certifications.push({line1:"",line2:"",logo:""}); return d;})}>+ Add certification</button>
+        <button className="chip" onClick={()=>setDoc(p=>{const d=clone(p); d.certifications.push({line1:"",line2:"",logo:""}); return d;})}>+ Add certification</button>
       </section>
     ),
     awards:()=>(
       <section>
         <Title keyName="awards"/>
         {(doc.awards||[]).map((a,i)=>(
-          <div key={i} style="margin-bottom:8px;display:flex;gap:10px;align-items:flex-start">
-            {a.logo && <img src={a.logo} alt="" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--rule);object-fit:cover"/>}
-            <div style="flex:1 1 auto">
-              <div style="font-weight:600"><CE value={a.line1||""} onChange={v=>setDoc(p=>{const d=clone(p); d.awards[i].line1=v; return d;})}/></div>
+          <div key={i} style={{marginBottom:"8px",display:"flex",gap:"10px",alignItems:"flex-start"}}>
+            {a.logo && <img src={a.logo} alt="" style={{width:"28px",height:"28px",borderRadius:"6px",border:"1px solid var(--rule)",objectFit:"cover"}}/>}
+            <div style={{flex:"1 1 auto"}}>
+              <div style={{fontWeight:600}}><CE value={a.line1||""} onChange={v=>setDoc(p=>{const d=clone(p); d.awards[i].line1=v; return d;})}/></div>
               <div><CE value={a.line2||""} onChange={v=>setDoc(p=>{const d=clone(p); d.awards[i].line2=v; return d;})}/></div>
-              <div style="margin-top:6px;display:flex;gap:6px">
-                <button class="chip" onclick={()=>pickImage(url=>setLogo('awards',i,url))}>Logo</button>
-                {a.logo && <button class="chip" onclick={()=>setLogo('awards',i,"")}>Remove logo</button>}
-                <button class="chip btn-danger" onclick={()=>setDoc(p=>{const d=clone(p); d.awards.splice(i,1); return d;})}>Delete</button>
+              <div style={{marginTop:"6px",display:"flex",gap:"6px"}}>
+                <button className="chip" onClick={()=>pickImage(url=>setLogo('awards',i,url))}>Logo</button>
+                {a.logo && <button className="chip" onClick={()=>setLogo('awards',i,"")}>Remove logo</button>}
+                <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=clone(p); d.awards.splice(i,1); return d;})}>Delete</button>
               </div>
             </div>
           </div>
         ))}
-        <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.awards.push({line1:"",line2:"",logo:""}); return d;})}>+ Add award</button>
+        <button className="chip" onClick={()=>setDoc(p=>{const d=clone(p); d.awards.push({line1:"",line2:"",logo:""}); return d;})}>+ Add award</button>
       </section>
     ),
     skills:()=>(
       <section>
         <Title keyName="skills"/>
         {(doc.skills||[]).map((g,gi)=>(
-          <div key={g.id} style="margin-bottom:8px">
-            <div style="font-weight:500"><CE value={g.group} onChange={v=>setDoc(p=>{const d=clone(p); d.skills[gi].group=v; return d;})}/></div>
-            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
+          <div key={g.id} style={{marginBottom:"8px"}}>
+            <div style={{fontWeight:500}}><CE value={g.group} onChange={v=>setDoc(p=>{const d=clone(p); d.skills[gi].group=v; return d;})}/></div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:"6px",marginTop:"4px"}}>
               {(g.items||[]).map((t,ti)=>
-                <span key={ti} style="border:1px solid var(--rule);border-radius:999px;padding:2px 8px;font-size:11px">
+                <span key={ti} style={{border:"1px solid var(--rule)",borderRadius:"999px",padding:"2px 8px",fontSize:"11px"}}>
                   <CE value={t} onChange={v=>setDoc(p=>{const d=clone(p); d.skills[gi].items[ti]=v; return d;})}/>
                 </span>
               )}
             </div>
-            <div style="margin-top:6px;display:flex;gap:6px">
-              <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.skills[gi].items=[...(d.skills[gi].items||[]), ""]; return d;})}>+ Skill</button>
-              <button class="chip btn-danger" onclick={()=>setDoc(p=>{const d=clone(p); d.skills.splice(gi,1); return d;})}>Delete group</button>
+            <div style={{marginTop:"6px",display:"flex",gap:"6px"}}>
+              <button className="chip" onClick={()=>setDoc(p=>{const d=clone(p); d.skills[gi].items=[...(d.skills[gi].items||[]), ""]; return d;})}>+ Skill</button>
+              <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=clone(p); d.skills.splice(gi,1); return d;})}>Delete group</button>
             </div>
           </div>
         ))}
-        <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.skills.push({id:rid(),group:"",items:[]}); return d;})}>+ Add group</button>
+        <button className="chip" onClick={()=>setDoc(p=>{const d=clone(p); d.skills.push({id:rid(),group:"",items:[]}); return d;})}>+ Add group</button>
       </section>
     ),
     languages:()=>(
       <section>
         <Title keyName="languages"/>
         {(doc.languages||[]).map((l,li)=>(
-          <div key={l.id} style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <div key={l.id} style={{display:"flex",justifyContent:"space-between",marginBottom:"6px"}}>
             <div><CE value={l.name} onChange={v=>setDoc(p=>{const d=clone(p); d.languages[li].name=v; return d;})}/></div>
-            <div class="meta"><CE value={l.level} onChange={v=>setDoc(p=>{const d=clone(p); d.languages[li].level=v; return d;})}/></div>
+            <div className="meta"><CE value={l.level} onChange={v=>setDoc(p=>{const d=clone(p); d.languages[li].level=v; return d;})}/></div>
           </div>
         ))}
-        <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.languages.push({id:rid(),name:"",score:3,level:""}); return d;})}>+ Add language</button>
+        <button className="chip" onClick={()=>setDoc(p=>{const d=clone(p); d.languages.push({id:rid(),name:"",score:3,level:""}); return d;})}>+ Add language</button>
       </section>
     ),
     strengths:()=>(
       <section>
         <Title keyName="strengths"/>
         {(doc.strengths||[]).map((st,i)=>(
-          <div key={st.id} style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
-            {st.logo && <img src={st.logo} style="width:28px;height:28px;border-radius:6px;border:1px solid var(--rule);object-fit:cover" alt=""/>}
+          <div key={st.id} style={{display:"flex",gap:"8px",alignItems:"center",marginBottom:"6px"}}>
+            {st.logo && <img src={st.logo} style={{width:"28px",height:"28px",borderRadius:"6px",border:"1px solid var(--rule)",objectFit:"cover"}} alt=""/>}
             <CE value={st.label||""} onChange={v=>setDoc(p=>{const d=clone(p); d.strengths[i].label=v; return d;})}/>
-            <div style="margin-left:auto;display:flex;gap:6px">
-              <button class="chip" onclick={()=>pickImage(url=>setLogo('strengths',i,url))}>Logo</button>
-              {st.logo && <button class="chip" onclick={()=>setLogo('strengths',i,"")}>Remove</button>}
-              <button class="chip btn-danger" onclick={()=>setDoc(p=>{const d=clone(p); d.strengths.splice(i,1); return d;})}>Delete</button>
+            <div style={{marginLeft:"auto",display:"flex",gap:"6px"}}>
+              <button className="chip" onClick={()=>pickImage(url=>setLogo('strengths',i,url))}>Logo</button>
+              {st.logo && <button className="chip" onClick={()=>setLogo('strengths',i,"")}>Remove</button>}
+              <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=clone(p); d.strengths.splice(i,1); return d;})}>Delete</button>
             </div>
           </div>
         ))}
-        <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.strengths.push({id:rid(),label:""}); return d;})}>+ Add strength</button>
+        <button className="chip" onClick={()=>setDoc(p=>{const d=clone(p); d.strengths.push({id:rid(),label:""}); return d;})}>+ Add strength</button>
       </section>
     ),
     hobbies:()=>(
       <section>
         <Title keyName="hobbies"/>
         {(doc.hobbies||[]).map((hb,i)=>(
-          <div key={hb.id} style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
-            {hb.logo && <img src={hb.logo} style="width:28px;height:28px;border-radius:6px;border:1px solid var(--rule);object-fit:cover" alt=""/>}
+          <div key={hb.id} style={{display:"flex",gap:"8px",alignItems:"center",marginBottom:"6px"}}>
+            {hb.logo && <img src={hb.logo} style={{width:"28px",height:"28px",borderRadius:"6px",border:"1px solid var(--rule)",objectFit:"cover"}} alt=""/>}
             <CE value={hb.label||""} onChange={v=>setDoc(p=>{const d=clone(p); d.hobbies[i].label=v; return d;})}/>
-            <div style="margin-left:auto;display:flex;gap:6px">
-              <button class="chip" onclick={()=>pickImage(url=>setLogo('hobbies',i,url))}>Logo</button>
-              {hb.logo && <button class="chip" onclick={()=>setLogo('hobbies',i,"")}>Remove</button>}
-              <button class="chip btn-danger" onclick={()=>setDoc(p=>{const d=clone(p); d.hobbies.splice(i,1); return d;})}>Delete</button>
+            <div style={{marginLeft:"auto",display:"flex",gap:"6px"}}>
+              <button className="chip" onClick={()=>pickImage(url=>setLogo('hobbies',i,url))}>Logo</button>
+              {hb.logo && <button className="chip" onClick={()=>setLogo('hobbies',i,"")}>Remove</button>}
+              <button className="chip btn-danger" onClick={()=>setDoc(p=>{const d=clone(p); d.hobbies.splice(i,1); return d;})}>Delete</button>
             </div>
           </div>
         ))}
-        <button class="chip" onclick={()=>setDoc(p=>{const d=clone(p); d.hobbies.push({id:rid(),label:""}); return d;})}>+ Add hobby</button>
+        <button className="chip" onClick={()=>setDoc(p=>{const d=clone(p); d.hobbies.push({id:rid(),label:""}); return d;})}>+ Add hobby</button>
       </section>
     ),
     online:()=>(
       <section>
         <Title keyName="online"/>
-        <div class="meta"><CE value={doc.online?.linkedin?.label||""} onChange={v=>setDoc(p=>{const d=clone(p); d.online.linkedin=d.online.linkedin||{}; d.online.linkedin.label=v; return d;})}/></div>
-        <div class="meta"><CE value={doc.online?.github?.label||""} onChange={v=>setDoc(p=>{const d=clone(p); d.online.github=d.online.github||{}; d.online.github.label=v; return d;})}/></div>
-        <div class="meta"><CE value={doc.online?.website?.label||""} onChange={v=>setDoc(p=>{const d=clone(p); d.online.website=d.online.website||{}; d.online.website.label=v; return d;})}/></div>
+        <div className="meta"><CE value={doc.online?.linkedin?.label||""} onChange={v=>setDoc(p=>{const d=clone(p); d.online.linkedin=d.online.linkedin||{}; d.online.linkedin.label=v; return d;})}/></div>
+        <div className="meta"><CE value={doc.online?.github?.label||""} onChange={v=>setDoc(p=>{const d=clone(p); d.online.github=d.online.github||{}; d.online.github.label=v; return d;})}/></div>
+        <div className="meta"><CE value={doc.online?.website?.label||""} onChange={v=>setDoc(p=>{const d=clone(p); d.online.website=d.online.website||{}; d.online.website.label=v; return d;})}/></div>
       </section>
     ),
     laws:()=>(
       <section>
         <Title keyName="laws"/>
-        <div class="meta"><CE value={(doc.laws||[]).join("\n")} onChange={v=>setDoc(p=>{const d=clone(p); d.laws=[v]; return d;})}/></div>
+        <div className="meta"><CE value={(doc.laws||[]).join("\n")} onChange={v=>setDoc(p=>{const d=clone(p); d.laws=[v]; return d;})}/></div>
       </section>
     )
   };
@@ -539,7 +538,7 @@ function App(){
             {ROW_TYPES.map(rt=><option key={rt.id} value={rt.id}>{rt.label}</option>)}
           </select>
           <button className="btn" onClick={()=>addRowBelow(pgIdx,rowIdx)}>+ row</button>
-          {true && <button className="btn-danger" onClick={()=>deleteRow(pgIdx,rowIdx)}>Delete row</button>}
+          <button className="btn-danger" onClick={()=>deleteRow(pgIdx,rowIdx)}>Delete row</button>
         </div>
 
         {/* LEFT column */}
@@ -574,28 +573,28 @@ function App(){
       {/* Main */}
       <div className="wrap">
         <aside>
-          <div style="font-weight:600;margin-bottom:8px">Section labels (mirror of inline)</div>
+          <div style={{fontWeight:600,marginBottom:"8px"}}>Section labels (mirror of inline)</div>
           {Object.keys(doc.sectionNames).map(k=>(
-            <div key={k} style="display:grid;grid-template-columns:120px 1fr;gap:8px;align-items:center;margin-bottom:6px">
+            <div key={k} style={{display:"grid",gridTemplateColumns:"120px 1fr",gap:"8px",alignItems:"center",marginBottom:"6px"}}>
               <div className="meta">{k}</div>
               <input className="field" value={doc.sectionNames[k]}
                      onChange={e=>setDoc(p=>{const d=clone(p); d.sectionNames[k]=e.target.value; return d;})}/>
             </div>
           ))}
-          <div style="height:12px"></div>
-          <div style="font-weight:600;margin-bottom:8px">Theme</div>
-          <div style="display:grid;grid-template-columns:120px 1fr;gap:8px;align-items:center;margin-bottom:6px">
-            <div class="meta">Accent</div>
-            <input type="color" class="field" value={doc._theme.accent}
+          <div style={{height:"12px"}}></div>
+          <div style={{fontWeight:600,marginBottom:"8px"}}>Theme</div>
+          <div style={{display:"grid",gridTemplateColumns:"120px 1fr",gap:"8px",alignItems:"center",marginBottom:"6px"}}>
+            <div className="meta">Accent</div>
+            <input type="color" className="field" value={doc._theme.accent}
                    onChange={e=>setDoc(p=>{const d=clone(p); d._theme.accent=e.target.value; return d;})}/>
           </div>
-          <div style="display:grid;grid-template-columns:120px 1fr;gap:8px;align-items:center;margin-bottom:6px">
-            <div class="meta">Font size</div>
+          <div style={{display:"grid",gridTemplateColumns:"120px 1fr",gap:"8px",alignItems:"center",marginBottom:"6px"}}>
+            <div className="meta">Font size</div>
             <input type="range" min="9" max="14" step="1" value={doc._theme.fontSize}
                    onChange={e=>setDoc(p=>{const d=clone(p); d._theme.fontSize=Number(e.target.value); return d;})}/>
           </div>
-          <div style="display:grid;grid-template-columns:120px 1fr;gap:8px;align-items:center;margin-bottom:6px">
-            <div class="meta">Line height</div>
+          <div style={{display:"grid",gridTemplateColumns:"120px 1fr",gap:"8px",alignItems:"center",marginBottom:"6px"}}>
+            <div className="meta">Line height</div>
             <input type="range" min="1.2" max="1.8" step="0.05" value={doc._theme.lineHeight}
                    onChange={e=>setDoc(p=>{const d=clone(p); d._theme.lineHeight=Number(e.target.value); return d;})}/>
           </div>
@@ -603,7 +602,7 @@ function App(){
 
         <div className="preview">
           <div className="sheets">
-            {doc._layout.sort((a,b)=>a.page-b.page).map((pg,pgIdx)=>(
+            {doc._layout.slice().sort((a,b)=>a.page-b.page).map((pg,pgIdx)=>(
               <div key={pg.id} className="sheet" style={{fontSize:`${doc._theme.fontSize}pt`,lineHeight:doc._theme.lineHeight}}>
                 {pg.rows.map((row,rowIdx)=> <Row key={row.id} pgIdx={pgIdx} rowIdx={rowIdx} row={row}/>)}
               </div>
